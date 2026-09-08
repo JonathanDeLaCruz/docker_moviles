@@ -1,0 +1,118 @@
+services:
+
+  db:
+    image: mariadb:11.8
+    container_name: moviles-db
+    restart: unless-stopped
+
+    ports:
+      - "3310:3306"
+
+    environment:
+      MARIADB_ROOT_PASSWORD: root123
+      MARIADB_DATABASE: moviles
+      MARIADB_USER: moviles
+      MARIADB_PASSWORD: moviles123
+
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./database/init:/docker-entrypoint-initdb.d
+
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+    networks:
+      - moviles
+
+  cloudbeaver:
+    image: dbeaver/cloudbeaver:latest
+    container_name: moviles-cloudbeaver
+    restart: unless-stopped
+
+    ports:
+      - "8978:8978"
+
+    volumes:
+      - cloudbeaver_data:/opt/cloudbeaver/workspace
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    networks:
+      - moviles
+
+  api:
+    image: directus/directus:latest
+    container_name: moviles-api
+    restart: unless-stopped
+
+    ports:
+      - "8000:8055"
+
+    environment:
+      SECRET: "moviles-directus-clave-2026"
+
+      ADMIN_EMAIL: "admin@moviles.local"
+      ADMIN_PASSWORD: "admin123"
+
+      DB_CLIENT: "mysql"
+      DB_HOST: "db"
+      DB_PORT: "3306"
+      DB_DATABASE: "especialidades"
+      DB_USER: "root"
+      DB_PASSWORD: "root123"
+
+    volumes:
+      - directus_uploads:/directus/uploads
+      - directus_extensions:/directus/extensions
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    networks:
+      - moviles
+
+  mobile:
+    build:
+      context: ./mobile
+
+    container_name: moviles-ionic
+    restart: unless-stopped
+
+    ports:
+      - "8100:8100"
+
+    volumes:
+      - ./mobile:/app
+      - ionic_node_modules:/app/node_modules
+
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+
+    depends_on:
+      - api
+
+    networks:
+      - moviles
+
+    stdin_open: true
+    tty: true
+
+
+volumes:
+  mariadb_data:
+  ionic_node_modules:
+  cloudbeaver_data:
+  directus_uploads:
+  directus_extensions:
+
+
+networks:
+  moviles:
+    driver: bridge
