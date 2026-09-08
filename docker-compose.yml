@@ -66,6 +66,9 @@ services:
       DB_USER: "root"
       DB_PASSWORD: "root123"
 
+      CORS_ENABLED: "true"
+      CORS_ORIGIN: "true"
+
     volumes:
       - directus_uploads:/directus/uploads
       - directus_extensions:/directus/extensions
@@ -103,6 +106,23 @@ services:
 
     stdin_open: true
     tty: true
+
+  swagger:
+    image: swaggerapi/swagger-ui:latest
+    container_name: moviles-swagger
+    restart: unless-stopped
+
+    ports:
+      - "8081:8080"
+
+    environment:
+      SWAGGER_JSON_URL: "http://localhost:8000/server/specs/oas"
+
+    depends_on:
+      - api
+
+    networks:
+      - moviles
 
 
 volumes:

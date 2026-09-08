@@ -18,6 +18,8 @@ El entorno completo se ejecuta mediante **Docker Compose**.
 | **Angular 20** | Framework utilizado por Ionic |
 | **Capacitor 8** | Integración de la aplicación con Android, iOS y funcionalidades nativas |
 | **Directus** | Backend y API REST |
+| **OpenAPI** | Especificación de la API generada por Directus |
+| **Swagger UI** | Documentación interactiva de la API |
 | **MariaDB** | Base de datos |
 | **CloudBeaver** | Administración gráfica de MariaDB |
 
@@ -28,35 +30,34 @@ El entorno completo se ejecuta mediante **Docker Compose**.
 El proyecto utiliza una arquitectura separada por servicios.
 
 ```text
-┌──────────────────────────────┐
-│           Ionic              │
-│ Ionic 8 + Angular 20         │
-│ Capacitor 8                  │
-│ Puerto 8100                  │
-└──────────────┬───────────────┘
-               │
-               │ HTTP / JSON
-               ▼
-┌──────────────────────────────┐
-│          Directus            │
-│ Backend / API REST           │
-│ Puerto 8000                  │
-└──────────────┬───────────────┘
-               │
-               │ SQL
-               ▼
-┌──────────────────────────────┐
-│          MariaDB             │
-│ Base de datos                │
-│ Puerto interno 3306          │
-└──────────────────────────────┘
-               ▲
-               │
-┌──────────────┴───────────────┐
-│        CloudBeaver           │
-│ Administración de BD        │
-│ Puerto 8978                  │
-└──────────────────────────────┘
+                    ┌──────────────────────────────┐
+                    │         Swagger UI           │
+                    │ Documentación de la API      │
+                    │ Puerto 8081                  │
+                    └──────────────┬───────────────┘
+                                   │
+                                   │ OpenAPI
+                                   ▼
+┌──────────────────────────────┐   ┌──────────────────────────────┐
+│           Ionic              │   │          Directus            │
+│ Ionic 8 + Angular 20         │──▶│ Backend / API REST           │
+│ Capacitor 8                  │   │ Puerto 8000                  │
+│ Puerto 8100                  │   └──────────────┬───────────────┘
+└──────────────────────────────┘                  │
+                                                 │ SQL
+                                                 ▼
+                                  ┌──────────────────────────────┐
+                                  │          MariaDB             │
+                                  │ Base de datos                │
+                                  │ Puerto interno 3306          │
+                                  └──────────────┬───────────────┘
+                                                 ▲
+                                                 │
+                                  ┌──────────────┴───────────────┐
+                                  │        CloudBeaver           │
+                                  │ Administración de BD         │
+                                  │ Puerto 8978                  │
+                                  └──────────────────────────────┘
 ```
 
 ### Ionic
@@ -72,6 +73,26 @@ Directus funciona como backend del proyecto.
 Se conecta directamente con MariaDB y genera una API a partir de las colecciones y tablas disponibles en la base de datos.
 
 Por esta razón no es necesario desarrollar y mantener una API independiente dentro del repositorio.
+
+### OpenAPI y Swagger UI
+
+Directus genera automáticamente una especificación **OpenAPI** de la API disponible en el proyecto.
+
+La especificación puede consultarse en:
+
+```text
+http://localhost:8000/server/specs/oas
+```
+
+Swagger UI utiliza esta especificación para proporcionar una interfaz gráfica en la que se pueden consultar y probar los endpoints disponibles.
+
+Swagger UI se encuentra disponible en:
+
+```text
+http://localhost:8081
+```
+
+La especificación generada por Directus depende del esquema y de los permisos disponibles en el proyecto.
 
 ### MariaDB
 
@@ -97,6 +118,9 @@ Docker Compose
 │
 ├── api
 │   └── Directus
+│
+├── swagger
+│   └── Swagger UI
 │
 ├── db
 │   └── MariaDB
@@ -125,11 +149,11 @@ docker_moviles/
 ├── database/
 │   └── init/
 │
-├── mobile/
-│
 ├── docs/
-│   ├── manuales/
-│   └── correcciones/
+│   ├── correcciones/
+│   └── manuales/
+│
+├── mobile/
 │
 ├── .gitignore
 ├── README.md
@@ -150,8 +174,8 @@ Contiene la documentación utilizada durante el curso.
 
 ```text
 docs/
-├── manuales/
-└── correcciones/
+├── correcciones/
+└── manuales/
 ```
 
 ---
@@ -173,6 +197,7 @@ No es necesario instalar directamente en Windows:
 - Capacitor
 - MariaDB
 - Directus
+- Swagger UI
 - CloudBeaver
 - XAMPP
 
@@ -228,6 +253,8 @@ docker compose up -d
 | --- | --- |
 | Ionic | `http://localhost:8100` |
 | Directus | `http://localhost:8000` |
+| OpenAPI de Directus | `http://localhost:8000/server/specs/oas` |
+| Swagger UI | `http://localhost:8081` |
 | CloudBeaver | `http://localhost:8978` |
 
 MariaDB se utiliza principalmente mediante la red interna de Docker.
@@ -271,6 +298,38 @@ Dentro de Docker no debe utilizarse `localhost` para comunicarse con MariaDB.
 
 ---
 
+## Documentación interactiva de la API
+
+Directus genera la especificación OpenAPI del proyecto en:
+
+```text
+http://localhost:8000/server/specs/oas
+```
+
+Swagger UI utiliza esta especificación y presenta la documentación desde:
+
+```text
+http://localhost:8081
+```
+
+La relación es:
+
+```text
+Directus
+   │
+   │ genera
+   ▼
+OpenAPI
+   │
+   │ interpreta
+   ▼
+Swagger UI
+```
+
+Swagger UI no reemplaza a Directus. Su función es facilitar la consulta y prueba de la API que Directus genera.
+
+---
+
 ## Recarga automática de Ionic
 
 El entorno está configurado para detectar los cambios realizados en los archivos del proyecto mientras Ionic se ejecuta dentro de Docker.
@@ -301,10 +360,7 @@ Changes detected. Rebuilding...
 
 ## NgModules y componentes standalone
 
-Angular permite trabajar actualmente con dos formas principales de organizar componentes:
-
-- componentes standalone;
-- componentes organizados mediante NgModules.
+Angular permite trabajar con componentes standalone o con componentes organizados mediante NgModules.
 
 Este proyecto utiliza **NgModules**, por lo que los componentes generados utilizan:
 
@@ -342,6 +398,12 @@ Directus:
 
 ```powershell
 docker compose logs -f api
+```
+
+Swagger UI:
+
+```powershell
+docker compose logs -f swagger
 ```
 
 MariaDB:
@@ -437,56 +499,11 @@ Ionic no debe acceder directamente a MariaDB.
 
 La aplicación se comunica con Directus mediante HTTP y Directus se encarga del acceso a la base de datos, permisos y exposición de la API.
 
----
-
-## Documentación de Directus
-
-Directus cuenta con documentación oficial completa.
-
-### Documentación general
-
-https://directus.com/docs/
-
-Incluye información sobre:
-
-- configuración de proyectos;
-- modelo de datos;
-- colecciones y campos;
-- permisos;
-- autenticación;
-- API;
-- archivos;
-- relaciones;
-- automatizaciones;
-- configuración y despliegue.
-
-### Referencia de la API
-
-https://directus.com/docs/api
-
-Contiene la referencia de los endpoints disponibles en Directus, incluyendo:
-
-- autenticación;
-- colecciones;
-- elementos;
-- archivos;
-- usuarios;
-- permisos;
-- roles;
-- relaciones;
-- esquema;
-- utilidades.
-
-### Autenticación
-
-https://directus.com/docs/guides/connect/authentication
-
-Explica cómo realizar peticiones autenticadas utilizando tokens y encabezados HTTP.
-
-Por ejemplo:
+De forma complementaria:
 
 ```text
-Authorization: Bearer TOKEN
+CloudBeaver -> Administración de MariaDB
+Swagger UI -> Documentación y pruebas de la API
 ```
 
 ---
