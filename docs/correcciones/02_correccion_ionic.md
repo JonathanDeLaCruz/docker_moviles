@@ -81,14 +81,14 @@ if [ ! -f package.json ]; then \
   echo 'Configurando proyecto...'; \
   npm pkg set name='moviles'; \
 \
-  node -e "\
+  node -e \"\
     const fs = require('fs'); \
     const config = JSON.parse(fs.readFileSync('ionic.config.json', 'utf8')); \
     config.name = 'moviles'; \
     config.type = 'angular'; \
     config.integrations = { capacitor: {} }; \
     fs.writeFileSync('ionic.config.json', JSON.stringify(config, null, 2) + '\\n'); \
-  "; \
+  \"; \
 \
   echo 'Instalando Ionic 8 + Angular 20...'; \
   npm install; \
