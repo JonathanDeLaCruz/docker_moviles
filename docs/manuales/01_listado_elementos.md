@@ -820,35 +820,17 @@ Reemplaza el contenido generado por Ionic por:
 </ion-header>
 
 <ion-content>
-
   <ion-list>
-
     <ion-item *ngFor="let producto of productos">
-
       <ion-label class="ion-text-wrap">
-
         <h2>{{ producto.nombre }}</h2>
-
         <p>{{ producto.descripcion }}</p>
-
-        <p>
-          Precio: ${{ producto.precio }}
-        </p>
-
-        <p>
-          Stock: {{ producto.stock }}
-        </p>
-
-        <p>
-          Registro: {{ producto.fecha_registro | date:'yyyy-MM-dd' }}
-        </p>
-
+        <p> Precio: ${{ producto.precio }}</p>
+        <p>Stock: {{ producto.stock }}</p>
+        <p>Registro: {{ producto.fecha_registro | date:'yyyy-MM-dd' }}</p>
       </ion-label>
-
     </ion-item>
-
   </ion-list>
-
 </ion-content>
 ```
 
