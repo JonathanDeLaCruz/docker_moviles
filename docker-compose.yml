@@ -68,6 +68,10 @@ services:
 
       CORS_ENABLED: "true"
       CORS_ORIGIN: "true"
+      CORS_METHODS: "GET,POST,PATCH,DELETE,OPTIONS"
+      CORS_ALLOWED_HEADERS: "Content-Type,Authorization"
+      CORS_EXPOSED_HEADERS: "Content-Range"
+      CORS_CREDENTIALS: "true"
 
     volumes:
       - directus_uploads:/directus/uploads

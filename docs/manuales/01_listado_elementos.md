@@ -349,6 +349,143 @@ Si Directus responde:
 
 deben revisarse los permisos de lectura de la colección `productos`.
 
+### 5.1. Habilitar CORS en Directus
+
+Aunque Directus permita consultar la colección desde el navegador, Ionic se ejecuta en:
+
+```text
+http://localhost:8100
+```
+
+mientras que Directus se encuentra en:
+
+```text
+http://localhost:8000
+```
+
+Al utilizar puertos diferentes, el navegador considera que se trata de orígenes distintos.
+
+Por esta razón es necesario habilitar **CORS** en Directus para permitir que la aplicación Ionic pueda realizar peticiones a la API.
+
+Abre el archivo:
+
+```text
+docker-compose.yml
+```
+
+Localiza el servicio:
+
+```yaml
+api:
+```
+
+y dentro de la sección:
+
+```yaml
+environment:
+```
+
+agrega:
+
+```yaml
+CORS_ENABLED: "true"
+CORS_ORIGIN: "true"
+CORS_METHODS: "GET,POST,PATCH,DELETE,OPTIONS"
+CORS_ALLOWED_HEADERS: "Content-Type,Authorization"
+CORS_EXPOSED_HEADERS: "Content-Range"
+CORS_CREDENTIALS: "true"
+```
+
+La sección del servicio `api` deberá quedar de forma similar a:
+
+```yaml
+api:
+  image: directus/directus:latest
+  container_name: moviles-api
+  restart: unless-stopped
+
+  ports:
+    - "8000:8055"
+
+  environment:
+    SECRET: "moviles-directus-clave-2026"
+    ADMIN_EMAIL: "admin@moviles.local"
+    ADMIN_PASSWORD: "admin123"
+
+    DB_CLIENT: "mysql"
+    DB_HOST: "db"
+    DB_PORT: "3306"
+    DB_DATABASE: "moviles"
+    DB_USER: "moviles"
+    DB_PASSWORD: "moviles123"
+
+    CORS_ENABLED: "true"
+    CORS_ORIGIN: "true"
+    CORS_METHODS: "GET,POST,PATCH,DELETE,OPTIONS"
+    CORS_ALLOWED_HEADERS: "Content-Type,Authorization"
+    CORS_EXPOSED_HEADERS: "Content-Range"
+    CORS_CREDENTIALS: "true"
+```
+
+Estas variables habilitan CORS en Directus y permiten las operaciones HTTP que se utilizarán durante las prácticas.
+
+- `CORS_ENABLED` habilita CORS.
+- `CORS_ORIGIN` permite solicitudes desde el origen de la aplicación durante el desarrollo.
+- `CORS_METHODS` define los métodos HTTP permitidos.
+- `CORS_ALLOWED_HEADERS` permite encabezados como `Content-Type` y `Authorization`.
+- `CORS_EXPOSED_HEADERS` permite que el navegador tenga acceso al encabezado `Content-Range`.
+- `CORS_CREDENTIALS` permite el envío de credenciales cuando sean necesarias.
+
+---
+
+### 5.2. Recrear el contenedor de Directus
+
+Después de modificar `docker-compose.yml`, Directus debe volver a crear su contenedor para cargar las nuevas variables de entorno.
+
+No es necesario reconstruir todos los servicios.
+
+Desde la carpeta donde se encuentra:
+
+```text
+docker-compose.yml
+```
+
+ejecuta:
+
+```powershell
+docker compose up -d --force-recreate api
+```
+
+El parámetro:
+
+```text
+--force-recreate
+```
+
+obliga a Docker Compose a crear nuevamente el contenedor `api` utilizando la configuración actualizada.
+
+Este procedimiento no elimina la base de datos ni los demás contenedores.
+
+Para comprobar que Directus inició correctamente, puede ejecutarse:
+
+```powershell
+docker compose logs -f api
+```
+
+Una vez que Directus termine de iniciar, la aplicación Ionic podrá realizar peticiones desde:
+
+```text
+http://localhost:8100
+```
+
+hacia:
+
+```text
+http://localhost:8000
+```
+
+sin que el navegador bloquee la petición por CORS.
+
 ---
 
 ## 6. Configurar `productos-list.page.ts`
