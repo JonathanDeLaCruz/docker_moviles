@@ -4,6 +4,19 @@
 
 El problema que se resolvió era que los cambios realizados en los archivos del proyecto no se reflejaban automáticamente mientras el contenedor estaba en ejecución. Además, el entorno ahora trabaja con **Ionic 8**, **Angular 20**, **Capacitor 8**, **NgModules** y recarga automática.
 
+> **Importante:** en esta corrección se anexa el archivo `Dockerfile` que debe utilizarse.  
+> **No copies y pegues el contenido del Dockerfile desde el manual**, ya que durante el copiado pueden modificarse caracteres, barras invertidas o saltos de línea y provocar errores.
+>
+> El archivo `Dockerfile` se encontrará en la misma carpeta que este documento:
+>
+> ```text
+> docs/correcciones/
+> ├── 02_correccion_ionic.md
+> └── Dockerfile
+> ```
+
+---
+
 ## 1. Modificar `docker-compose.yml`
 
 En el servicio `mobile`, agrega las siguientes variables de entorno:
@@ -14,7 +27,9 @@ environment:
   WATCHPACK_POLLING: "true"
 ```
 
-Estas variables permiten detectar cambios en los archivos cuando el proyecto se ejecuta dentro de Docker, especialmente en Windows.
+Estas variables permiten detectar los cambios realizados en los archivos cuando Ionic se ejecuta dentro de Docker, especialmente al trabajar en Windows.
+
+---
 
 ## 2. Detener el servicio `mobile`
 
@@ -24,162 +39,215 @@ Desde la carpeta donde se encuentra `docker-compose.yml`, ejecuta:
 docker compose stop mobile
 ```
 
+---
+
 ## 3. Eliminar el contenedor del servicio `mobile`
+
+Ejecuta:
 
 ```powershell
 docker compose rm -f mobile
 ```
 
-Este comando elimina únicamente el contenedor asociado al servicio `mobile`.
+Este comando elimina únicamente el contenedor correspondiente al servicio `mobile`.
 
-## 4. Eliminar el contenido de la carpeta `mobile`
+---
 
-Elimina el contenido actual de la carpeta `mobile` para generar nuevamente el proyecto Ionic desde cero.
+## 4. Eliminar el volumen de `node_modules` de Ionic
 
-## 5. Crear el archivo `Dockerfile`
+Antes de volver a construir el servicio es necesario eliminar el volumen utilizado para almacenar `node_modules`.
 
-Dentro de la carpeta `mobile`, crea el archivo:
+Este paso es importante porque el volumen puede conservar dependencias de una instalación anterior, incluso si se elimina el contenido de la carpeta `mobile` o se reconstruye la imagen.
+
+Primero localiza el nombre del volumen:
+
+```powershell
+docker volume ls --format "{{.Name}}" | findstr ionic_node_modules
+```
+
+El resultado será similar a:
+
+```text
+docker_moviles_ionic_node_modules
+```
+
+o:
+
+```text
+app_ionic_node_modules
+```
+
+El nombre depende de la carpeta o del nombre del proyecto de Docker Compose.
+
+Elimina el volumen utilizando **exactamente el nombre que apareció en tu computadora**.
+
+Por ejemplo:
+
+```powershell
+docker volume rm docker_moviles_ionic_node_modules
+```
+
+o:
+
+```powershell
+docker volume rm app_ionic_node_modules
+```
+
+> **No escribas uno de estos nombres si no coincide con el que aparece en tu equipo.**
+>
+> Este procedimiento elimina únicamente las dependencias almacenadas para Ionic. No se debe eliminar el volumen de MariaDB.
+
+Puedes verificar nuevamente con:
+
+```powershell
+docker volume ls --format "{{.Name}}" | findstr ionic_node_modules
+```
+
+Si el volumen fue eliminado correctamente, ya no deberá aparecer.
+
+---
+
+## 5. Eliminar el contenido actual de la carpeta `mobile`
+
+Elimina el contenido existente dentro de:
+
+```text
+mobile/
+```
+
+La carpeta debe quedar vacía antes de colocar el nuevo Dockerfile.
+
+No elimines la carpeta `mobile`, solamente su contenido.
+
+---
+
+## 6. Utilizar el `Dockerfile` anexado
+
+En la misma carpeta donde se encuentra este manual se proporciona el archivo:
 
 ```text
 Dockerfile
 ```
 
-con el siguiente contenido:
+No copies su contenido manualmente.
 
-```dockerfile
-FROM node:22-alpine
-
-RUN apk add --no-cache git \
-    && npm install -g @ionic/cli
-
-WORKDIR /app
-
-EXPOSE 8100
-
-ENV NG_CLI_ANALYTICS=false
-ENV CI=true
-
-CMD ["sh", "-c", "\
-set -e; \
-\
-if [ ! -f package.json ]; then \
-  echo 'Creando proyecto Ionic 8 Tabs...'; \
-\
-  rm -rf /tmp/ionic-starters; \
-  git clone --depth 1 https://github.com/ionic-team/starters.git /tmp/ionic-starters; \
-\
-  echo 'Copiando base oficial de Ionic Angular...'; \
-  cp -a /tmp/ionic-starters/angular/base/. /app/; \
-\
-  echo 'Agregando starter oficial Ionic Tabs...'; \
-  cp -a /tmp/ionic-starters/angular/official/tabs/src/app/. /app/src/app/; \
-\
-  rm -rf /tmp/ionic-starters; \
-\
-  cd /app; \
-\
-  echo 'Configurando proyecto...'; \
-  npm pkg set name='moviles'; \
-\
-  node -e \"\
-    const fs = require('fs'); \
-    const config = JSON.parse(fs.readFileSync('ionic.config.json', 'utf8')); \
-    config.name = 'moviles'; \
-    config.type = 'angular'; \
-    config.integrations = { capacitor: {} }; \
-    fs.writeFileSync('ionic.config.json', JSON.stringify(config, null, 2) + '\\n'); \
-  \"; \
-\
-  echo 'Instalando Ionic 8 + Angular 20...'; \
-  npm install; \
-\
-  echo 'Instalando Capacitor 8...'; \
-  npm install --save-exact \
-    @capacitor/core@8 \
-    @capacitor/android@8 \
-    @capacitor/ios@8 \
-    @capacitor/app@8 \
-    @capacitor/haptics@8 \
-    @capacitor/keyboard@8 \
-    @capacitor/status-bar@8; \
-\
-  npm install --save-dev --save-exact @capacitor/cli@8; \
-\
-  echo 'Configurando Capacitor...'; \
-  npx cap init Moviles mx.edu.moviles --web-dir=www; \
-fi; \
-\
-cd /app; \
-\
-if [ ! -d node_modules/@ionic/angular ]; then \
-  echo 'Instalando dependencias...'; \
-  npm install; \
-fi; \
-\
-echo 'Iniciando Ionic...'; \
-exec ionic serve \
-  --external \
-  --port=8100 \
-  --no-open \
-  -- \
-  --poll=1000 \
-"]
-```
-
-El parámetro:
+Copia directamente ese archivo a:
 
 ```text
---poll=1000
+mobile/Dockerfile
 ```
 
-hace que Ionic revise los cambios de los archivos cada segundo, permitiendo la recarga automática del proyecto dentro del contenedor.
+Al terminar, la carpeta deberá verse así:
 
-## 6. Construir nuevamente el contenedor
+```text
+mobile/
+└── Dockerfile
+```
 
-Construye el servicio `mobile` sin utilizar la caché:
+El Dockerfile se encargará de generar automáticamente el proyecto Ionic y las dependencias necesarias cuando se inicie el contenedor.
+
+---
+
+## 7. Construir nuevamente el servicio `mobile`
+
+Desde la carpeta donde se encuentra `docker-compose.yml`, construye el servicio sin utilizar la caché:
 
 ```powershell
 docker compose build --no-cache mobile
 ```
 
-## 7. Levantar el servicio `mobile`
+El parámetro:
+
+```text
+--no-cache
+```
+
+obliga a Docker a reconstruir la imagen sin reutilizar capas de construcciones anteriores.
+
+---
+
+## 8. Levantar el servicio `mobile`
+
+Ejecuta:
 
 ```powershell
 docker compose up -d mobile
 ```
 
-## 8. Revisar los logs
+Durante la primera ejecución se generará automáticamente el proyecto Ionic dentro de la carpeta `mobile`.
+
+---
+
+## 9. Revisar los logs
+
+Para observar el proceso de instalación e inicio ejecuta:
 
 ```powershell
 docker compose logs -f mobile
 ```
 
-## 9. Verificar que Ionic esté funcionando
-
-Cuando aparezca un mensaje similar al siguiente, el contenedor estará listo:
+Durante el proceso deberán aparecer mensajes similares a:
 
 ```text
-moviles-ionic  | [INFO] Development server running!
-moviles-ionic  |
-moviles-ionic  |        Local: http://localhost:8100
-moviles-ionic  |        External: http://172.18.0.4:8100
-moviles-ionic  |
-moviles-ionic  |        Use Ctrl+C to quit this process
-moviles-ionic  |
-moviles-ionic  | [ng]   ➜  Local:   http://localhost:8100/
-moviles-ionic  | [ng]   ➜  Network: http://172.18.0.4:8100/
-moviles-ionic  | [ng] ❯ Changes detected. Rebuilding...
+Creando proyecto Ionic 8 Tabs...
+Copiando base oficial de Ionic Angular...
+Agregando starter oficial Ionic Tabs...
+Configurando proyecto...
+Instalando Ionic 8 + Angular 20...
+Instalando Capacitor 8...
+Configurando Capacitor...
+Iniciando Ionic...
 ```
 
-La aplicación puede abrirse desde:
+La primera ejecución puede tardar varios minutos debido a que se descargan e instalan las dependencias necesarias.
+
+---
+
+## 10. Verificar que Ionic esté funcionando
+
+Cuando aparezca un mensaje similar a:
+
+```text
+[INFO] Development server running!
+```
+
+Ionic estará disponible en:
 
 ```text
 http://localhost:8100
 ```
 
-La dirección `172.18.0.4` corresponde a una dirección interna de la red de Docker y puede cambiar entre ejecuciones.
+En los logs también puede aparecer:
 
-## 10. Nomenclatura de las páginas
+```text
+Changes detected. Rebuilding...
+```
+
+Esto indica que la detección automática de cambios está funcionando.
+
+---
+
+## 11. Verificar la recarga automática
+
+Con Ionic funcionando, modifica algún archivo `.html`, `.ts` o `.scss` dentro de:
+
+```text
+mobile/src/
+```
+
+Guarda el archivo.
+
+En los logs deberá aparecer un mensaje similar a:
+
+```text
+Changes detected. Rebuilding...
+```
+
+y la aplicación deberá actualizarse automáticamente.
+
+---
+
+## 12. Nomenclatura de las páginas
 
 Durante el curso se utilizará la siguiente nomenclatura:
 
@@ -205,43 +273,45 @@ productos-view
 productos-form
 ```
 
-## 11. Crear la página `productos-list`
+---
 
-El proyecto está configurado para trabajar con **NgModules** y generar las páginas con:
+## 13. Proyecto con NgModules
+
+Durante el curso se trabajará con **NgModules** y no con componentes standalone.
+
+En esta versión del proyecto, al generar una página con Ionic, la propiedad:
 
 ```typescript
 standalone: false
 ```
 
-Por lo tanto, durante el curso no se utilizarán componentes standalone.
+**no se agrega automáticamente**.
 
-Desde la carpeta donde se encuentra `docker-compose.yml`, ejecuta:
-
-```powershell
-docker compose exec mobile ionic g page productos-list
-```
-
-Ionic generará una estructura similar a:
+Por lo tanto, después de crear una página, es necesario abrir su archivo:
 
 ```text
-src/app/productos-list/
-├── productos-list-routing.module.ts
-├── productos-list.module.ts
-├── productos-list.page.html
-├── productos-list.page.scss
-├── productos-list.page.spec.ts
-└── productos-list.page.ts
+nombre-pagina.page.ts
 ```
 
-En `productos-list.page.ts`, el componente generado deberá contener una configuración similar a:
+y agregar manualmente:
+
+```typescript
+standalone: false,
+```
+
+dentro del decorador `@Component`.
+
+Por ejemplo:
 
 ```typescript
 @Component({
-  selector: 'app-productos-list',
-  templateUrl: './productos-list.page.html',
-  styleUrls: ['./productos-list.page.scss'],
+  selector: 'app-productos-listado',
+  templateUrl: './productos-listado.page.html',
+  styleUrls: ['./productos-listado.page.scss'],
   standalone: false,
 })
 ```
 
-No es necesario agregar `standalone: false` manualmente, ya que el proyecto está configurado para generar las páginas utilizando NgModules.
+Este paso debe realizarse en cada archivo `page.ts` que se genere durante el curso.
+
+---
