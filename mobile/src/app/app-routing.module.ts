@@ -9,6 +9,14 @@ const routes: Routes = [
   {
     path: 'productos-list',
     loadChildren: () => import('./productos-list/productos-list.module').then( m => m.ProductosListPageModule)
+  },
+  {
+    path: 'productos-view/:id',
+    loadChildren: () => import('./productos-view/productos-view.module').then( m => m.ProductosViewPageModule)
+  },
+  {
+    path: 'productos-form',
+    loadChildren: () => import('./productos-form/productos-form.module').then( m => m.ProductosFormPageModule)
   }
 ];
 @NgModule({

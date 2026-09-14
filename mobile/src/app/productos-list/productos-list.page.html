@@ -1,6 +1,11 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>Productos</ion-title>
+    <ion-buttons slot="end">
+      <ion-button [routerLink]="['/productos-form']">
+        Nuevo
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -14,6 +19,9 @@
         <p>Stock: {{ producto.stock }}</p>
         <p>Registro: {{ producto.fecha_registro | date:'yyyy-MM-dd' }}</p>
       </ion-label>
+      <ion-button slot="end" [routerLink]="['/productos-view', producto.id]">
+        Ver detalle
+      </ion-button>
     </ion-item>
   </ion-list>
 </ion-content>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import axios from 'axios';
 import { environment } from '../../environments/environment';
 
@@ -18,13 +18,13 @@ interface Producto {
   standalone: false
 })
 
-export class ProductosListPage implements OnInit {
+export class ProductosListPage {
 
   productos: Producto[] = [];
 
   constructor() { }
 
-  ngOnInit(): void {
+  ionViewWillEnter(): void {
     this.cargarProductos();
   }
 
@@ -39,5 +39,4 @@ export class ProductosListPage implements OnInit {
       console.error('Error al cargar los productos:', error);
     }
   }
-
 }
