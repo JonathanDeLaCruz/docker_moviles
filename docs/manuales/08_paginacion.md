@@ -560,29 +560,24 @@ src/app/components/paginacion/paginacion.component.html
 Agrega:
 
 ```html
-<div class="paginacion" *ngIf="totalPaginas > 1"
->
+<div class="paginacion" *ngIf="totalPaginas > 1">
 
-  <ion-button fill="clear" size="small" [disabled]="paginaActual === 1" (click)="anterior()" >
+  <ion-button fill="clear" size="small" [disabled]="paginaActual === 1" (click)="anterior()">
     Anterior
   </ion-button>
 
-  <ion-button *ngFor="let pagina of paginasVisibles" size="small" [fill]="pagina === paginaActual ? 'solid' : 'outline'" (click)="cambiarPagina(pagina)" >
+  <ion-button *ngFor="let pagina of paginasVisibles" size="small" [fill]="pagina === paginaActual ? 'solid' : 'outline'" (click)="cambiarPagina(pagina)">
     {{ pagina }}
   </ion-button>
 
-  <ion-button fill="clear" size="small" [disabled]="paginaActual === totalPaginas" (click)="siguiente()" >
+  <ion-button fill="clear" size="small" [disabled]="paginaActual === totalPaginas" (click)="siguiente()">
     Siguiente
   </ion-button>
 
 </div>
 
-<p class="informacion" *ngIf="total > 0"
->
-  Página {{ paginaActual }}
-  de {{ totalPaginas }}
-  ·
-  {{ total }} registros
+<p class="informacion" *ngIf="total > 0">
+  Página {{ paginaActual }} de {{ totalPaginas }} · {{ total }} registros
 </p>
 ```
 
@@ -926,7 +921,7 @@ src/app/productos-list/productos-list.page.html
 Después del listado agrega:
 
 ```html
-<app-paginacion [total]="total" [porPagina]="porPagina" [paginaActual]="paginaActual" [maxPaginasVisibles]="5" (paginaCambio)="cambiarPagina($event)" ></app-paginacion>
+<app-paginacion [total]="total" [porPagina]="porPagina" [paginaActual]="paginaActual" [maxPaginasVisibles]="5" (paginaCambio)="cambiarPagina($event)"></app-paginacion>
 ```
 
 Cuando el usuario selecciona una página, el componente ejecuta:
