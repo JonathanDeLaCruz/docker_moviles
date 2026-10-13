@@ -228,264 +228,7 @@ muestra 10
 
 ---
 
-## 4. Variables necesarias en `productos-list`
-
-Abre:
-
-```text
-src/app/productos-list/productos-list.page.ts
-```
-
-Dentro de la clase agrega:
-
-```typescript
-total: number = 0;
-paginaActual: number = 1;
-porPagina: number = 10;
-```
-
-Estas variables representan:
-
-```text
-total         -> cantidad total de productos
-paginaActual  -> página que se está mostrando
-porPagina     -> productos solicitados por página
-```
-
----
-
-## 5. Modificar `cargarProductos()`
-
-Modifica el método de la siguiente manera:
-
-```typescript
-async cargarProductos(): Promise<void> {
-  try {
-    const response = await axios.get<{ data: Producto[] }>(
-      `${environment.apiUrl}/items/productos`,
-      {
-        params: {
-          limit: this.porPagina,
-          page: this.paginaActual,
-          sort: 'id'
-        }
-      }
-    );
-
-    this.productos = response.data.data;
-
-  } catch (error) {
-    console.error('Error al cargar los productos:', error);
-  }
-}
-```
-
-Axios generará una petición equivalente a:
-
-```text
-GET /items/productos?limit=10&page=1&sort=id
-```
-
-### ¿Para qué sirve `sort`?
-
-Utilizamos:
-
-```typescript
-sort: 'id'
-```
-
-para mantener un orden estable entre páginas.
-
-También podríamos utilizar:
-
-```typescript
-sort: '-id'
-```
-
-para ordenar de forma descendente.
-
----
-
-## 6. Obtener el total de productos
-
-Para calcular el número de páginas necesitamos conocer el total de registros.
-
-No necesitamos crear un endpoint adicional. Directus permite obtener conteos mediante agregaciones.
-
-La petición será:
-
-```text
-GET /items/productos?aggregate[count]=*
-```
-
----
-
-## 7. Crear la interfaz para el conteo
-
-Antes de la clase agrega:
-
-```typescript
-interface ConteoDirectus {
-  count: number | string;
-}
-
-interface ConteoDirectusResponse {
-  data: ConteoDirectus[];
-}
-```
-
-Se acepta:
-
-```typescript
-number | string
-```
-
-porque el conteo puede recibirse como número o como texto dependiendo de la respuesta.
-
----
-
-## 8. Crear `cargarTotal()`
-
-Dentro de `ProductosListPage` agrega:
-
-```typescript
-async cargarTotal(): Promise<void> {
-  try {
-    const response = await axios.get<ConteoDirectusResponse>(
-      `${environment.apiUrl}/items/productos?aggregate[count]=*`
-    );
-
-    this.total = Number(
-      response.data.data[0]?.count ?? 0
-    );
-
-  } catch (error) {
-    console.error(
-      'Error al obtener el total de productos:',
-      error
-    );
-
-    this.total = 0;
-  }
-}
-```
-
-Si la API devuelve:
-
-```json
-{
-  "data": [
-    {
-      "count": "47"
-    }
-  ]
-}
-```
-
-la expresión:
-
-```typescript
-Number(response.data.data[0]?.count ?? 0)
-```
-
-convierte el resultado a número.
-
----
-
-## 9. Crear `cargarDatos()`
-
-Cuando se abra el listado necesitamos:
-
-1. obtener el total;
-2. verificar que la página actual siga siendo válida;
-3. cargar los productos correspondientes.
-
-Agrega:
-
-```typescript
-async cargarDatos(): Promise<void> {
-  await this.cargarTotal();
-  this.ajustarPaginaActual();
-  await this.cargarProductos();
-}
-```
-
----
-
-## 10. Ajustar la página después de eliminar registros
-
-Supongamos que tenemos:
-
-```text
-21 productos
-```
-
-con:
-
-```text
-10 por página
-```
-
-Existen tres páginas. La última contiene un solo producto.
-
-Si eliminamos ese producto, ahora solamente existirán dos páginas. La aplicación no debe permanecer intentando mostrar la página 3.
-
-Agrega:
-
-```typescript
-private ajustarPaginaActual(): void {
-  const totalPaginas = Math.ceil(
-    this.total / this.porPagina
-  );
-
-  if (totalPaginas === 0) {
-    this.paginaActual = 1;
-    return;
-  }
-
-  if (this.paginaActual > totalPaginas) {
-    this.paginaActual = totalPaginas;
-  }
-}
-```
-
----
-
-## 11. Cargar los datos al iniciar
-
-En:
-
-```typescript
-ngOnInit()
-```
-
-utiliza:
-
-```typescript
-ngOnInit(): void {
-  this.cargarDatos();
-}
-```
-
-Si la rama de navegación mediante páginas utiliza:
-
-```typescript
-ionViewWillEnter()
-```
-
-para actualizar el listado al regresar desde el formulario, utiliza:
-
-```typescript
-ionViewWillEnter(): void {
-  this.cargarDatos();
-}
-```
-
-En ese caso no es suficiente llamar solamente a `cargarProductos()`, porque también debemos actualizar el total.
-
----
-
-## 12. Crear el componente de paginación
+## 4. Crear el componente de paginación
 
 Desde la raíz del proyecto ejecuta:
 
@@ -511,7 +254,7 @@ src/app/components/paginacion/
 
 ---
 
-## 13. Configurar `standalone: false`
+## 5. Configurar `standalone: false`
 
 Abre:
 
@@ -538,7 +281,7 @@ Por ejemplo:
 
 ---
 
-## 14. Crear `paginacion.module.ts`
+## 6. Crear `paginacion.module.ts`
 
 Dentro de:
 
@@ -578,7 +321,7 @@ export class PaginacionModule {}
 
 ---
 
-## 15. Entradas y salida del componente
+## 7. Entradas y salida del componente
 
 El componente recibirá información con `@Input()`:
 
@@ -623,7 +366,7 @@ Hijo -> Padre
 
 ---
 
-## 16. Código de `paginacion.component.ts`
+## 8. Código de `paginacion.component.ts`
 
 Utiliza:
 
@@ -722,7 +465,7 @@ export class PaginacionComponent implements OnChanges {
 
 ---
 
-## 17. ¿Por qué utilizamos `OnChanges`?
+## 9. ¿Por qué utilizamos `OnChanges`?
 
 El componente recibe valores desde la página padre.
 
@@ -764,7 +507,7 @@ Si después se elimina un registro y el total cambia, el componente recalcula su
 
 ---
 
-## 18. ¿Por qué limitar los números visibles?
+## 10. ¿Por qué limitar los números visibles?
 
 Supongamos que existen:
 
@@ -806,7 +549,7 @@ y cuando el usuario se encuentra cerca de la página 20:
 
 ---
 
-## 19. Configurar el HTML del componente
+## 11. Configurar el HTML del componente
 
 Abre:
 
@@ -817,43 +560,24 @@ src/app/components/paginacion/paginacion.component.html
 Agrega:
 
 ```html
-<div
-  class="paginacion"
-  *ngIf="totalPaginas > 1"
+<div class="paginacion" *ngIf="totalPaginas > 1"
 >
 
-  <ion-button
-    fill="clear"
-    size="small"
-    [disabled]="paginaActual === 1"
-    (click)="anterior()"
-  >
+  <ion-button fill="clear" size="small" [disabled]="paginaActual === 1" (click)="anterior()" >
     Anterior
   </ion-button>
 
-  <ion-button
-    *ngFor="let pagina of paginasVisibles"
-    size="small"
-    [fill]="pagina === paginaActual ? 'solid' : 'outline'"
-    (click)="cambiarPagina(pagina)"
-  >
+  <ion-button *ngFor="let pagina of paginasVisibles" size="small" [fill]="pagina === paginaActual ? 'solid' : 'outline'" (click)="cambiarPagina(pagina)" >
     {{ pagina }}
   </ion-button>
 
-  <ion-button
-    fill="clear"
-    size="small"
-    [disabled]="paginaActual === totalPaginas"
-    (click)="siguiente()"
-  >
+  <ion-button fill="clear" size="small" [disabled]="paginaActual === totalPaginas" (click)="siguiente()" >
     Siguiente
   </ion-button>
 
 </div>
 
-<p
-  class="informacion"
-  *ngIf="total > 0"
+<p class="informacion" *ngIf="total > 0"
 >
   Página {{ paginaActual }}
   de {{ totalPaginas }}
@@ -864,7 +588,7 @@ Agrega:
 
 ---
 
-## 20. Configurar el SCSS
+## 12. Configurar el SCSS
 
 Abre:
 
@@ -897,7 +621,263 @@ Agrega:
 }
 ```
 
-No necesitamos `Swiper`, `ElementRef` ni acceso directo al DOM.
+
+---
+
+## 13. Variables necesarias en `productos-list`
+
+Abre:
+
+```text
+src/app/productos-list/productos-list.page.ts
+```
+
+Dentro de la clase agrega:
+
+```typescript
+total: number = 0;
+paginaActual: number = 1;
+porPagina: number = 10;
+```
+
+Estas variables representan:
+
+```text
+total         -> cantidad total de productos
+paginaActual  -> página que se está mostrando
+porPagina     -> productos solicitados por página
+```
+
+---
+
+## 14. Modificar `cargarProductos()`
+
+Modifica el método de la siguiente manera:
+
+```typescript
+async cargarProductos(): Promise<void> {
+  try {
+    const response = await axios.get<{ data: Producto[] }>(
+      `${environment.apiUrl}/items/productos`,
+      {
+        params: {
+          limit: this.porPagina,
+          page: this.paginaActual,
+          sort: 'id'
+        }
+      }
+    );
+
+    this.productos = response.data.data;
+
+  } catch (error) {
+    console.error('Error al cargar los productos:', error);
+  }
+}
+```
+
+Axios generará una petición equivalente a:
+
+```text
+GET /items/productos?limit=10&page=1&sort=id
+```
+
+### ¿Para qué sirve `sort`?
+
+Utilizamos:
+
+```typescript
+sort: 'id'
+```
+
+para mantener un orden estable entre páginas.
+
+También podríamos utilizar:
+
+```typescript
+sort: '-id'
+```
+
+para ordenar de forma descendente.
+
+---
+
+## 15. Obtener el total de productos
+
+Para calcular el número de páginas necesitamos conocer el total de registros.
+
+Directus permite obtener conteos mediante agregaciones.
+
+La petición será:
+
+```text
+GET /items/productos?aggregate[count]=*
+```
+
+---
+
+## 16. Crear la interfaz para el conteo
+
+Antes de la clase agrega:
+
+```typescript
+interface ConteoDirectus {
+  count: number | string;
+}
+
+interface ConteoDirectusResponse {
+  data: ConteoDirectus[];
+}
+```
+
+Se acepta:
+
+```typescript
+number | string
+```
+
+porque el conteo puede recibirse como número o como texto dependiendo de la respuesta.
+
+---
+
+## 17. Crear `cargarTotal()`
+
+Dentro de `ProductosListPage` agrega:
+
+```typescript
+async cargarTotal(): Promise<void> {
+  try {
+    const response = await axios.get<ConteoDirectusResponse>(
+      `${environment.apiUrl}/items/productos?aggregate[count]=*`
+    );
+
+    this.total = Number(
+      response.data.data[0]?.count ?? 0
+    );
+
+  } catch (error) {
+    console.error(
+      'Error al obtener el total de productos:',
+      error
+    );
+
+    this.total = 0;
+  }
+}
+```
+
+Si la API devuelve:
+
+```json
+{
+  "data": [
+    {
+      "count": "47"
+    }
+  ]
+}
+```
+
+la expresión:
+
+```typescript
+Number(response.data.data[0]?.count ?? 0)
+```
+
+convierte el resultado a número.
+
+---
+
+## 18. Crear `cargarDatos()`
+
+Cuando se abra el listado necesitamos:
+
+1. obtener el total;
+2. verificar que la página actual siga siendo válida;
+3. cargar los productos correspondientes.
+
+Agrega:
+
+```typescript
+async cargarDatos(): Promise<void> {
+  await this.cargarTotal();
+  this.ajustarPaginaActual();
+  await this.cargarProductos();
+}
+```
+
+---
+
+## 19. Ajustar la página después de eliminar registros
+
+Supongamos que tenemos:
+
+```text
+21 productos
+```
+
+con:
+
+```text
+10 por página
+```
+
+Existen tres páginas. La última contiene un solo producto.
+
+Si eliminamos ese producto, ahora solamente existirán dos páginas. La aplicación no debe permanecer intentando mostrar la página 3.
+
+Agrega:
+
+```typescript
+private ajustarPaginaActual(): void {
+  const totalPaginas = Math.ceil(
+    this.total / this.porPagina
+  );
+
+  if (totalPaginas === 0) {
+    this.paginaActual = 1;
+    return;
+  }
+
+  if (this.paginaActual > totalPaginas) {
+    this.paginaActual = totalPaginas;
+  }
+}
+```
+
+---
+
+## 20. Cargar los datos al iniciar
+
+En:
+
+```typescript
+ngOnInit()
+```
+
+utiliza:
+
+```typescript
+ngOnInit(): void {
+  this.cargarDatos();
+}
+```
+
+Si la rama de navegación mediante páginas utiliza:
+
+```typescript
+ionViewWillEnter()
+```
+
+para actualizar el listado al regresar desde el formulario, utiliza:
+
+```typescript
+ionViewWillEnter(): void {
+  this.cargarDatos();
+}
+```
+
+En ese caso no es suficiente llamar solamente a `cargarProductos()`, porque también debemos actualizar el total.
 
 ---
 
@@ -946,13 +926,7 @@ src/app/productos-list/productos-list.page.html
 Después del listado agrega:
 
 ```html
-<app-paginacion
-  [total]="total"
-  [porPagina]="porPagina"
-  [paginaActual]="paginaActual"
-  [maxPaginasVisibles]="5"
-  (paginaCambio)="cambiarPagina($event)"
-></app-paginacion>
+<app-paginacion [total]="total" [porPagina]="porPagina" [paginaActual]="paginaActual" [maxPaginasVisibles]="5" (paginaCambio)="cambiarPagina($event)" ></app-paginacion>
 ```
 
 Cuando el usuario selecciona una página, el componente ejecuta:
@@ -984,7 +958,7 @@ async cambiarPagina(
 }
 ```
 
-No necesitamos consultar nuevamente el total cuando únicamente cambiamos de página.
+Al cambiar de página, se consulta el conjunto de productos correspondiente.
 
 El flujo será:
 
@@ -1298,9 +1272,7 @@ El componente recalculará automáticamente el número total de páginas.
 No debemos utilizar:
 
 ```html
-<app-paginacion
-  (click)="pagina($event)"
-></app-paginacion>
+<app-paginacion (click)="pagina($event)" ></app-paginacion>
 ```
 
 para después obtener:
@@ -1383,80 +1355,7 @@ Directus
 
 ---
 
-## 34. ¿Qué ocurrió con Swiper?
-
-Para esta práctica no utilizaremos:
-
-```text
-Swiper
-```
-
-La paginación no es un carrusel.
-
-Swiper tiene sentido cuando queremos desplazar contenido como:
-
-```text
-imágenes
-tarjetas
-galerías
-slides
-```
-
-Para seleccionar páginas únicamente necesitamos controles de navegación.
-
-Por eso tampoco necesitamos:
-
-```typescript
-ElementRef
-```
-
-ni acceso directo al DOM.
-
----
-
-## 35. ¿Qué ocurrió con el endpoint `total` de Yii2?
-
-En una implementación anterior podía ser necesario crear un endpoint como:
-
-```text
-/user-alumnos/total
-```
-
-En esta aplicación utilizamos Directus, que ya permite realizar agregaciones.
-
-Por eso utilizamos:
-
-```text
-/items/productos?aggregate[count]=*
-```
-
-No necesitamos modificar:
-
-```text
-controller
-web.php
-UrlRule
-```
-
-ni crear un endpoint personalizado únicamente para contar registros.
-
----
-
-## 36. ¿Por qué utilizamos agregación y no `meta`?
-
-En versiones anteriores de Directus se podían solicitar conteos mediante metadata.
-
-Actualmente los conteos mediante metadata están marcados como deprecados en la documentación de Directus. Para nuevos desarrollos conviene utilizar agregaciones.
-
-Por eso usamos:
-
-```text
-aggregate[count]=*
-```
-
----
-
-## 37. Preparación para búsquedas y filtros
+## 34. Preparación para búsquedas y filtros
 
 Posteriormente podemos combinar esta paginación con:
 
@@ -1474,7 +1373,7 @@ Por ejemplo, si existen 100 productos pero una búsqueda encuentra solamente 17,
 
 ---
 
-## 38. Organización final
+## 35. Organización final
 
 La estructura relacionada con esta práctica será:
 
@@ -1508,7 +1407,7 @@ src/app/components/
 
 ---
 
-## 39. Resumen
+## 36. Resumen
 
 La paginación se divide en dos responsabilidades.
 
@@ -1586,18 +1485,7 @@ ProductosListPage
 Directus
 ```
 
-Los principales cambios respecto al manual anterior son:
-
-```text
-No Yii2
-No endpoint total personalizado
-No Swiper
-No ElementRef
-No event.target.innerText
-No window.location.reload()
-```
-
-En su lugar utilizamos:
+Los elementos utilizados en esta práctica son:
 
 ```text
 Directus
