@@ -2,9 +2,12 @@
 
 En esta práctica crearás una página que consulta productos en Directus y los muestra en Ionic. Trabajarás con Angular, TypeScript, Axios y NgModules.
 
-**Resultado esperado:** al abrir `http://localhost:8100/productos-list`, verás el nombre, descripción, precio, stock y fecha de registro de cada producto.
+**Resultado esperado:** al abrir `http://localhost:8100/productos-list`, verás el nombre, descripción, precio, stock y fecha de registro de cada producto, como se muestra en la figura 1.
 
-![Captura real del listado de productos en tamaño de pantalla móvil](imagenes/01-listado-productos.jpg)
+<p align="center">
+  <img src="imagenes/01-listado-productos.jpg" alt="Listado de productos en tamaño de pantalla móvil" width="390"><br>
+  <em>Figura 1. Listado de productos obtenido desde Directus.</em>
+</p>
 
 Captura de la aplicación ejecutando el código de esta práctica en el navegador con tamaño de pantalla móvil. Los productos y las fechas corresponden a los registros disponibles al realizar la prueba; en tu colección pueden ser diferentes. La captura utiliza el tema oscuro del entorno de prueba.
 
