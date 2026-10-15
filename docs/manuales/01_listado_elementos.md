@@ -1,117 +1,68 @@
-# list de elementos con Ionic
+# Listado de elementos con Ionic
 
-En esta práctica se creará una página en **Ionic con Angular y TypeScript** que realizará una petición `GET` a Directus para obtener y mostrar el list de productos almacenados en MariaDB.
+En esta práctica crearás una página que consulta productos en Directus y los muestra en Ionic. Trabajarás con Angular, TypeScript, Axios y NgModules.
 
-La colección utilizada será:
+**Resultado esperado:** al abrir `http://localhost:8100/productos-list`, verás el nombre, descripción, precio, stock y fecha de registro de cada producto.
 
-```text
-productos
-```
+![Captura real del listado de productos en tamaño de pantalla móvil](imagenes/01-listado-productos.jpg)
 
-Durante el desarrollo, la API está disponible en:
+Captura de la aplicación ejecutando el código de esta práctica en el navegador con tamaño de pantalla móvil. Los productos y las fechas corresponden a los registros disponibles al realizar la prueba; en tu colección pueden ser diferentes. La captura utiliza el tema oscuro del entorno de prueba.
 
-```text
-http://localhost:8000/items/productos
-```
+## 1. Antes de comenzar
 
-Actualmente devuelve información con la siguiente estructura:
+Necesitas el entorno Docker del proyecto en ejecución, la colección `productos` disponible en Directus y algunos registros de prueba. Esta práctica se realiza desde el navegador de la computadora donde se ejecuta Docker.
 
-```json
-{
-  "data": [
-    {
-      "id": 1,
-      "nombre": "Laptop",
-      "descripcion": "Producto de prueba",
-      "precio": "15000.00",
-      "stock": 5,
-      "fecha_registro": "2026-08-25T21:40:56.000Z"
-    },
-    {
-      "id": 2,
-      "nombre": "Teclado",
-      "descripcion": "Producto de prueba",
-      "precio": "850.00",
-      "stock": 10,
-      "fecha_registro": "2026-08-25T21:40:56.000Z"
-    }
-  ]
-}
-```
+- Ejecuta los comandos desde la carpeta del repositorio que contiene `docker-compose.yml`.
+- Las rutas `src/...` de este manual son relativas al proyecto Ionic: en este repositorio corresponden a `mobile/src/...`.
+- El proyecto utiliza **NgModules**. Después de crear cada página o componente, debes configurar manualmente `standalone: false` en su decorador `@Component`.
+- Ionic debe estar disponible en `http://localhost:8100` y Directus en `http://localhost:8000`.
 
-## Objetivo
+Durante el curso se utilizará esta nomenclatura:
 
-Al finalizar la práctica, la aplicación deberá:
-
-1. Crear una página nueva utilizando NgModules.
-2. Configurar la dirección de la API mediante los archivos `environment`.
-3. Consultar la colección `productos` de Directus.
-4. Guardar la respuesta en un arreglo tipado de TypeScript.
-5. Recorrer el arreglo desde la vista HTML.
-6. Mostrar los productos utilizando componentes de Ionic.
-
-El flujo será:
-
-```text
-Ionic
-  |
-  | GET /items/productos
-  v
-Directus
-  |
-  v
-MariaDB
-```
-
----
-
-## 1. Nomenclatura de las páginas
-
-Durante el curso se utilizará la siguiente nomenclatura:
-
-| Operación | Nomenclatura | Ejemplo con `productos` | Uso |
+| Operación | Nombre de la página | Ejemplo | Uso |
 | --- | --- | --- | --- |
-| `GET` | `tabla-list` | `productos-list` | Mostrar todos los registros |
-| `GET` con ID | `tabla-view` | `productos-view` | Mostrar un registro específico |
-| `POST` y `PATCH` | `tabla-form` | `productos-form` | Crear y modificar registros reutilizando el mismo formulario |
+| `GET` del listado | `tabla-list` | `productos-list` | Consultar varios registros. |
+| `GET` con ID | `tabla-view` | `productos-view` | Consultar un registro. |
+| `POST` y `PATCH` | `tabla-form` | `productos-form` | Crear y actualizar registros. |
 
-En esta práctica se realizará el list de productos, por lo que se creará:
+**En esta práctica solo implementarás el listado.**
 
-```text
-productos-list
-```
+## 2. Conceptos y métodos que utilizarás
 
----
+Antes de escribir el código, identifica para qué sirve cada elemento:
 
-## 2. Crear la página `productos-list`
+| Elemento | Cómo se utiliza | Para qué sirve |
+| --- | --- | --- |
+| `ngOnInit()` | `ngOnInit(): void { this.cargarProductos(); }` | Angular lo ejecuta al inicializar el componente; aquí iniciaremos la consulta. |
+| `cargarProductos()` | `this.cargarProductos()` | Método que crearás para consultar la API y guardar los productos. |
+| `axios.get()` | `await axios.get(url)` | Realiza una petición HTTP de lectura y permite obtener su respuesta. |
+| `async` / `await` | `async cargarProductos()` y `await axios.get(...)` | Permiten esperar la respuesta dentro del método sin bloquear la interfaz. |
+| `interface Producto` | `productos: Producto[] = []` | Describe los campos y tipos de cada producto; `Producto[]` representa un arreglo de esos objetos. |
+| `environment.apiUrl` | `` `${environment.apiUrl}/items/productos` `` | Construye la dirección de la consulta a partir de una URL base. |
+| `*ngFor` | `*ngFor="let producto of productos"` | Repite un elemento HTML por cada producto del arreglo. |
+| Interpolación y punto | `{{ producto.nombre }}` | Accede a una propiedad del objeto y muestra su valor en el HTML. |
+| Pipe `date` | `{{ producto.fecha_registro \| date:'yyyy-MM-dd' }}` | Presenta la fecha con el formato indicado. |
 
-El proyecto está configurado para trabajar con **NgModules** y generar las páginas con:
+Por ejemplo, `await axios.get('http://localhost:8000/items/productos')` solicita los productos. En la implementación utilizarás `environment.apiUrl` para centralizar la dirección del servidor.
 
-```typescript
-standalone: false
-```
+## 3. Implementación paso a paso
 
-Por lo tanto, no se utilizarán componentes standalone durante el curso.
+Sigue los pasos en orden. Primero prepararás el proyecto y la API; después escribirás el TypeScript y el HTML. En la sección 4 encontrarás los archivos completos para comparar el resultado.
 
-Desde la carpeta donde se encuentra `docker-compose.yml`, ejecuta:
+### Paso 1. Crear la página e instalar Axios
+
+Ejecuta en la terminal, desde la carpeta que contiene `docker-compose.yml`:
 
 ```powershell
 docker compose exec mobile ionic g page productos-list
+docker compose exec mobile npm install axios
 ```
 
-Ionic generará una estructura similar a:
+Si la página ya existe, continúa con ella sin volver a generarla. Instala Axios solo si todavía no está agregado al proyecto.
 
-```text
-src/app/productos-list/
-├── productos-list-routing.module.ts
-├── productos-list.module.ts
-├── productos-list.page.html
-├── productos-list.page.scss
-├── productos-list.page.spec.ts
-└── productos-list.page.ts
-```
+El generador creará los archivos de la página en `mobile/src/app/productos-list/`, incluidos su módulo, rutas, TypeScript, HTML, estilos y archivo de prueba. Axios se instalará dentro del contenedor `mobile` y actualizará `mobile/package.json` y `mobile/package-lock.json`.
 
-En `productos-list.page.ts`, el componente generado deberá contener:
+**Después de generar la página**, abre `mobile/src/app/productos-list/productos-list.page.ts` y agrega `standalone: false` dentro del objeto de `@Component`, como se muestra a continuación. Si aparece `standalone: true`, cámbialo a `false`; si ya está en `false`, consérvalo sin duplicarlo:
 
 ```typescript
 @Component({
@@ -122,63 +73,11 @@ En `productos-list.page.ts`, el componente generado deberá contener:
 })
 ```
 
-No es necesario agregar `standalone: false` manualmente, ya que el proyecto está configurado para generarlo de esta manera.
+Repite esta configuración cada vez que crees una página o un componente durante el curso: se declararán dentro de módulos de Angular.
 
----
+### Paso 2. Configurar la URL de la API
 
-## 3. Instalar Axios
-
-Se utilizará **Axios** para realizar las peticiones HTTP.
-
-Como el entorno de Ionic se ejecuta mediante Docker, Axios debe instalarse dentro del contenedor `mobile`.
-
-Desde la carpeta donde se encuentra `docker-compose.yml`, ejecuta:
-
-```powershell
-docker compose exec mobile npm install axios
-```
-
-Este comando solo es necesario la primera vez que se agrega Axios al proyecto.
-
-La instalación actualizará las dependencias del proyecto en:
-
-```text
-package.json
-package-lock.json
-```
-
-[Axios](https://axios-http.com/es/) es un cliente HTTP basado en promesas que permite realizar peticiones HTTP desde JavaScript y TypeScript.
-
----
-
-## 4. Configurar la URL de la API
-
-No se escribirá la dirección completa de Directus directamente en cada página.
-
-En su lugar, la URL base de la API se configurará en los archivos de entorno de Angular. Esto permitirá utilizar `localhost` durante el desarrollo y posteriormente cambiar a un dominio sin modificar las páginas de la aplicación.
-
-Se utilizarán:
-
-```text
-src/environments/environment.ts
-src/environments/environment.prod.ts
-```
-
-Ambos archivos tendrán una propiedad llamada:
-
-```typescript
-apiUrl
-```
-
-### 4.1. Entorno de desarrollo
-
-Abre:
-
-```text
-src/environments/environment.ts
-```
-
-y configúralo de la siguiente manera:
+Abre `mobile/src/environments/environment.ts`. Dentro del objeto `environment`, agrega o actualiza `apiUrl` y conserva `production: false`:
 
 ```typescript
 export const environment = {
@@ -187,27 +86,7 @@ export const environment = {
 };
 ```
 
-Esta será la dirección utilizada mientras se trabaje con:
-
-```text
-http://localhost:8100
-```
-
-y Directus se encuentre disponible en:
-
-```text
-http://localhost:8000
-```
-
-### 4.2. Entorno de producción
-
-Abre:
-
-```text
-src/environments/environment.prod.ts
-```
-
-y agrega la misma propiedad:
+Después abre `mobile/src/environments/environment.prod.ts`. Agrega la misma propiedad, conservando `production: true`:
 
 ```typescript
 export const environment = {
@@ -216,107 +95,13 @@ export const environment = {
 };
 ```
 
-El dominio anterior es únicamente un ejemplo. Cuando Directus sea publicado en el servidor definitivo, deberá sustituirse por el dominio real de la API.
+`https://api.midominio.com` es un dominio de ejemplo: sustitúyelo por el dominio real cuando publiques Directus. Para esta práctica en desarrollo se utiliza el primer archivo.
 
-Por ejemplo:
+**Guarda únicamente la URL base en `apiUrl`, sin `/items/productos`.** Si los archivos tienen otras propiedades, consérvalas.
 
-```typescript
-export const environment = {
-  production: true,
-  apiUrl: 'https://api.ejemplo.com'
-};
-```
+### Paso 3. Comprobar el acceso a Directus y habilitar CORS
 
-### 4.3. ¿Cómo sabe Angular qué archivo utilizar?
-
-El proyecto ya tiene configurado en `angular.json` el reemplazo del archivo de entorno para producción:
-
-```json
-"fileReplacements": [
-  {
-    "replace": "src/environments/environment.ts",
-    "with": "src/environments/environment.prod.ts"
-  }
-]
-```
-
-Además, el servidor de desarrollo utiliza la configuración:
-
-```text
-development
-```
-
-Por lo tanto:
-
-```text
-Desarrollo
-    |
-    v
-environment.ts
-    |
-    v
-http://localhost:8000
-```
-
-Mientras que al generar una compilación de producción:
-
-```text
-Producción
-    |
-    v
-environment.prod.ts
-    |
-    v
-https://api.midominio.com
-```
-
-No será necesario cambiar los imports ni las direcciones en cada página.
-
-> En el código de la aplicación siempre se importa `environment` desde `environment.ts`. Angular realiza automáticamente el reemplazo correspondiente durante una compilación de producción.
-
-### 4.4. Importar `environment`
-
-En las páginas que necesiten consumir la API se utilizará:
-
-```typescript
-import { environment } from '../../environments/environment';
-```
-
-Por ejemplo, la dirección para consultar los productos se construirá de esta forma:
-
-```typescript
-`${environment.apiUrl}/items/productos`
-```
-
-Durante el desarrollo, el resultado será:
-
-```text
-http://localhost:8000/items/productos
-```
-
-Posteriormente, en producción, podría convertirse automáticamente en:
-
-```text
-https://api.midominio.com/items/productos
-```
-
-De esta manera, el código de las páginas no necesita modificarse cuando cambie la dirección del servidor.
-
-> La propiedad `apiUrl` debe contener únicamente la URL base. No agregues `/items/productos`, ya que la misma variable se reutilizará para todas las colecciones.
-
----
-
-## 5. Verificar la API
-
-Antes de programar la petición desde Ionic, comprueba que Directus permita consultar la colección.
-
-Abre en el navegador:
-
-```text
-http://localhost:8000/items/productos
-```
-
-La respuesta debe ser similar a:
+Abre `http://localhost:8000/items/productos` en el navegador. La respuesta debe contener un arreglo `data`, con una estructura similar a esta:
 
 ```json
 {
@@ -328,97 +113,16 @@ La respuesta debe ser similar a:
       "precio": "15000.00",
       "stock": 5,
       "fecha_registro": "2026-08-25T21:40:56.000Z"
-    },
-    {
-      "id": 2,
-      "nombre": "Teclado",
-      "descripcion": "Producto de prueba",
-      "precio": "850.00",
-      "stock": 10,
-      "fecha_registro": "2026-08-25T21:40:56.000Z"
     }
   ]
 }
 ```
 
-Si Directus responde:
+Comprueba que la política usada en estas prácticas permita la lectura de `productos`. Si recibes `403 Forbidden`, ajusta ese permiso antes de continuar. Para ver filas en pantalla, la colección debe contener registros.
 
-```text
-403 Forbidden
-```
-
-deben revisarse los permisos de lectura de la colección `productos`.
-
-### 5.1. Habilitar CORS en Directus
-
-Aunque Directus permita consultar la colección desde el navegador, Ionic se ejecuta en:
-
-```text
-http://localhost:8100
-```
-
-mientras que Directus se encuentra en:
-
-```text
-http://localhost:8000
-```
-
-Al utilizar puertos diferentes, el navegador considera que se trata de orígenes distintos.
-
-Por esta razón es necesario habilitar **CORS** en Directus para permitir que la aplicación Ionic pueda realizar peticiones a la API.
-
-Abre el archivo:
-
-```text
-docker-compose.yml
-```
-
-Localiza el servicio:
+Abre `docker-compose.yml`. Dentro del servicio `api`, localiza su bloque `environment` y agrega o actualiza estas variables. **Conserva las variables de base de datos, administrador y demás configuración existente; no crees otro bloque `environment`.**
 
 ```yaml
-api:
-```
-
-y dentro de la sección:
-
-```yaml
-environment:
-```
-
-agrega:
-
-```yaml
-CORS_ENABLED: "true"
-CORS_ORIGIN: "true"
-CORS_METHODS: "GET,POST,PATCH,DELETE,OPTIONS"
-CORS_ALLOWED_HEADERS: "Content-Type,Authorization"
-CORS_EXPOSED_HEADERS: "Content-Range"
-CORS_CREDENTIALS: "true"
-```
-
-La sección del servicio `api` deberá quedar de forma similar a:
-
-```yaml
-api:
-  image: directus/directus:latest
-  container_name: moviles-api
-  restart: unless-stopped
-
-  ports:
-    - "8000:8055"
-
-  environment:
-    SECRET: "moviles-directus-clave-2026"
-    ADMIN_EMAIL: "admin@moviles.local"
-    ADMIN_PASSWORD: "admin123"
-
-    DB_CLIENT: "mysql"
-    DB_HOST: "db"
-    DB_PORT: "3306"
-    DB_DATABASE: "moviles"
-    DB_USER: "moviles"
-    DB_PASSWORD: "moviles123"
-
     CORS_ENABLED: "true"
     CORS_ORIGIN: "true"
     CORS_METHODS: "GET,POST,PATCH,DELETE,OPTIONS"
@@ -427,82 +131,34 @@ api:
     CORS_CREDENTIALS: "true"
 ```
 
-Estas variables habilitan CORS en Directus y permiten las operaciones HTTP que se utilizarán durante las prácticas.
+Las variables deben tener la misma indentación que las demás entradas de `environment`. Esta es su ubicación; el siguiente esquema solo muestra dónde insertarlas, no reemplaza el servicio completo:
 
-- `CORS_ENABLED` habilita CORS.
-- `CORS_ORIGIN` permite solicitudes desde el origen de la aplicación durante el desarrollo.
-- `CORS_METHODS` define los métodos HTTP permitidos.
-- `CORS_ALLOWED_HEADERS` permite encabezados como `Content-Type` y `Authorization`.
-- `CORS_EXPOSED_HEADERS` permite que el navegador tenga acceso al encabezado `Content-Range`.
-- `CORS_CREDENTIALS` permite el envío de credenciales cuando sean necesarias.
-
----
-
-### 5.2. Recrear el contenedor de Directus
-
-Después de modificar `docker-compose.yml`, Directus debe volver a crear su contenedor para cargar las nuevas variables de entorno.
-
-No es necesario reconstruir todos los servicios.
-
-Desde la carpeta donde se encuentra:
-
-```text
-docker-compose.yml
+```yaml
+services:
+  api:
+    environment:
+      # Aquí se conservan las variables existentes.
+      CORS_ENABLED: "true"
+      CORS_ORIGIN: "true"
+      CORS_METHODS: "GET,POST,PATCH,DELETE,OPTIONS"
+      CORS_ALLOWED_HEADERS: "Content-Type,Authorization"
+      CORS_EXPOSED_HEADERS: "Content-Range"
+      CORS_CREDENTIALS: "true"
 ```
 
-ejecuta:
+Si modificaste estas variables, aplica los cambios ejecutando:
 
 ```powershell
 docker compose up -d --force-recreate api
 ```
 
-El parámetro:
+Este comando recrea el contenedor de Directus para cargar la configuración actualizada y conserva la base de datos. Puedes revisar su arranque con `docker compose logs -f api`; presiona `Ctrl+C` para salir de la consulta de logs.
 
-```text
---force-recreate
-```
+### Paso 4. Preparar el TypeScript de la página
 
-obliga a Docker Compose a crear nuevamente el contenedor `api` utilizando la configuración actualizada.
+Abre `mobile/src/app/productos-list/productos-list.page.ts`.
 
-Este procedimiento no elimina la base de datos ni los demás contenedores.
-
-Para comprobar que Directus inició correctamente, puede ejecutarse:
-
-```powershell
-docker compose logs -f api
-```
-
-Una vez que Directus termine de iniciar, la aplicación Ionic podrá realizar peticiones desde:
-
-```text
-http://localhost:8100
-```
-
-hacia:
-
-```text
-http://localhost:8000
-```
-
-sin que el navegador bloquee la petición por CORS.
-
----
-
-## 6. Configurar `productos-list.page.ts`
-
-Abre:
-
-```text
-src/app/productos-list/productos-list.page.ts
-```
-
-El código necesario se agregará en este archivo.
-
----
-
-## 7. Importar Axios y `environment`
-
-Conserva las importaciones generadas por Ionic y agrega Axios y `environment`:
+**Al inicio del archivo**, deja estas importaciones para el listado básico:
 
 ```typescript
 import { Component, OnInit } from '@angular/core';
@@ -510,13 +166,7 @@ import axios from 'axios';
 import { environment } from '../../environments/environment';
 ```
 
-Axios realizará la petición HTTP y `environment` proporcionará la URL base de la API.
-
----
-
-## 8. Crear la interfaz `Producto`
-
-Antes de la clase `ProductosListPage`, crea la interfaz:
+**Después de las importaciones y antes de `@Component`**, agrega la interfaz:
 
 ```typescript
 interface Producto {
@@ -529,108 +179,15 @@ interface Producto {
 }
 ```
 
-Una interfaz permite definir la estructura que tendrán los objetos utilizados en TypeScript.
-
-En este caso, un producto deberá contener:
-
-```text
-id
-nombre
-descripcion
-precio
-stock
-fecha_registro
-```
-
-### Tipos de datos
-
-Los campos `id` y `stock` se reciben como números:
-
-```typescript
-id: number;
-stock: number;
-```
-
-Los campos de texto se representan mediante `string`:
-
-```typescript
-nombre: string;
-descripcion: string;
-```
-
-En la respuesta actual de Directus, `precio` se recibe como:
-
-```json
-"precio": "15000.00"
-```
-
-Por esta razón se declara:
-
-```typescript
-precio: string;
-```
-
-La fecha también se recibe como una cadena en formato ISO:
-
-```json
-"fecha_registro": "2026-08-25T21:40:56.000Z"
-```
-
-por lo que se declara:
-
-```typescript
-fecha_registro: string;
-```
-
----
-
-## 9. Crear el arreglo de productos
-
-Dentro de la clase `ProductosListPage`, agrega:
+**Dentro de la clase `ProductosListPage`**, agrega el arreglo y el método de consulta. Sustituye el `ngOnInit()` generado por el que se muestra aquí; no declares dos métodos con el mismo nombre:
 
 ```typescript
 productos: Producto[] = [];
-```
 
-El arreglo almacenará los productos recibidos desde Directus.
-
-La declaración:
-
-```typescript
-Producto[]
-```
-
-indica que el arreglo solamente contendrá objetos que cumplan con la estructura definida en la interfaz `Producto`.
-
-Esto permite aprovechar el tipado de TypeScript y evita utilizar:
-
-```typescript
-any
-```
-
----
-
-## 10. Configurar `ngOnInit()`
-
-Dentro de `ngOnInit()` llama al método que cargará los productos:
-
-```typescript
 ngOnInit(): void {
   this.cargarProductos();
 }
-```
 
-Angular ejecuta `ngOnInit()` cuando inicializa el componente.
-
-Por lo tanto, al entrar a la página se realizará automáticamente la consulta de los productos.
-
----
-
-## 11. Crear el método `cargarProductos()`
-
-Dentro de la clase agrega:
-
-```typescript
 async cargarProductos(): Promise<void> {
   try {
     const response = await axios.get<{ data: Producto[] }>(
@@ -644,95 +201,75 @@ async cargarProductos(): Promise<void> {
 }
 ```
 
-### Método asíncrono
+Conserva el decorador `@Component`, `standalone: false`, el constructor y la declaración `export class ProductosListPage implements OnInit`. El arreglo empieza vacío y se llena cuando Directus responde.
 
-El método se declara como:
+### Paso 5. Escribir la vista HTML
 
-```typescript
-async cargarProductos(): Promise<void>
+Abre `mobile/src/app/productos-list/productos-list.page.html` y **reemplaza todo su contenido** por:
+
+```html
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Productos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <ion-item *ngFor="let producto of productos">
+      <ion-label class="ion-text-wrap">
+        <h2>{{ producto.nombre }}</h2>
+        <p>{{ producto.descripcion }}</p>
+        <p>Precio: ${{ producto.precio }}</p>
+        <p>Stock: {{ producto.stock }}</p>
+        <p>Registro: {{ producto.fecha_registro | date:'yyyy-MM-dd' }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>
 ```
 
-`async` permite utilizar `await` dentro del método.
+`*ngFor` crea una fila por producto; las expresiones `{{ }}` muestran sus propiedades. La fecha se presenta con año, mes y día.
 
-`Promise<void>` indica que se trata de una operación asíncrona que no devuelve un valor al código que la invoca.
+### Paso 6. Revisar la ruta y el módulo generados
 
-### Realizar la petición GET
-
-La petición se realiza mediante:
+En `mobile/src/app/app-routing.module.ts`, comprueba que el arreglo `routes` incluya esta entrada. El generador normalmente la agrega; si ya existe, no la dupliques:
 
 ```typescript
-axios.get(...)
-```
-
-La URL se construye utilizando:
-
-```typescript
-`${environment.apiUrl}/items/productos`
-```
-
-No se escribe:
-
-```typescript
-'http://localhost:8000/items/productos'
-```
-
-directamente en la página.
-
-De esta manera, el mismo código funciona en desarrollo y producción.
-
-### Respuesta de Axios y Directus
-
-Directus devuelve:
-
-```json
 {
-  "data": [
-    ...
-  ]
+  path: 'productos-list',
+  loadChildren: () => import('./productos-list/productos-list.module')
+    .then(m => m.ProductosListPageModule)
 }
 ```
 
-Axios también utiliza una propiedad llamada `data` para almacenar el cuerpo de la respuesta HTTP.
+Si necesitas agregarla, insértala dentro de `routes`, separándola de las otras entradas con una coma. Conserva las rutas existentes.
 
-Por esta razón se utiliza:
+En `productos-list.module.ts`, conserva los imports generados de `CommonModule`, `FormsModule`, `IonicModule` y `ProductosListPageRoutingModule`, y la declaración de `ProductosListPage`. El módulo de rutas de la página debe conservar `path: ''` y `component: ProductosListPage`.
 
-```typescript
-response.data.data
-```
+## 4. Así debe quedar el código completo
 
-Puede interpretarse de la siguiente manera:
+Estos son los archivos completos de entorno, TypeScript y HTML para el **listado básico de esta práctica**. Compáralos con lo que acabas de escribir. Si tus archivos de entorno tienen otras propiedades, también debes conservarlas.
 
-```text
-response
-   |
-   └── data       <- cuerpo de la respuesta de Axios
-        |
-        └── data  <- arreglo enviado por Directus
-```
-
-Finalmente, el arreglo recibido se guarda en:
+### `mobile/src/environments/environment.ts`
 
 ```typescript
-this.productos = response.data.data;
+export const environment = {
+  production: false,
+  apiUrl: 'http://localhost:8000'
+};
 ```
 
-### Manejo de errores
-
-Si la petición falla, se ejecutará:
+### `mobile/src/environments/environment.prod.ts`
 
 ```typescript
-catch (error) {
-  console.error('Error al cargar los productos:', error);
-}
+export const environment = {
+  production: true,
+  apiUrl: 'https://api.midominio.com'
+};
 ```
 
-Esto permitirá revisar el error desde la consola del navegador.
-
----
-
-## 12. Código completo de `productos-list.page.ts`
-
-El archivo deberá quedar de forma similar a:
+### `mobile/src/app/productos-list/productos-list.page.ts`
 
 ```typescript
 import { Component, OnInit } from '@angular/core';
@@ -755,7 +292,6 @@ interface Producto {
   standalone: false,
 })
 export class ProductosListPage implements OnInit {
-
   productos: Producto[] = [];
 
   constructor() {}
@@ -778,39 +314,7 @@ export class ProductosListPage implements OnInit {
 }
 ```
 
-Este archivo utiliza **TypeScript**, no solamente JavaScript.
-
-Algunas de las características de TypeScript utilizadas son:
-
-```typescript
-interface Producto
-```
-
-```typescript
-productos: Producto[]
-```
-
-```typescript
-Promise<void>
-```
-
-```typescript
-axios.get<{ data: Producto[] }>()
-```
-
-Estas declaraciones permiten especificar los tipos de datos que se esperan durante la ejecución de la aplicación.
-
----
-
-## 13. Configurar `productos-list.page.html`
-
-Abre:
-
-```text
-src/app/productos-list/productos-list.page.html
-```
-
-Reemplaza el contenido generado por Ionic por:
+### `mobile/src/app/productos-list/productos-list.page.html`
 
 ```html
 <ion-header>
@@ -825,7 +329,7 @@ Reemplaza el contenido generado por Ionic por:
       <ion-label class="ion-text-wrap">
         <h2>{{ producto.nombre }}</h2>
         <p>{{ producto.descripcion }}</p>
-        <p> Precio: ${{ producto.precio }}</p>
+        <p>Precio: ${{ producto.precio }}</p>
         <p>Stock: {{ producto.stock }}</p>
         <p>Registro: {{ producto.fecha_registro | date:'yyyy-MM-dd' }}</p>
       </ion-label>
@@ -834,173 +338,17 @@ Reemplaza el contenido generado por Ionic por:
 </ion-content>
 ```
 
----
+La configuración de CORS y la entrada de ruta son cambios dentro de archivos compartidos: aplica únicamente los bloques indicados en los pasos 3 y 6. Los módulos generados y el archivo SCSS no requieren cambios para este listado.
 
-## 14. Recorrer los productos con `*ngFor`
+## 5. Comprobar que funciona
 
-La instrucción:
+1. Guarda los archivos y espera a que Ionic termine de compilar.
+2. Abre `http://localhost:8100/productos-list`.
+3. Comprueba que aparezca el título **Productos** y una fila por cada registro devuelto por la API.
+4. Compara los datos de una fila con la respuesta de `http://localhost:8000/items/productos`.
+5. Verifica que cada fila muestre nombre, descripción, precio, stock y una fecha con formato `yyyy-MM-dd`.
 
-```html
-*ngFor="let producto of productos"
-```
-
-recorre los elementos almacenados en:
-
-```typescript
-productos: Producto[] = [];
-```
-
-En cada iteración, la variable:
-
-```text
-producto
-```
-
-representa un objeto diferente del arreglo.
-
-Con los datos de esta práctica, primero representará:
-
-```json
-{
-  "id": 1,
-  "nombre": "Laptop",
-  "descripcion": "Producto de prueba",
-  "precio": "15000.00",
-  "stock": 5,
-  "fecha_registro": "2026-08-25T21:40:56.000Z"
-}
-```
-
-y posteriormente:
-
-```json
-{
-  "id": 2,
-  "nombre": "Teclado",
-  "descripcion": "Producto de prueba",
-  "precio": "850.00",
-  "stock": 10,
-  "fecha_registro": "2026-08-25T21:40:56.000Z"
-}
-```
-
----
-
-## 15. Interpolación `{{ }}`
-
-Las dobles llaves permiten mostrar en el HTML valores provenientes de TypeScript.
-
-Por ejemplo:
-
-```html
-{{ producto.nombre }}
-```
-
-Para el primer registro mostrará:
-
-```text
-Laptop
-```
-
-Para el segundo:
-
-```text
-Teclado
-```
-
-También pueden mostrarse las demás propiedades:
-
-```html
-{{ producto.descripcion }}
-{{ producto.precio }}
-{{ producto.stock }}
-{{ producto.fecha_registro }}
-```
-
----
-
-## 16. Operador punto `.`
-
-El punto permite acceder a una propiedad de un objeto.
-
-Por ejemplo:
-
-```typescript
-producto.nombre
-```
-
-indica:
-
-```text
-Objeto: producto
-Propiedad: nombre
-```
-
-Otros ejemplos son:
-
-```typescript
-producto.id
-producto.descripcion
-producto.precio
-producto.stock
-producto.fecha_registro
-```
-
----
-
-## 17. Formatear la fecha
-
-Directus devuelve `fecha_registro` con un formato similar a:
-
-```text
-2026-08-25T21:40:56.000Z
-```
-
-Para mostrar únicamente el año, mes y día se utiliza el pipe `date` de Angular:
-
-```html
-{{ producto.fecha_registro | date:'yyyy-MM-dd' }}
-```
-
-El resultado será similar a:
-
-```text
-2026-08-25
-```
-
-El símbolo:
-
-```text
-|
-```
-
-permite aplicar un pipe al valor.
-
-En este caso:
-
-```text
-fecha_registro
-       |
-       v
-     date
-       |
-       v
- yyyy-MM-dd
-```
-
----
-
-## 18. Probar la página
-
-Ionic genera la ruta de la nueva página al crearla.
-
-Con la aplicación ejecutándose, abre:
-
-```text
-http://localhost:8100/productos-list
-```
-
-La página deberá mostrar información similar a:
+Por ejemplo, con el registro de prueba anterior verás:
 
 ```text
 Productos
@@ -1010,163 +358,111 @@ Producto de prueba
 Precio: $15000.00
 Stock: 5
 Registro: 2026-08-25
-
-Teclado
-Producto de prueba
-Precio: $850.00
-Stock: 10
-Registro: 2026-08-25
 ```
 
----
+Los valores dependerán de los registros de tu colección. Si la respuesta es `{"data": []}`, el listado no tendrá filas.
 
-## 19. Consideración sobre `localhost`
+## 6. Explicación detallada del flujo
 
-Durante el desarrollo se utiliza:
+### De la página a la base de datos y de regreso
+
+El siguiente diagrama muestra la consulta completa, incluida la respuesta y su presentación en pantalla:
+
+```mermaid
+flowchart TD
+    A["📱 El usuario abre Productos"] --> B["La página inicia: ngOnInit()"]
+    B --> C["cargarProductos() solicita los datos con Axios"]
+    C -->|"GET /items/productos"| D["🌐 Directus recibe la petición"]
+    D --> E["🗄️ MariaDB entrega los registros"]
+    E --> D
+    D -->|"Respuesta JSON: { data: [...] }"| F["📱 La app recibe la respuesta"]
+    F --> G["Guarda response.data.data en productos"]
+    G --> H["El HTML recorre productos con *ngFor"]
+    H --> I["📱 Pantalla Productos<br/><br/>Laptop<br/>Precio: $15000.00<br/>Stock: 5"]
+```
+
+Al inicializar el componente, Angular ejecuta `ngOnInit()`. Este llama a `cargarProductos()`, que solicita la colección mediante Axios. Directus consulta MariaDB y responde con un JSON; la página guarda el arreglo recibido y Angular actualiza la vista.
+
+`ngOnInit()` corresponde a la inicialización del componente. En prácticas posteriores, cuando sea necesario actualizar el listado al regresar de otra página, se ajustará el ciclo de carga.
+
+### Cómo se elige la URL del servidor
+
+Las páginas siempre importan el mismo archivo:
 
 ```typescript
-apiUrl: 'http://localhost:8000'
+import { environment } from '../../environments/environment';
 ```
 
-Esto funciona cuando la aplicación Ionic se abre desde el navegador de la misma computadora donde se ejecuta Docker.
+En desarrollo, `environment.apiUrl` vale `http://localhost:8000`. Al añadir `/items/productos`, la dirección final es `http://localhost:8000/items/productos`.
 
-Durante estas prácticas:
+El proyecto ya configura en `mobile/angular.json` el reemplazo de entornos para la compilación de producción:
 
-```text
-Ionic
-http://localhost:8100
-
-Directus
-http://localhost:8000
+```json
+"fileReplacements": [
+  {
+    "replace": "src/environments/environment.ts",
+    "with": "src/environments/environment.prod.ts"
+  }
+]
 ```
 
-Cuando la aplicación se ejecute posteriormente en un dispositivo físico, `localhost` representará al propio dispositivo y no a la computadora.
+Este fragmento describe una configuración existente; no debes pegarlo como un archivo JSON independiente. El servidor de desarrollo usa la configuración `development`; la compilación de producción aplica el reemplazo anterior. Por eso puedes cambiar la URL base sin editar las páginas ni sus importaciones.
 
-En ese escenario podrá ser necesario utilizar temporalmente la dirección IP de la computadora durante las pruebas, por ejemplo:
+**Al probar en un dispositivo físico**, `localhost` apunta al dispositivo. Para acceder al Docker de tu computadora desde ese dispositivo, utiliza en `environment.ts` una IP de la computadora que sea accesible desde la red, por ejemplo `http://192.168.1.50:8000`, sustituyéndola por la IP real. Cuando publiques la API, configura su dominio real en `environment.prod.ts`.
+
+### Por qué se configura CORS
+
+`http://localhost:8100` y `http://localhost:8000` son orígenes distintos porque usan puertos diferentes. Poder abrir la API directamente no significa que el navegador permita consultarla desde Ionic. CORS permite que Directus autorice esa comunicación.
+
+| Variable | Función en esta configuración |
+| --- | --- |
+| `CORS_ENABLED` | Habilita CORS. |
+| `CORS_ORIGIN` | Permite reflejar el origen de la petición durante el desarrollo. |
+| `CORS_METHODS` | Establece los métodos HTTP permitidos en las peticiones entre orígenes. |
+| `CORS_ALLOWED_HEADERS` | Permite encabezados como `Content-Type` y `Authorization`. |
+| `CORS_EXPOSED_HEADERS` | Permite leer `Content-Range` desde el navegador. |
+| `CORS_CREDENTIALS` | Autoriza el uso de credenciales en las peticiones entre orígenes cuando corresponda. |
+
+Esta configuración se utiliza en el entorno de prácticas. Los permisos de lectura de la colección se configuran por separado en Directus. Recrear el contenedor `api` hace que Directus cargue las variables actualizadas.
+
+### Qué aportan la interfaz y el arreglo
+
+`interface Producto` describe la estructura que TypeScript espera recibir. `id` y `stock` son números; `nombre` y `descripcion` son texto. En la respuesta de ejemplo, `precio` llega como una cadena (`"15000.00"`), por eso se declara `string`. La fecha también llega como texto en formato ISO.
+
+La declaración `productos: Producto[] = []` crea un arreglo inicialmente vacío y especifica el tipo de sus elementos. Mientras llega la respuesta, `*ngFor` no tiene filas que mostrar. Después de la asignación, recorre los productos recibidos.
+
+El tipado ayuda a detectar usos incorrectos durante el desarrollo. La interfaz no transforma ni valida por sí sola el JSON recibido en ejecución.
+
+### Cómo funciona el método asíncrono
+
+`async` permite utilizar `await` dentro de `cargarProductos()`. `await` espera a que se resuelva la petición antes de asignar los datos al arreglo. `Promise<void>` indica que el método devuelve una promesa cuyo resultado no contiene un valor.
+
+El genérico `axios.get<{ data: Producto[] }>(...)` indica a TypeScript que esperamos un cuerpo de respuesta con una propiedad `data` que contiene productos. [Axios](https://axios-http.com/es/) es el cliente HTTP utilizado para realizar esta consulta.
+
+La consulta y la asignación están dentro de `try`. Si la petición falla, `catch` registra el error con `console.error()` en la consola del navegador. Este ejemplo básico no muestra una alerta de error en pantalla.
+
+### Por qué se utiliza `response.data.data`
+
+Hay dos propiedades llamadas `data`, cada una en un nivel distinto:
+
+| Expresión | Contenido |
+| --- | --- |
+| `response` | Respuesta que entrega Axios. |
+| `response.data` | Cuerpo JSON enviado por Directus: un objeto con la propiedad `data`. |
+| `response.data.data` | Arreglo de productos que viene dentro de ese objeto. |
+
+Por eso la asignación es:
 
 ```typescript
-apiUrl: 'http://192.168.1.50:8000'
+this.productos = response.data.data;
 ```
 
-Este cambio se realizaría únicamente en:
+El primer `.data` accede al cuerpo HTTP; el segundo accede al arreglo que Directus incluyó en ese cuerpo.
 
-```text
-environment.ts
-```
+### Cómo se convierte el arreglo en filas
 
-y no en cada página.
+La directiva `*ngFor="let producto of productos"` repite el `ion-item` por cada objeto del arreglo. En cada repetición, `producto` representa el registro actual: por ejemplo, primero una Laptop y después un Teclado si la API devuelve ambos.
 
-Cuando Directus se publique en un servidor con dominio, la URL definitiva se configurará en:
+El operador punto permite acceder a las propiedades: `producto.nombre`, `producto.precio` o `producto.stock`. La interpolación `{{ producto.nombre }}` muestra ese valor dentro del HTML. Los componentes `ion-list`, `ion-item` e `ion-label` organizan la presentación.
 
-```text
-environment.prod.ts
-```
-
-Por ejemplo:
-
-```typescript
-export const environment = {
-  production: true,
-  apiUrl: 'https://api.midominio.com'
-};
-```
-
-Las páginas continuarán utilizando exactamente el mismo código:
-
-```typescript
-environment.apiUrl
-```
-
----
-
-## 20. Flujo completo de la aplicación
-
-Cuando el usuario entre a:
-
-```text
-productos-list
-```
-
-ocurrirá:
-
-```text
-ProductosListPage
-        |
-        v
-    ngOnInit()
-        |
-        v
- cargarProductos()
-        |
-        v
- environment.apiUrl
-        |
-        v
-Axios realiza GET
-        |
-        v
-/items/productos
-        |
-        v
-     Directus
-        |
-        v
-     MariaDB
-        |
-        v
-Directus devuelve JSON
-        |
-        v
-response.data.data
-        |
-        v
- this.productos
-        |
-        v
-*ngFor recorre el arreglo
-        |
-        v
-Ionic muestra los productos
-```
-
----
-
-## 21. Resumen
-
-Para mostrar todos los registros de una colección se utilizará la nomenclatura:
-
-```text
-tabla-list
-```
-
-Para la colección `productos`:
-
-```text
-productos-list
-```
-
-Los pasos realizados fueron:
-
-1. Crear la página `productos-list`.
-2. Trabajar con NgModules y `standalone: false`.
-3. Instalar Axios.
-4. Configurar `apiUrl` en `environment.ts`.
-5. Configurar `apiUrl` en `environment.prod.ts`.
-6. Importar siempre `environment` desde `environment.ts`.
-7. Crear la interfaz `Producto`.
-8. Crear el arreglo `productos`.
-9. Ejecutar `cargarProductos()` desde `ngOnInit()`.
-10. Realizar una petición `GET` a `${environment.apiUrl}/items/productos`.
-11. Guardar `response.data.data` en el arreglo.
-12. Recorrer los productos mediante `*ngFor`.
-13. Mostrar las propiedades mediante interpolación.
-
-La nomenclatura que se utilizará posteriormente será:
-
-```text
-productos-list  -> GET de todos los registros
-productos-view  -> GET de un registro mediante ID
-productos-form  -> POST y PATCH
-```
-
-La URL base de la API queda centralizada en los archivos de entorno, por lo que no será necesario modificar cada página cuando cambie la dirección del servidor.
+Por último, `{{ producto.fecha_registro | date:'yyyy-MM-dd' }}` aplica el pipe `date`: recibe la fecha ISO y la presenta con año, mes y día. El símbolo `|` aplica esa transformación para mostrar el dato sin modificar el valor almacenado en el objeto.
