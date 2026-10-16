@@ -1,137 +1,67 @@
 # Crear un elemento con Ionic mediante una página
 
-En esta práctica se continuará con el proyecto desarrollado en los manuales anteriores para crear un nuevo producto desde **Ionic con Angular y TypeScript**.
+En esta práctica abrirás un formulario desde el listado, validarás sus campos y enviarás un producto a Directus mediante `POST`. Después de guardar y aceptar la confirmación, regresarás al listado y verás el nuevo registro sin recargar el navegador.
 
-La aplicación enviará una petición `POST` a Directus y Directus almacenará el registro en MariaDB.
+**Resultado esperado:** el botón **Nuevo** abrirá la página `productos-form`. La figura 1 muestra el formulario con los datos del ejemplo, antes de guardarlo.
 
-Se utilizará la colección:
+| ![Formulario de creación con los datos del producto Mouse](imagenes/03-pagina-formulario.jpg) |
+| :---: |
+| *Figura 1. Formulario de creación mediante una página, listo para enviar el producto.* |
 
-```text
-productos
-```
+Las capturas se tomaron ejecutando el código de esta práctica en el navegador con tamaño de pantalla móvil. El tema oscuro y los registros del listado corresponden al entorno de prueba.
 
-La petición se realizará a:
+## 1. Antes de comenzar
 
-```text
-http://localhost:8000/items/productos
-```
+Continúa con los manuales [01: listado](01_listado_elementos.md) y [02: detalle](02_detalle_elemento.md) funcionando. Reutilizarás Axios, `environment.apiUrl`, la colección `productos`, el acceso de lectura y la configuración de CORS.
 
-Esta práctica parte de la configuración realizada anteriormente. Por lo tanto, no se volverá a instalar Axios ni a configurar `environment`, CORS o la conexión con Directus.
+- Ejecuta los comandos desde la carpeta que contiene `docker-compose.yml`.
+- Las rutas `src/...` pertenecen al proyecto Ionic: en este repositorio corresponden a `mobile/src/...`.
+- Se utilizan **NgModules**. Después de crear cada página o componente, configura manualmente `standalone: false` dentro de `@Component`.
+- La API debe permitir crear productos. Lo comprobarás en el primer paso de implementación.
 
-## Objetivo
+Esta es la variante **mediante página**: se navega a `/productos-form` y se regresa con `Router`. El [manual de creación mediante modal](03_crear_elemento_modal.md) es una alternativa; elige una variante para continuar y no mezcles sus instrucciones sobre apertura, cierre y actualización del listado.
 
-Al finalizar la práctica, la aplicación deberá:
+## 2. Conceptos y métodos que utilizarás
 
-1. Crear la página `productos-form`.
-2. Abrir el formulario desde `productos-list`.
-3. Configurar un formulario reactivo.
-4. Mantener los mensajes de validación en `page.ts`.
-5. Consultar los errores mediante un método `getError()`.
-6. Enviar los datos mediante una petición `POST` a Directus.
-7. Regresar al listado después de guardar.
-8. Recargar automáticamente el listado para mostrar el nuevo producto.
+| Elemento | Cómo se utiliza | Para qué sirve |
+| --- | --- | --- |
+| `ReactiveFormsModule` | Agregarlo a los `imports` del módulo del formulario. | Permite conectar el HTML con un formulario reactivo. |
+| `FormBuilder` y `FormGroup` | `this.formBuilder.group({...})` | Crean y representan el conjunto de controles del formulario. |
+| `Validators` | `required`, `maxLength(150)`, `min(0)` y `pattern(...)` | Definen las reglas de los campos. |
+| `[formGroup]` y `formControlName` | `[formGroup]="productoForm"` y `formControlName="nombre"` | Conectan el formulario y sus campos con TypeScript. |
+| `(ngSubmit)` | `(ngSubmit)="guardarProducto()"` | Ejecuta el método al enviar el formulario. |
+| `getError()` | `getError('nombre')` | Obtiene el mensaje de validación definido en TypeScript para un campo. |
+| `markAllAsTouched()` | `this.productoForm.markAllAsTouched()` | Marca los campos para mostrar sus errores cuando se intenta guardar un formulario inválido. |
+| `axios.post()` | `await axios.post(url, producto, opciones)` | Envía el JSON del producto a Directus. |
+| `AlertController` | `create()` y `present()` | Prepara y muestra la confirmación o el mensaje de error. |
+| `Router` | `this.router.navigateByUrl('/productos-list')` | Regresa al listado después de aceptar la confirmación. |
+| `ionViewWillEnter()` | `this.cargarProductos()` | Recarga el listado cada vez que Ionic vuelve a mostrar esa página. |
 
-El flujo será:
+`productoForm` almacena los controles y sus valores. `guardando` controla el estado del botón mientras se realiza el envío. Los mensajes se guardan en `mensajesValidacion` para mantenerlos fuera del HTML.
 
-```text
-productos-list
-      |
-      | Nuevo
-      v
-productos-form
-      |
-      | POST
-      v
-Directus
-      |
-      v
-MariaDB
-      |
-      | Guardado
-      v
-productos-list
-      |
-      v
-GET /items/productos
-```
+## 3. Implementación paso a paso
 
----
+Sigue los pasos en orden. La sección 4 reúne el código completo del listado, el módulo del formulario, su TypeScript y su HTML.
 
-## 1. Permitir la creación de productos en Directus
+### Paso 1. Permitir la creación en Directus
 
-En Directus, la política utilizada durante las prácticas ya tiene permiso de lectura sobre la colección `productos`.
+Abre `http://localhost:8000`. En **Access Policies**, localiza la política utilizada en las prácticas y habilita el permiso **Create** sobre `productos`. Si ya está habilitado, consérvalo.
 
-Para crear registros también debe habilitarse:
+La aplicación enviará únicamente `nombre`, `descripcion`, `precio` y `stock`. Los campos `id` y `fecha_registro` son generados por la base de datos y no deben agregarse al formulario ni al JSON enviado.
 
-```text
-Create
-```
+Conserva los permisos de lectura y la configuración de CORS de las prácticas anteriores. No necesitas reinstalar Axios ni cambiar `environment`.
 
-Ingresa a:
+### Paso 2. Crear la página y configurar su ruta
 
-```text
-http://localhost:8000
-```
-
-Abre **Access Policies**, localiza la política utilizada y habilita el permiso `Create` para:
-
-```text
-productos
-```
-
-Los campos que se enviarán en esta práctica son:
-
-```text
-nombre
-descripcion
-precio
-stock
-```
-
-No se enviarán manualmente:
-
-```text
-id
-fecha_registro
-```
-
-porque estos valores son generados por la base de datos.
-
----
-
-## 2. Crear la página `productos-form`
-
-Desde la carpeta donde se encuentra `docker-compose.yml`, ejecuta:
+Desde la carpeta que contiene `docker-compose.yml`, ejecuta:
 
 ```powershell
 docker compose exec mobile ionic g page productos-form
 ```
 
-Ionic generará:
+Si la página ya existe, continúa con ella sin volver a generarla. Los archivos se encuentran en `mobile/src/app/productos-form/`.
 
-```text
-src/app/productos-form/
-├── productos-form-routing.module.ts
-├── productos-form.module.ts
-├── productos-form.page.html
-├── productos-form.page.scss
-├── productos-form.page.spec.ts
-└── productos-form.page.ts
-```
-
-En esta versión del proyecto es necesario agregar manualmente:
-
-```typescript
-standalone: false,
-```
-
-en:
-
-```text
-src/app/productos-form/productos-form.page.ts
-```
-
-El decorador deberá quedar de forma similar a:
+Abre `productos-form.page.ts` y agrega manualmente `standalone: false` dentro de `@Component`. Si aparece con valor `true`, cámbialo a `false`; si ya está en `false`, consérvalo sin duplicarlo:
 
 ```typescript
 @Component({
@@ -142,97 +72,31 @@ El decorador deberá quedar de forma similar a:
 })
 ```
 
----
+En `mobile/src/app/app-routing.module.ts`, comprueba que `routes` incluya la entrada generada para el formulario. Si ya existe, no la dupliques:
 
-## 3. Agregar `ReactiveFormsModule`
-
-Abre:
-
-```text
-src/app/productos-form/productos-form.module.ts
+```typescript
+{
+  path: 'productos-form',
+  loadChildren: () => import('./productos-form/productos-form.module')
+    .then(m => m.ProductosFormPageModule)
+}
 ```
 
-Modifica la importación de formularios:
+Conserva las demás rutas y separa las entradas con comas. En `productos-form-routing.module.ts`, conserva la ruta interna con `path: ''` y `component: ProductosFormPage`.
+
+### Paso 3. Habilitar los formularios reactivos
+
+Abre `mobile/src/app/productos-form/productos-form.module.ts`. **Reemplaza la importación de formularios** por:
 
 ```typescript
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 ```
 
-Después agrega:
+Después agrega `ReactiveFormsModule` al arreglo `imports`, conservando `CommonModule`, `FormsModule`, `IonicModule` y `ProductosFormPageRoutingModule`. La página debe seguir declarada en `declarations`. El módulo completo está en la sección 4.
 
-```typescript
-ReactiveFormsModule
-```
+### Paso 4. Preparar el listado para abrir el formulario y recargarse
 
-al arreglo `imports`.
-
-El módulo deberá quedar de forma similar a:
-
-```typescript
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
-import { IonicModule } from '@ionic/angular';
-
-import { ProductosFormPageRoutingModule } from './productos-form-routing.module';
-
-import { ProductosFormPage } from './productos-form.page';
-
-@NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    IonicModule,
-    ProductosFormPageRoutingModule
-  ],
-  declarations: [ProductosFormPage]
-})
-export class ProductosFormPageModule {}
-```
-
-`ReactiveFormsModule` permitirá utilizar:
-
-```html
-[formGroup]
-```
-
-y:
-
-```html
-formControlName
-```
-
-en la vista.
-
----
-
-## 4. Hacer que el listado se recargue al regresar
-
-En el manual 01 los productos se cargaron desde:
-
-```typescript
-ngOnInit()
-```
-
-El problema es que Ionic puede conservar la página en memoria cuando se navega hacia otra página.
-
-Al regresar a `productos-list`, `ngOnInit()` no necesariamente vuelve a ejecutarse.
-
-Para que el listado se consulte cada vez que la página vuelva a mostrarse se utilizará el ciclo de vida de Ionic:
-
-```typescript
-ionViewWillEnter()
-```
-
-Abre:
-
-```text
-src/app/productos-list/productos-list.page.ts
-```
-
-Si actualmente tienes:
+Abre `mobile/src/app/productos-list/productos-list.page.ts` y **reemplaza**:
 
 ```typescript
 ngOnInit(): void {
@@ -240,7 +104,7 @@ ngOnInit(): void {
 }
 ```
 
-reemplázalo por:
+por el ciclo de vida de Ionic:
 
 ```typescript
 ionViewWillEnter(): void {
@@ -248,81 +112,9 @@ ionViewWillEnter(): void {
 }
 ```
 
-Si la clase tiene:
+Retira `implements OnInit` de la clase y `OnInit` de la importación de Angular, que debe quedar como `import { Component } from '@angular/core';`. Conserva la interfaz `Producto`, el arreglo y el método `cargarProductos()` del manual 01. Si ya utilizas `ionViewWillEnter()`, no lo dupliques.
 
-```typescript
-implements OnInit
-```
-
-elimínalo.
-
-También puedes retirar `OnInit` de la importación:
-
-```typescript
-import { Component } from '@angular/core';
-```
-
-La parte principal del archivo quedará de forma similar a:
-
-```typescript
-@Component({
-  selector: 'app-productos-list',
-  templateUrl: './productos-list.page.html',
-  styleUrls: ['./productos-list.page.scss'],
-  standalone: false,
-})
-export class ProductosListPage {
-
-  productos: Producto[] = [];
-
-  constructor() {}
-
-  ionViewWillEnter(): void {
-    this.cargarProductos();
-  }
-
-  async cargarProductos(): Promise<void> {
-    try {
-      const response = await axios.get<{ data: Producto[] }>(
-        `${environment.apiUrl}/items/productos`
-      );
-
-      this.productos = response.data.data;
-    } catch (error) {
-      console.error('Error al cargar los productos:', error);
-    }
-  }
-}
-```
-
-A partir de este momento:
-
-```text
-Entrar a productos-list
-        |
-        v
-ionViewWillEnter()
-        |
-        v
-cargarProductos()
-        |
-        v
-GET /items/productos
-```
-
-Esto permitirá mostrar un producto recién creado cuando el usuario regrese al listado.
-
----
-
-## 5. Agregar el botón para crear un producto
-
-Abre:
-
-```text
-src/app/productos-list/productos-list.page.html
-```
-
-Dentro de `ion-toolbar`, después de `ion-title`, agrega:
+En `mobile/src/app/productos-list/productos-list.page.html`, **dentro de `ion-toolbar`, después de `ion-title`**, agrega:
 
 ```html
 <ion-buttons slot="end">
@@ -332,39 +124,11 @@ Dentro de `ion-toolbar`, después de `ion-title`, agrega:
 </ion-buttons>
 ```
 
-La cabecera quedará de forma similar a:
+Conserva el listado y los botones **Ver detalle** del manual 02. Si ya existe el botón **Nuevo**, no lo dupliques.
 
-```html
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Productos</ion-title>
+### Paso 5. Crear el formulario y sus mensajes en TypeScript
 
-    <ion-buttons slot="end">
-      <ion-button [routerLink]="['/productos-form']">
-        Nuevo
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
-```
-
-Al presionar el botón Angular navegará a:
-
-```text
-/productos-form
-```
-
----
-
-## 6. Importar los elementos del formulario
-
-Abre:
-
-```text
-src/app/productos-form/productos-form.page.ts
-```
-
-Utiliza las siguientes importaciones:
+Abre `mobile/src/app/productos-form/productos-form.page.ts` y deja estas importaciones al inicio:
 
 ```typescript
 import { Component, OnInit } from '@angular/core';
@@ -375,21 +139,7 @@ import axios from 'axios';
 import { environment } from '../../environments/environment';
 ```
 
-| Importación | Uso |
-| --- | --- |
-| `FormBuilder` | Crear el formulario |
-| `FormGroup` | Representar el formulario |
-| `Validators` | Definir validaciones |
-| `AlertController` | Mostrar mensajes |
-| `Router` | Regresar al listado |
-| `axios` | Enviar la petición `POST` |
-| `environment` | Obtener la URL base de Directus |
-
----
-
-## 7. Crear la interfaz de los datos
-
-Antes de la clase agrega:
+Después de las importaciones y **antes de `@Component`**, agrega la interfaz con los datos que enviarás:
 
 ```typescript
 interface ProductoCrear {
@@ -400,30 +150,14 @@ interface ProductoCrear {
 }
 ```
 
-La interfaz contiene únicamente los datos que serán enviados a Directus.
-
----
-
-## 8. Crear las variables del formulario
-
-Dentro de la clase agrega:
+**Dentro de `ProductosFormPage`**, agrega las propiedades:
 
 ```typescript
 productoForm!: FormGroup;
 guardando: boolean = false;
 ```
 
-`productoForm` contendrá los controles del formulario.
-
-`guardando` permitirá evitar múltiples peticiones mientras se realiza el `POST`.
-
----
-
-## 9. Mantener los mensajes de validación en `page.ts`
-
-Para mantener el HTML más limpio, los mensajes de validación se definirán en TypeScript.
-
-Dentro de la clase agrega:
+Después agrega el mapa de mensajes, también dentro de la clase:
 
 ```typescript
 mensajesValidacion: Record<string, Record<string, string>> = {
@@ -443,22 +177,7 @@ mensajesValidacion: Record<string, Record<string, string>> = {
 };
 ```
 
-Cada control contiene los mensajes asociados con los errores que pueden devolver los `Validators`.
-
-Por ejemplo:
-
-```text
-nombre
-  |
-  ├── required
-  └── maxlength
-```
-
----
-
-## 10. Configurar el constructor
-
-Reemplaza el constructor vacío por:
+**Reemplaza el constructor y `ngOnInit()` generados** por los siguientes, sin duplicarlos. Conserva `export class ProductosFormPage implements OnInit`:
 
 ```typescript
 constructor(
@@ -466,21 +185,13 @@ constructor(
   private alertController: AlertController,
   private router: Router
 ) {}
-```
 
----
-
-## 11. Crear el formulario
-
-Dentro de `ngOnInit()` ejecuta:
-
-```typescript
 ngOnInit(): void {
   this.crearFormulario();
 }
 ```
 
-Después agrega:
+A continuación agrega los métodos para construir los controles y consultar su primer mensaje de error:
 
 ```typescript
 private crearFormulario(): void {
@@ -501,24 +212,7 @@ private crearFormulario(): void {
     ]]
   });
 }
-```
 
-Los controles utilizados son:
-
-```text
-nombre
-descripcion
-precio
-stock
-```
-
----
-
-## 12. Crear el método `getError()`
-
-Dentro de la clase agrega:
-
-```typescript
 getError(controlName: string): string {
   const control = this.productoForm.get(controlName);
 
@@ -533,39 +227,7 @@ getError(controlName: string): string {
 }
 ```
 
-El método recibe el nombre de un control:
-
-```typescript
-getError('nombre')
-```
-
-Después:
-
-1. busca el control dentro del formulario;
-2. comprueba si contiene errores;
-3. obtiene el primer tipo de error;
-4. busca su mensaje en `mensajesValidacion`;
-5. devuelve el mensaje correspondiente.
-
-Por ejemplo:
-
-```text
-nombre
-   |
-   v
-required
-   |
-   v
-El nombre es obligatorio.
-```
-
-De esta forma los textos de validación permanecen en `page.ts` y el HTML solamente solicita el mensaje que debe mostrar.
-
----
-
-## 13. Crear el método `guardarProducto()`
-
-Dentro de la clase agrega:
+Por último, **dentro de la misma clase**, agrega el método de guardado:
 
 ```typescript
 async guardarProducto(): Promise<void> {
@@ -626,86 +288,169 @@ async guardarProducto(): Promise<void> {
 }
 ```
 
----
+El método marca los campos inválidos sin enviar datos. Cuando el formulario es válido, prepara el JSON y realiza el `POST`; al aceptar la confirmación, navega al listado. `finally` restablece el estado del botón al finalizar el intento de guardado.
 
-## 14. Validar antes de enviar
+### Paso 6. Conectar el formulario con el HTML
 
-La condición:
+Abre `mobile/src/app/productos-form/productos-form.page.html` y **reemplaza su contenido** por:
+
+```html
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/productos-list"></ion-back-button>
+    </ion-buttons>
+
+    <ion-title>Nuevo producto</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form *ngIf="productoForm" [formGroup]="productoForm" (ngSubmit)="guardarProducto()">
+    <ion-list>
+      <ion-item>
+        <ion-input label="Nombre" labelPlacement="stacked" type="text" formControlName="nombre" maxlength="150"></ion-input>
+      </ion-item>
+      <ion-note color="danger" *ngIf="getError('nombre') as error">
+        {{ error }}
+      </ion-note>
+
+      <ion-item>
+        <ion-textarea label="Descripción" labelPlacement="stacked" formControlName="descripcion" autoGrow="true"></ion-textarea>
+      </ion-item>
+
+      <ion-item>
+        <ion-input label="Precio" labelPlacement="stacked" type="number" formControlName="precio" min="0"></ion-input>
+      </ion-item>
+      <ion-note color="danger" *ngIf="getError('precio') as error">
+        {{ error }}
+      </ion-note>
+
+      <ion-item>
+        <ion-input label="Stock" labelPlacement="stacked" type="number" formControlName="stock" min="0"></ion-input>
+      </ion-item>
+      <ion-note color="danger" *ngIf="getError('stock') as error">
+        {{ error }}
+      </ion-note>
+    </ion-list>
+
+    <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="guardando">
+      {{ guardando ? 'Guardando...' : 'Guardar' }}
+    </ion-button>
+  </form>
+</ion-content>
+```
+
+Los campos se conectan mediante `formControlName`. El HTML llama a `getError()` y muestra el mensaje devuelto desde TypeScript. El botón envía el formulario con `(ngSubmit)` y se deshabilita mientras `guardando` sea `true`.
+
+## 4. Así debe quedar el código completo
+
+Los siguientes archivos corresponden a la variante mediante página, conservando el listado y el acceso al detalle de las prácticas anteriores. Compáralos con lo que acabas de escribir.
+
+### `mobile/src/app/productos-list/productos-list.page.ts`
 
 ```typescript
-if (this.productoForm.invalid) {
-  this.productoForm.markAllAsTouched();
-  return;
+import { Component } from '@angular/core';
+import axios from 'axios';
+import { environment } from '../../environments/environment';
+
+interface Producto {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  precio: string;
+  stock: number;
+  fecha_registro: string;
 }
-```
 
-impide enviar información inválida.
+@Component({
+  selector: 'app-productos-list',
+  templateUrl: './productos-list.page.html',
+  styleUrls: ['./productos-list.page.scss'],
+  standalone: false,
+})
+export class ProductosListPage {
+  productos: Producto[] = [];
 
-`markAllAsTouched()` provoca que los mensajes controlados por `getError()` puedan mostrarse cuando el usuario intenta guardar un formulario incorrecto.
+  constructor() {}
 
----
+  ionViewWillEnter(): void {
+    this.cargarProductos();
+  }
 
-## 15. Preparar los datos
+  async cargarProductos(): Promise<void> {
+    try {
+      const response = await axios.get<{ data: Producto[] }>(
+        `${environment.apiUrl}/items/productos`
+      );
 
-Los valores se obtienen mediante:
-
-```typescript
-const valores = this.productoForm.value;
-```
-
-Después se construye:
-
-```typescript
-const producto: ProductoCrear = {
-  nombre: valores.nombre.trim(),
-  descripcion: valores.descripcion?.trim() ?? '',
-  precio: Number(valores.precio),
-  stock: Number(valores.stock)
-};
-```
-
-El JSON enviado será similar a:
-
-```json
-{
-  "nombre": "Mouse",
-  "descripcion": "Mouse inalámbrico",
-  "precio": 450,
-  "stock": 10
-}
-```
-
----
-
-## 16. Realizar la petición `POST`
-
-La petición:
-
-```typescript
-await axios.post(
-  `${environment.apiUrl}/items/productos`,
-  producto,
-  {
-    headers: {
-      'Content-Type': 'application/json'
+      this.productos = response.data.data;
+    } catch (error) {
+      console.error('Error al cargar los productos:', error);
     }
   }
-);
+}
 ```
 
-durante el desarrollo se enviará a:
+### `mobile/src/app/productos-list/productos-list.page.html`
 
-```text
-http://localhost:8000/items/productos
+```html
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Productos</ion-title>
+    <ion-buttons slot="end">
+      <ion-button [routerLink]="['/productos-form']">
+        Nuevo
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <ion-item *ngFor="let producto of productos">
+      <ion-label class="ion-text-wrap">
+        <h2>{{ producto.nombre }}</h2>
+        <p>{{ producto.descripcion }}</p>
+        <p>Precio: ${{ producto.precio }}</p>
+        <p>Stock: {{ producto.stock }}</p>
+        <p>Registro: {{ producto.fecha_registro | date:'yyyy-MM-dd' }}</p>
+      </ion-label>
+      <ion-button slot="end" [routerLink]="['/productos-view', producto.id]">
+        Ver detalle
+      </ion-button>
+    </ion-item>
+  </ion-list>
+</ion-content>
 ```
 
-Directus recibirá el JSON y creará el registro en MariaDB.
+### `mobile/src/app/productos-form/productos-form.module.ts`
 
----
+```typescript
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-## 17. Código completo de `productos-form.page.ts`
+import { IonicModule } from '@ionic/angular';
 
-El archivo deberá quedar de forma similar a:
+import { ProductosFormPageRoutingModule } from './productos-form-routing.module';
+
+import { ProductosFormPage } from './productos-form.page';
+
+@NgModule({
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    IonicModule,
+    ProductosFormPageRoutingModule
+  ],
+  declarations: [ProductosFormPage]
+})
+export class ProductosFormPageModule {}
+```
+
+### `mobile/src/app/productos-form/productos-form.page.ts`
 
 ```typescript
 import { Component, OnInit } from '@angular/core';
@@ -854,17 +599,7 @@ export class ProductosFormPage implements OnInit {
 }
 ```
 
----
-
-## 18. Configurar `productos-form.page.html`
-
-Abre:
-
-```text
-src/app/productos-form/productos-form.page.html
-```
-
-Reemplaza el contenido por:
+### `mobile/src/app/productos-form/productos-form.page.html`
 
 ```html
 <ion-header>
@@ -913,84 +648,117 @@ Reemplaza el contenido por:
 </ion-content>
 ```
 
-El HTML ya no contiene los textos específicos de cada validación. Solamente llama a:
+En `app-routing.module.ts`, aplica únicamente la entrada del paso 2 y conserva las demás rutas. El módulo de rutas del formulario mantiene su configuración generada. Los archivos SCSS no requieren cambios.
 
-```typescript
-getError(...)
+## 5. Comprobar que funciona
+
+1. Guarda los archivos y espera a que Ionic termine de compilar.
+2. Abre `http://localhost:8100/productos-list` y presiona **Nuevo**. Debe abrirse `/productos-form`.
+3. Presiona **Guardar** sin capturar datos. Deben aparecer los mensajes de nombre, precio y stock obligatorios, como en la figura 2.
+4. Comprueba que un precio negativo y un stock decimal muestren los mensajes correspondientes. Corrige esos valores antes de guardar.
+
+| ![Mensajes de los campos obligatorios al intentar guardar el formulario vacío](imagenes/03-pagina-validaciones.jpg) |
+| :---: |
+| *Figura 2. Validación del formulario vacío antes de enviar información a Directus.* |
+
+Captura los mismos datos del ejemplo de la figura 1:
+
+| Campo | Valor |
+| --- | --- |
+| Nombre | Mouse |
+| Descripción | Mouse inalámbrico |
+| Precio | 450 |
+| Stock | 10 |
+
+Presiona **Guardar**. Debe aparecer **Producto guardado**. Al presionar **Aceptar**, la aplicación debe regresar al listado y mostrar el nuevo producto sin recargar manualmente el navegador, como en la figura 3.
+
+| ![Listado actualizado con el producto Mouse recién creado](imagenes/03-pagina-producto-creado.jpg) |
+| :---: |
+| *Figura 3. Producto recién creado visible en el listado después de aceptar la confirmación.* |
+
+Los demás productos y las fechas dependen de tu base de datos. Esta prueba crea un registro real en la colección `productos` del entorno de prácticas.
+
+## 6. Explicación detallada del flujo
+
+### Del formulario al listado actualizado
+
+La app valida los datos antes de enviarlos. Directus crea el producto y la aplicación regresa al listado; al volver a mostrarse, el listado consulta otra vez la colección.
+
+```mermaid
+flowchart TD
+    A["📱 El usuario presiona Nuevo"] --> B["Router abre /productos-form"]
+    B --> C["ngOnInit() crea el formulario reactivo"]
+    C --> D["El usuario captura los datos y presiona Guardar"]
+    D --> E{"¿El formulario es válido?"}
+    E -->|"No"| F["markAllAsTouched() permite mostrar los mensajes de getError()"]
+    F --> D
+    E -->|"Sí"| G["La app prepara el JSON y Axios envía los datos"]
+    G -->|"POST /items/productos"| H["🌐 Directus recibe la petición"]
+    H --> I["🗄️ MariaDB guarda el producto y genera su ID y fecha"]
+    I --> H
+    H -->|"Creación exitosa"| J["📱 La app muestra Producto guardado"]
+    J --> K["El usuario acepta y Router regresa al listado"]
+    K --> L["ionViewWillEnter() llama a cargarProductos()"]
+    L -->|"GET /items/productos"| M["🌐 Directus consulta la colección actualizada"]
+    M --> N["📱 El listado muestra el producto nuevo"]
 ```
 
-y muestra el mensaje devuelto desde `page.ts`.
+### Cómo se construye el formulario
 
----
+`ReactiveFormsModule` permite utilizar `[formGroup]` y `formControlName` en el HTML. `FormBuilder` construye el `FormGroup` con cuatro controles. `ngOnInit()` llama a `crearFormulario()` al inicializar la página.
 
-## 19. Probar la creación
+`productoForm!: FormGroup` declara la propiedad que se asignará en ese método. El símbolo `!` indica a TypeScript que la propiedad será inicializada, aunque no se asigne directamente en el constructor.
 
-Abre:
+| Control | Validaciones |
+| --- | --- |
+| `nombre` | Obligatorio y con un máximo de 150 caracteres. |
+| `descripcion` | Opcional. |
+| `precio` | Obligatorio y mayor o igual que cero. |
+| `stock` | Obligatorio, mayor o igual que cero y compuesto únicamente por dígitos enteros. |
 
-```text
-http://localhost:8100/productos-list
+`Validators.pattern('^[0-9]+$')` comprueba que todo el valor del stock esté formado por uno o más dígitos. Los atributos del HTML complementan la captura; las reglas del formulario reactivo se definen en TypeScript.
+
+### Cómo se elige el mensaje de validación
+
+`getError('nombre')` obtiene ese control del formulario. Si no existe, no tiene errores o todavía no está marcado como `touched` o `dirty`, devuelve una cadena vacía. Esto evita mostrar mensajes antes de que el usuario interactúe con el formulario.
+
+Si hay errores, `Object.keys(control.errors)[0]` selecciona el primer tipo de error y busca su texto dentro de `mensajesValidacion`. Por ejemplo, `nombre` → `required` devuelve **El nombre es obligatorio**. Si no existe un mensaje específico, `??` utiliza **El valor ingresado no es válido**.
+
+La expresión `getError('nombre') as error` del HTML muestra el `ion-note` cuando hay un mensaje y permite usar el nombre local `error` para presentarlo. Así, los textos de validación permanecen en `page.ts`.
+
+Al intentar guardar un formulario inválido, `markAllAsTouched()` marca los controles para que se vean sus errores y `return` termina el método antes del `POST`.
+
+### Cómo se prepara el JSON
+
+`this.productoForm.value` contiene los valores capturados. La interfaz `ProductoCrear` describe únicamente los cuatro campos que se enviarán; no incluye `id` ni `fecha_registro`.
+
+`trim()` retira espacios al inicio y al final del nombre. Para la descripción, `?.trim() ?? ''` permite usar una cadena vacía si no hay un valor. `Number()` convierte el precio y el stock en números para construir el JSON:
+
+```json
+{
+  "nombre": "Mouse",
+  "descripcion": "Mouse inalámbrico",
+  "precio": 450,
+  "stock": 10
+}
 ```
 
-Presiona:
+El precio se envía como número. En las consultas de los manuales anteriores, Directus lo devuelve como cadena, por ejemplo `"450.00"`; por eso las interfaces de creación y lectura no usan el mismo tipo para ese campo.
 
-```text
-Nuevo
-```
+### Cómo se envía y se confirma el guardado
 
-Prueba primero enviar el formulario vacío.
+`axios.post()` recibe la URL, el objeto del producto y la configuración de encabezados. `Content-Type: application/json` indica el formato del cuerpo enviado. La URL se construye con `environment.apiUrl` y `/items/productos`, igual que en las prácticas anteriores.
 
-Los errores deberán mostrarse debajo de los campos.
+Al iniciar el envío, `guardando` pasa a `true`: el botón queda deshabilitado y muestra **Guardando...** mientras se procesa el intento de guardado. En `finally` vuelve a `false`.
 
-Después captura, por ejemplo:
+Si el `POST` termina correctamente, `AlertController.create()` prepara la alerta **Producto guardado** y `present()` la muestra. El `handler` de **Aceptar** ejecuta `this.router.navigateByUrl('/productos-list')`.
 
-```text
-Nombre: Mouse
-Descripción: Mouse inalámbrico
-Precio: 450
-Stock: 10
-```
+Si falla la petición, `catch` registra el error en la consola y muestra una alerta indicando que no fue posible guardar. La navegación al listado pertenece a la confirmación de éxito.
 
-Presiona:
+### Por qué el listado utiliza `ionViewWillEnter()`
 
-```text
-Guardar
-```
+Ionic puede conservar la página del listado en memoria al navegar hacia el formulario. Por eso `ngOnInit()` no necesariamente vuelve a ejecutarse al regresar.
 
-Al aceptar el mensaje de confirmación la aplicación regresará a:
+`ionViewWillEnter()` se ejecuta cuando Ionic va a mostrar la página. Al llamar allí a `cargarProductos()`, se realiza otro `GET /items/productos` y se actualiza el arreglo que recorre `*ngFor`. Así aparece el registro recién creado sin recargar el navegador.
 
-```text
-productos-list
-```
-
-Al entrar nuevamente en la página se ejecutará:
-
-```typescript
-ionViewWillEnter()
-```
-
-y el listado realizará otra petición:
-
-```text
-GET /items/productos
-```
-
-por lo que el producto recién creado deberá aparecer sin recargar manualmente el navegador.
-
----
-
-## 20. Resumen
-
-Los elementos nuevos de esta práctica son:
-
-1. Permiso `Create` de Directus.
-2. Página `productos-form`.
-3. `ReactiveFormsModule`.
-4. Formularios reactivos.
-5. `Validators`.
-6. Mensajes de validación almacenados en `page.ts`.
-7. Método `getError()`.
-8. Petición `POST` con Axios.
-9. Navegación al listado con `Router`.
-10. Uso de `ionViewWillEnter()` para actualizar automáticamente el listado al regresar.
-
-No fue necesario repetir la instalación de Axios, la configuración de `environment` ni la configuración CORS, porque forman parte de las prácticas anteriores.
+Esta variante regresa mediante `Router`. En la alternativa mediante modal, el resultado se comunica al cerrar el modal y el listado se actualiza con ese resultado; ese mecanismo se desarrolla en su propio manual.
