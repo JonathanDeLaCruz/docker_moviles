@@ -2,7 +2,7 @@
 
 En esta práctica abrirás un formulario desde el listado, validarás sus campos y enviarás un producto a Directus mediante `POST`. Después de guardar y aceptar la confirmación, regresarás al listado y verás el nuevo registro sin recargar el navegador.
 
-**Resultado esperado:** el botón **Nuevo** abrirá la página `productos-form`. La figura 1 muestra el formulario con los datos del ejemplo, antes de guardarlo.
+**Resultado esperado:** el botón con icono **+** abrirá la página `productos-form`. La figura 1 muestra el formulario con los datos del ejemplo, antes de guardarlo.
 
 <p align="center">
   <img src="imagenes/03-pagina-formulario.jpg" alt="Formulario de creación con los datos del producto Mouse" width="390"><br>
@@ -119,13 +119,25 @@ En `mobile/src/app/productos-list/productos-list.page.html`, **dentro de `ion-to
 
 ```html
 <ion-buttons slot="end">
-  <ion-button [routerLink]="['/productos-form']">
-    Nuevo
+  <ion-button fill="solid" [routerLink]="['/productos-form']" aria-label="Nuevo producto">
+    <ion-icon slot="icon-only" name="add"></ion-icon>
   </ion-button>
 </ion-buttons>
 ```
 
-Conserva el listado y los botones **Ver detalle** del manual 02. Si ya existe el botón **Nuevo**, no lo dupliques.
+**Opción A: botón en la barra.** El bloque anterior coloca el icono **+** a la derecha del título (figura 4). El atributo `aria-label` identifica su acción para lectores de pantalla sin mostrar palabras.
+
+**Opción B: botón flotante.** Si prefieres el acceso flotante, retira el bloque `ion-buttons` de creación de la barra y agrega el siguiente bloque **dentro de `ion-content`, antes de `</ion-content>`**, después de `</ion-list>`:
+
+```html
+<ion-fab slot="fixed" vertical="bottom" horizontal="center">
+  <ion-fab-button [routerLink]="['/productos-form']" aria-label="Nuevo producto">
+    <ion-icon name="add"></ion-icon>
+  </ion-fab-button>
+</ion-fab>
+```
+
+La figura 5 muestra esta alternativa. **Elige una sola opción**: ambas abren la misma página y utilizan el mismo formulario. Conserva las filas y los botones con icono de **ojo** del manual 02. El código completo de la sección 4 utiliza la opción A. Los botones `ion-button` llevan `fill="solid"`; `ion-fab-button` ya es sólido.
 
 ### Paso 5. Crear el formulario y sus mensajes en TypeScript
 
@@ -335,7 +347,7 @@ Abre `mobile/src/app/productos-form/productos-form.page.html` y **reemplaza su c
       </ion-note>
     </ion-list>
 
-    <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="guardando">
+    <ion-button fill="solid" expand="block" type="submit" class="ion-margin-top" [disabled]="guardando">
       {{ guardando ? 'Guardando...' : 'Guardar' }}
     </ion-button>
   </form>
@@ -400,8 +412,8 @@ export class ProductosListPage {
   <ion-toolbar>
     <ion-title>Productos</ion-title>
     <ion-buttons slot="end">
-      <ion-button [routerLink]="['/productos-form']">
-        Nuevo
+      <ion-button fill="solid" [routerLink]="['/productos-form']" aria-label="Nuevo producto">
+        <ion-icon slot="icon-only" name="add"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -417,8 +429,8 @@ export class ProductosListPage {
         <p>Stock: {{ producto.stock }}</p>
         <p>Registro: {{ producto.fecha_registro | date:'yyyy-MM-dd' }}</p>
       </ion-label>
-      <ion-button slot="end" [routerLink]="['/productos-view', producto.id]">
-        Ver detalle
+      <ion-button fill="solid" slot="end" [routerLink]="['/productos-view', producto.id]" aria-label="Ver detalle">
+        <ion-icon slot="icon-only" name="eye"></ion-icon>
       </ion-button>
     </ion-item>
   </ion-list>
@@ -642,7 +654,7 @@ export class ProductosFormPage implements OnInit {
       </ion-note>
     </ion-list>
 
-    <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="guardando">
+    <ion-button fill="solid" expand="block" type="submit" class="ion-margin-top" [disabled]="guardando">
       {{ guardando ? 'Guardando...' : 'Guardar' }}
     </ion-button>
   </form>
@@ -681,6 +693,20 @@ Presiona **Guardar**. Debe aparecer **Producto guardado**. Al presionar **Acepta
 
 Los demás productos y las fechas dependen de tu base de datos. Esta prueba crea un registro real en la colección `productos` del entorno de prácticas.
 
+### Dos ubicaciones para el botón de creación
+
+Con la opción A, el icono **+** aparece en la barra (figura 4). Con la opción B, aparece flotando en la parte inferior (figura 5). En ambos casos, presiónalo y comprueba que abre `/productos-form` con el formulario vacío; regresa al listado con la flecha de atrás.
+
+<p align="center">
+  <img src="imagenes/03-pagina-boton-barra.jpg" alt="Icono más en la barra del listado para abrir la página de creación" width="390"><br>
+  <em>Figura 4. Opción A: botón sólido con icono + en la barra.</em>
+</p>
+
+<p align="center">
+  <img src="imagenes/03-pagina-boton-flotante.jpg" alt="Botón flotante con icono más para abrir la página de creación" width="390"><br>
+  <em>Figura 5. Opción B: botón flotante + que abre la misma página.</em>
+</p>
+
 ## 6. Explicación detallada del flujo
 
 ### Del formulario al listado actualizado
@@ -689,7 +715,7 @@ La app valida los datos antes de enviarlos. Directus crea el producto y la aplic
 
 ```mermaid
 flowchart TD
-    A["📱 El usuario presiona Nuevo"] --> B["Router abre /productos-form"]
+    A["📱 El usuario presiona +"] --> B["Router abre /productos-form"]
     B --> C["ngOnInit() crea el formulario reactivo"]
     C --> D["El usuario captura los datos y presiona Guardar"]
     D --> E{"¿El formulario es válido?"}
