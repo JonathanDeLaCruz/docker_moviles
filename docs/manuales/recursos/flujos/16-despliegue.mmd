@@ -1,5 +1,5 @@
 flowchart TD
-  N0["USUARIO<br/>Abre el dominio mediante HTTPS"] 
+  N0["USUARIO<br/>Abre el dominio mediante HTTPS"]
   N1["NGINX<br/>Recibe la petición<br/>Aplicación: sirve los archivos compilados de Ionic."]
   N2["NGINX<br/>Las peticiones /api/ se reenvían a Directus"]
   N3["DIRECTUS<br/>Consulta los datos en MariaDB<br/>Los archivos utilizan el volumen persistente de Directus."]

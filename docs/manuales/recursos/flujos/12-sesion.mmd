@@ -1,5 +1,5 @@
 flowchart TD
-  N0["USUARIO<br/>Completa el formulario de registro<br/>Este recorrido comienza con registro; una cuenta activa puede ir directamente al acceso."] 
+  N0["USUARIO<br/>Completa el formulario de registro<br/>Este recorrido comienza con registro; una cuenta activa puede ir directamente al acceso."]
   N1["APP IONIC<br/>Envía POST /users/register"]
   N2["DIRECTUS<br/>Procesa la solicitud de registro<br/>La verificación depende de la configuración de Directus."]
   N3["USUARIO<br/>Completa la verificación, si se solicita, y abre el acceso"]
