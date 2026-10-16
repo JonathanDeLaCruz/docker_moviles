@@ -82,9 +82,9 @@ Cada manual conserva la implementación en el **punto 3**. El punto 2 presenta l
 | 11 | [Servicios](docs/manuales/11_servicios.md) |
 | 12 | [Inicio de sesión y registro](docs/manuales/12_login_registro.md) |
 | 13 | [Guardia de autenticación](docs/manuales/13_guard.md) |
-| 14 | [Relaciones muchos a muchos](docs/manuales/14_muchos_muchos.md) |
+| 14 | [Categorías en creación, actualización y detalle](docs/manuales/14_muchos_muchos.md) |
 | 15 | [Subida de imágenes](docs/manuales/15_subir_archivos.md) |
-| 16 | [Directus en Azure y APK Android](docs/manuales/16_Rocky_Linux_Azure.md) |
+| 17 | [Imagen en el formulario y el detalle](docs/manuales/17_imagen_formulario_detalle.md) |
 
 Al generar una página o componente, agrega manualmente `standalone: false` en `@Component` para declararlo en su NgModule. Cada práctica especifica los módulos que utiliza.
 
@@ -94,8 +94,8 @@ Las capturas y los diagramas se incluyen como imágenes centradas con pie de fig
 
 - **09–11, 13 y 14:** pruebas realizadas con la aplicación y la API del entorno del curso.
 - **12:** acceso y validaciones comprobados; registro completo pendiente de habilitar el registro y configurar el correo de verificación.
-- **15:** carga pendiente de los permisos de archivos propios; el entorno actual rechaza esas reglas con `RESOURCE_RESTRICTED`.
-- **16:** Compose y proxy HTTPS comprobados; APK debug creada y firma verificada. El servidor ejecuta MariaDB y Directus; el despliegue remoto, la instalación y las solicitudes desde el teléfono están pendientes.
+- **15:** subida, asociación y recuperación de imágenes comprobadas con una cuenta de práctica y archivos compartidos.
+- El manual 16 se retiró temporalmente del índice hasta disponer de un servidor y comprobar el despliegue remoto y las solicitudes desde el teléfono.
 
 Consulta el [registro de validación](docs/VALIDACION.md) para conocer el alcance de cada comprobación.
 

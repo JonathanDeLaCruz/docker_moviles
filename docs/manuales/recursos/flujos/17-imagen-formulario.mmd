@@ -1,0 +1,35 @@
+flowchart TD
+  A["El usuario abre Crear o Editar producto"]
+  LOAD["En edición carga datos, categorías e imagen"]
+  SELECT["Captura datos y selecciona imagen opcional"]
+  VALID{"¿Formulario válido?"}
+  BAD["Muestra las validaciones"]
+  FILE{"¿Hay un archivo nuevo?"}
+  UP["FormData envía POST /files a Directus"]
+  ID["Conserva el ID devuelto y limpia archivo pendiente"]
+  KEEP["Conserva la imagen existente o sin imagen"]
+  MODE{"¿Crear o actualizar?"}
+  POST["POST crea producto, imagen y categorías"]
+  PATCH["PATCH actualiza datos, imagen y enlaces"]
+  OK["Confirma y regresa al listado"]
+  DETAIL["El detalle consulta producto y categorías"]
+  GET["Si tiene imagen, GET /assets/{id} autenticado"]
+  VIEW["Blob muestra la imagen junto a datos y categorías"]
+  A --> LOAD
+  LOAD --> SELECT
+  SELECT -->|"Guardar"| VALID
+  VALID -->|"No"| BAD
+  BAD -.->|"Corregir"| SELECT
+  VALID -->|"Sí"| FILE
+  FILE -->|"Sí"| UP
+  UP --> ID
+  FILE -->|"No"| KEEP
+  ID --> MODE
+  KEEP --> MODE
+  MODE -->|"Crear"| POST
+  MODE -->|"Actualizar"| PATCH
+  POST --> OK
+  PATCH --> OK
+  OK --> DETAIL
+  DETAIL --> GET
+  GET --> VIEW

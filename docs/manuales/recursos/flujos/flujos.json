@@ -2039,183 +2039,199 @@
   },
   {
     "nombre": "14-categorias",
-    "titulo": "Guardar un producto con categorías",
+    "titulo": "Categorías en creación, edición y detalle",
+    "imagen": "flujo-14-categorias-integradas.png",
     "nodos": [
       {
         "id": "A",
-        "texto": "Se abre el formulario de creación",
+        "texto": "La app abre el formulario",
         "tipo": "proceso"
+      },
+      {
+        "id": "CAT",
+        "texto": "Consulta el catálogo de categorías",
+        "tipo": "proceso"
+      },
+      {
+        "id": "MODE",
+        "texto": "¿Está editando?",
+        "tipo": "decision"
       },
       {
         "id": "LOAD",
-        "texto": "CategoriasService consulta Directus",
+        "texto": "Consulta el producto y sus enlaces",
         "tipo": "proceso"
       },
       {
-        "id": "OPTIONS",
-        "texto": "La app recibe las categorías disponibles",
+        "id": "FILL",
+        "texto": "patchValue y FormArray cargan selecciones",
         "tipo": "proceso"
       },
       {
-        "id": "FORM",
-        "texto": "El usuario completa los datos del producto",
+        "id": "NEW",
+        "texto": "Formulario nuevo con categorías opcionales",
         "tipo": "proceso"
       },
       {
-        "id": "PLUS",
-        "texto": "+ agrega una fila al FormArray",
-        "tipo": "proceso"
-      },
-      {
-        "id": "SELECT",
-        "texto": "El usuario elige la categoría de cada fila",
-        "tipo": "proceso"
-      },
-      {
-        "id": "TRASH",
-        "texto": "La papelera quita una fila",
+        "id": "EDIT",
+        "texto": "El usuario agrega, cambia o quita filas",
         "tipo": "proceso"
       },
       {
         "id": "VALID",
-        "texto": "¿Formulario y selecciones válidos?",
+        "texto": "¿Formulario válido?",
         "tipo": "decision"
       },
       {
-        "id": "INVALID",
-        "texto": "Muestra validaciones y permite corregir",
+        "id": "ERR",
+        "texto": "Muestra validaciones",
         "tipo": "proceso"
       },
       {
-        "id": "JSON",
-        "texto": "Convierte IDs, elimina repetidos con Set y prepara enlaces",
+        "id": "IDS",
+        "texto": "Set reúne IDs únicos",
         "tipo": "proceso"
+      },
+      {
+        "id": "SAVE",
+        "texto": "¿Crear o actualizar?",
+        "tipo": "decision"
       },
       {
         "id": "POST",
-        "texto": "Directus recibe POST del producto con categorias",
+        "texto": "POST envía categorias_id de cada selección",
+        "tipo": "proceso"
+      },
+      {
+        "id": "PATCH",
+        "texto": "PATCH envía create y delete de enlaces",
         "tipo": "proceso"
       },
       {
         "id": "DB",
-        "texto": "MariaDB guarda producto y filas de productos_categorias",
+        "texto": "Directus guarda producto y asociaciones",
         "tipo": "proceso"
       },
       {
-        "id": "DONE",
-        "texto": "La app muestra la confirmación",
+        "id": "DETAIL",
+        "texto": "El detalle consulta categorías expandidas",
+        "tipo": "proceso"
+      },
+      {
+        "id": "VIEW",
+        "texto": "Muestra los nombres o Sin categorías asignadas",
         "tipo": "pantalla"
       }
     ],
     "aristas": [
       {
         "de": "A",
-        "a": "LOAD"
+        "a": "CAT"
+      },
+      {
+        "de": "CAT",
+        "a": "MODE"
+      },
+      {
+        "de": "MODE",
+        "a": "LOAD",
+        "texto": "Sí"
       },
       {
         "de": "LOAD",
-        "a": "OPTIONS"
+        "a": "FILL"
       },
       {
-        "de": "OPTIONS",
-        "a": "FORM"
+        "de": "FILL",
+        "a": "EDIT"
       },
       {
-        "de": "FORM",
-        "a": "PLUS"
+        "de": "MODE",
+        "a": "NEW",
+        "texto": "No"
       },
       {
-        "de": "PLUS",
-        "a": "SELECT"
+        "de": "NEW",
+        "a": "EDIT"
       },
       {
-        "de": "SELECT",
-        "a": "TRASH",
-        "texto": "Quitar fila",
-        "tipo": "alternativa"
-      },
-      {
-        "de": "TRASH",
-        "a": "SELECT",
-        "texto": "Selecciones restantes",
-        "tipo": "retorno",
-        "influye": false
-      },
-      {
-        "de": "SELECT",
+        "de": "EDIT",
         "a": "VALID",
         "texto": "Guardar"
       },
       {
         "de": "VALID",
-        "a": "INVALID",
+        "a": "ERR",
         "texto": "No"
       },
       {
-        "de": "INVALID",
-        "a": "SELECT",
+        "de": "ERR",
+        "a": "EDIT",
         "texto": "Corregir",
         "tipo": "retorno",
         "influye": false
       },
       {
         "de": "VALID",
-        "a": "JSON",
+        "a": "IDS",
         "texto": "Sí"
       },
       {
-        "de": "JSON",
-        "a": "POST"
+        "de": "IDS",
+        "a": "SAVE"
+      },
+      {
+        "de": "SAVE",
+        "a": "POST",
+        "texto": "Crear"
+      },
+      {
+        "de": "SAVE",
+        "a": "PATCH",
+        "texto": "Actualizar"
       },
       {
         "de": "POST",
-        "a": "DB",
-        "influye": false,
-        "salida": "e",
-        "entrada": "w",
-        "descripcion": "Consulta"
+        "a": "DB"
+      },
+      {
+        "de": "PATCH",
+        "a": "DB"
       },
       {
         "de": "DB",
-        "a": "POST",
-        "influye": false,
-        "tipo": "retorno",
-        "salida": "s",
-        "entrada": "e",
-        "descripcion": "Datos"
+        "a": "DETAIL"
       },
       {
-        "de": "POST",
-        "a": "DONE",
-        "texto": "Creación exitosa"
-      },
-      {
-        "de": "SELECT",
-        "a": "PLUS",
-        "texto": "Agregar otra",
-        "tipo": "retorno",
-        "influye": false
+        "de": "DETAIL",
+        "a": "VIEW"
       }
     ],
     "filas": [
       [
+        "LOAD",
+        "NEW"
+      ],
+      [
         "POST",
-        "DB"
+        "PATCH"
       ]
     ],
     "principal": [
       "A",
+      "CAT",
+      "MODE",
       "LOAD",
-      "OPTIONS",
-      "FORM",
-      "PLUS",
-      "SELECT",
+      "FILL",
+      "EDIT",
       "VALID",
-      "JSON",
-      "POST",
-      "DONE"
-    ],
-    "imagen": "flujo-14-categorias-ramas.png"
+      "IDS",
+      "SAVE",
+      "PATCH",
+      "DB",
+      "DETAIL",
+      "VIEW"
+    ]
   },
   {
     "nombre": "15-archivos",
@@ -2602,5 +2618,201 @@
       "VIEW"
     ],
     "imagen": "flujo-00-entorno-ramas.png"
+  },
+  {
+    "nombre": "17-imagen-formulario",
+    "titulo": "Imagen en formulario y detalle",
+    "imagen": "flujo-17-imagen-formulario-ramas.png",
+    "nodos": [
+      {
+        "id": "A",
+        "texto": "El usuario abre Crear o Editar producto",
+        "tipo": "proceso"
+      },
+      {
+        "id": "LOAD",
+        "texto": "En edición carga datos, categorías e imagen",
+        "tipo": "proceso"
+      },
+      {
+        "id": "SELECT",
+        "texto": "Captura datos y selecciona imagen opcional",
+        "tipo": "proceso"
+      },
+      {
+        "id": "VALID",
+        "texto": "¿Formulario válido?",
+        "tipo": "decision"
+      },
+      {
+        "id": "BAD",
+        "texto": "Muestra las validaciones",
+        "tipo": "proceso"
+      },
+      {
+        "id": "FILE",
+        "texto": "¿Hay un archivo nuevo?",
+        "tipo": "decision"
+      },
+      {
+        "id": "UP",
+        "texto": "FormData envía POST /files a Directus",
+        "tipo": "proceso"
+      },
+      {
+        "id": "ID",
+        "texto": "Conserva el ID devuelto y limpia archivo pendiente",
+        "tipo": "proceso"
+      },
+      {
+        "id": "KEEP",
+        "texto": "Conserva la imagen existente o sin imagen",
+        "tipo": "proceso"
+      },
+      {
+        "id": "MODE",
+        "texto": "¿Crear o actualizar?",
+        "tipo": "decision"
+      },
+      {
+        "id": "POST",
+        "texto": "POST crea producto, imagen y categorías",
+        "tipo": "proceso"
+      },
+      {
+        "id": "PATCH",
+        "texto": "PATCH actualiza datos, imagen y enlaces",
+        "tipo": "proceso"
+      },
+      {
+        "id": "OK",
+        "texto": "Confirma y regresa al listado",
+        "tipo": "proceso"
+      },
+      {
+        "id": "DETAIL",
+        "texto": "El detalle consulta producto y categorías",
+        "tipo": "proceso"
+      },
+      {
+        "id": "GET",
+        "texto": "Si tiene imagen, GET /assets/{id} autenticado",
+        "tipo": "proceso"
+      },
+      {
+        "id": "VIEW",
+        "texto": "Blob muestra la imagen junto a datos y categorías",
+        "tipo": "pantalla"
+      }
+    ],
+    "aristas": [
+      {
+        "de": "A",
+        "a": "LOAD"
+      },
+      {
+        "de": "LOAD",
+        "a": "SELECT"
+      },
+      {
+        "de": "SELECT",
+        "a": "VALID",
+        "texto": "Guardar"
+      },
+      {
+        "de": "VALID",
+        "a": "BAD",
+        "texto": "No"
+      },
+      {
+        "de": "BAD",
+        "a": "SELECT",
+        "texto": "Corregir",
+        "tipo": "retorno",
+        "influye": false
+      },
+      {
+        "de": "VALID",
+        "a": "FILE",
+        "texto": "Sí"
+      },
+      {
+        "de": "FILE",
+        "a": "UP",
+        "texto": "Sí"
+      },
+      {
+        "de": "UP",
+        "a": "ID"
+      },
+      {
+        "de": "FILE",
+        "a": "KEEP",
+        "texto": "No"
+      },
+      {
+        "de": "ID",
+        "a": "MODE"
+      },
+      {
+        "de": "KEEP",
+        "a": "MODE"
+      },
+      {
+        "de": "MODE",
+        "a": "POST",
+        "texto": "Crear"
+      },
+      {
+        "de": "MODE",
+        "a": "PATCH",
+        "texto": "Actualizar"
+      },
+      {
+        "de": "POST",
+        "a": "OK"
+      },
+      {
+        "de": "PATCH",
+        "a": "OK"
+      },
+      {
+        "de": "OK",
+        "a": "DETAIL"
+      },
+      {
+        "de": "DETAIL",
+        "a": "GET"
+      },
+      {
+        "de": "GET",
+        "a": "VIEW"
+      }
+    ],
+    "filas": [
+      [
+        "UP",
+        "KEEP"
+      ],
+      [
+        "POST",
+        "PATCH"
+      ]
+    ],
+    "principal": [
+      "A",
+      "LOAD",
+      "SELECT",
+      "VALID",
+      "FILE",
+      "UP",
+      "ID",
+      "MODE",
+      "POST",
+      "OK",
+      "DETAIL",
+      "GET",
+      "VIEW"
+    ]
   }
 ]
