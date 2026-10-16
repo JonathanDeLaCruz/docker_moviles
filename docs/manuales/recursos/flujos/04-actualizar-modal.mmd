@@ -1,24 +1,31 @@
 flowchart TD
-  N0["USUARIO<br/>Presiona el lápiz del producto"]
-  N1["APP IONIC<br/>Abre el modal con componentProps.id"]
-  N2["APP IONIC<br/>Solicita GET del producto por ID"]
-  N3["DIRECTUS<br/>Consulta el registro en MariaDB"]
-  N4["MARIADB<br/>Entrega el registro actual"]
-  N5["DIRECTUS<br/>Responde con los datos del producto"]
-  N6["APP IONIC<br/>patchValue() llena el formulario"]
-  N7["USUARIO<br/>Edita los datos y solicita guardar"]
-  N8["APP IONIC<br/>Valida y envía PATCH a Directus"]
-  N9["MARIADB<br/>Directus solicita guardar los cambios"]
-  N10["APP IONIC<br/>Recibe la confirmación y dismiss devuelve guardado: true"]
-  N11["APP IONIC<br/>El listado vuelve a consultar Directus"]
-  N0 --> N1
-  N1 --> N2
-  N2 --> N3
-  N3 --> N4
-  N4 --> N5
-  N5 --> N6
-  N6 --> N7
-  N7 --> N8
-  N8 --> N9
-  N9 --> N10
-  N10 --> N11
+  A["El usuario presiona el lápiz"]
+  B["El modal recibe el ID en componentProps"]
+  GET["Directus consulta el producto"]
+  DBR["MariaDB devuelve los datos actuales"]
+  FORM["patchValue() llena el formulario"]
+  EDIT["El usuario modifica y solicita actualizar"]
+  V{"¿Formulario válido?"}
+  INVALID["Muestra los mensajes de validación"]
+  PATCH["Directus recibe los cambios del producto"]
+  DBW["MariaDB guarda los cambios"]
+  OK["La app muestra Producto actualizado"]
+  RETURN["Aceptar: dismiss devuelve guardado: true"]
+  LIST["onDidDismiss() recarga los productos"]
+  ERROR["catch muestra la alerta de error"]
+  A --> B
+  B -->|"GET por ID"| GET
+  GET --> DBR
+  DBR -.-> GET
+  GET -->|"Registro actual"| FORM
+  FORM --> EDIT
+  EDIT --> V
+  V -->|"No"| INVALID
+  INVALID -.->|"Corregir"| EDIT
+  V -->|"Sí: PATCH por ID"| PATCH
+  PATCH --> DBW
+  DBW -.-> PATCH
+  PATCH -->|"Actualización exitosa"| OK
+  OK --> RETURN
+  RETURN --> LIST
+  PATCH -.->|"Falla la actualización"| ERROR

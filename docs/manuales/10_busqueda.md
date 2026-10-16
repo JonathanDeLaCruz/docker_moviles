@@ -299,7 +299,7 @@ La figura 1 muestra el resultado obtenido con el código de esta práctica. Las 
 La figura 2 muestra el recorrido de arriba hacia abajo.
 
 <p align="center">
-  <img src="imagenes/flujo-10-busqueda.png" alt="Filtrar los productos" width="390"><br>
+  <img src="imagenes/flujo-10-busqueda-ramas.png" alt="Filtrar los productos" width="1000"><br>
   <em>Figura 2. Filtrar los productos.</em>
 </p>
 

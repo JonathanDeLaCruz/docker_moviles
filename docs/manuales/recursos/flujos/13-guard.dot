@@ -1,0 +1,22 @@
+digraph Flujo {
+  graph [rankdir=TB, bgcolor="#181818", pad="0.24", nodesep="0.42", ranksep="0.55", splines=spline, outputorder=edgesfirst];
+  node [shape=box, style="rounded,filled", fillcolor="#0e2a4d", color="#304b67", fontcolor="#b5d3f6", fontname="Arial", fontsize=17, penwidth=1.15, margin="0.22,0.20"];
+  edge [color="#89929c", fontcolor="#b5d3f6", fontname="Arial", fontsize=13, arrowsize=0.65, penwidth=1.15];
+  A [label="El usuario solicita una\nruta protegida", group=main];
+  GUARD [label="authGuard llama a\nvalidarSesion()", group=main];
+  CHECK [label="AuthService comprueba la\nsesión con Directus", group=main];
+  VALID [label="¿Sesión válida?", group=main, shape=diamond, style=filled, margin="0.12,0.08"];
+  PAGE [label="Permite abrir la página\nsolicitada", group=main, penwidth=1.7];
+  LOGIN [label="Devuelve Login con\nreturnUrl"];
+  AUTH [label="El usuario inicia sesión"];
+  RETURN [label="Router vuelve al destino y\nejecuta el guard"];
+  subgraph cluster_row0 { style=invis; margin=8; {rank=same; PAGE; LOGIN;} }
+  A -> GUARD [weight=12];
+  GUARD -> CHECK [weight=12];
+  CHECK -> VALID [weight=12];
+  VALID -> PAGE [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Sí</TD></TR></TABLE>>];
+  VALID -> LOGIN [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>No</TD></TR></TABLE>>];
+  LOGIN -> AUTH;
+  AUTH -> RETURN;
+  RETURN -> GUARD [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Revalidar</TD></TR></TABLE>>, constraint=false, style=dashed, color="#80a6c9"];
+}

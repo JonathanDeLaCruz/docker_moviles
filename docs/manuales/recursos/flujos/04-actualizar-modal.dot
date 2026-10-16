@@ -1,0 +1,37 @@
+digraph Flujo {
+  graph [rankdir=TB, bgcolor="#181818", pad="0.24", nodesep="0.42", ranksep="0.55", splines=spline, outputorder=edgesfirst];
+  node [shape=box, style="rounded,filled", fillcolor="#0e2a4d", color="#304b67", fontcolor="#b5d3f6", fontname="Arial", fontsize=17, penwidth=1.15, margin="0.22,0.20"];
+  edge [color="#89929c", fontcolor="#b5d3f6", fontname="Arial", fontsize=13, arrowsize=0.65, penwidth=1.15];
+  A [label="El usuario presiona el\nlápiz", group=main];
+  B [label="El modal recibe el ID en\ncomponentProps", group=main];
+  GET [label="Directus consulta el\nproducto", group=main];
+  DBR [label="MariaDB devuelve los datos\nactuales"];
+  FORM [label="patchValue() llena el\nformulario", group=main];
+  EDIT [label="El usuario modifica y\nsolicita actualizar", group=main];
+  V [label="¿Formulario válido?", group=main, shape=diamond, style=filled, margin="0.12,0.08"];
+  INVALID [label="Muestra los mensajes de\nvalidación"];
+  PATCH [label="Directus recibe los cambios\ndel producto", group=main];
+  DBW [label="MariaDB guarda los cambios"];
+  OK [label="La app muestra Producto\nactualizado", group=main];
+  RETURN [label="Aceptar: dismiss devuelve\nguardado: true", group=main];
+  LIST [label="onDidDismiss() recarga los\nproductos", group=main];
+  ERROR [label="catch muestra la alerta de\nerror"];
+  subgraph cluster_row0 { style=invis; margin=8; {rank=same; GET; DBR;} }
+  subgraph cluster_row1 { style=invis; margin=8; {rank=same; PATCH; DBW;} }
+  A -> B [weight=12];
+  B -> GET [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>GET por ID</TD></TR></TABLE>>];
+  GET -> DBR [tailport=e, headport=w, constraint=false];
+  DBR -> GET [tailport=s, headport=e, constraint=false, style=dashed, color="#80a6c9"];
+  GET -> FORM [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Registro actual</TD></TR></TABLE>>];
+  FORM -> EDIT [weight=12];
+  EDIT -> V [weight=12];
+  V -> INVALID [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>No</TD></TR></TABLE>>];
+  INVALID -> EDIT [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Corregir</TD></TR></TABLE>>, constraint=false, style=dashed, color="#80a6c9"];
+  V -> PATCH [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Sí: PATCH por ID</TD></TR></TABLE>>];
+  PATCH -> DBW [tailport=e, headport=w, constraint=false];
+  DBW -> PATCH [tailport=s, headport=e, constraint=false, style=dashed, color="#80a6c9"];
+  PATCH -> OK [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Actualización exitosa</TD></TR></TABLE>>];
+  OK -> RETURN [weight=12];
+  RETURN -> LIST [weight=12];
+  PATCH -> ERROR [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Falla la<BR/>actualización</TD></TR></TABLE>>, style=dashed];
+}

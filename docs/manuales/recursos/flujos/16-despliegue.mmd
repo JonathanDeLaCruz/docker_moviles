@@ -1,16 +1,24 @@
 flowchart TD
-  N0["CELULAR ANDROID<br/>El usuario abre la APK instalada"]
-  N1["APP IONIC<br/>environment.apiUrl contiene la URL HTTPS pública de Directus"]
-  N2["APP IONIC<br/>Envía la petición HTTPS desde el celular"]
-  N3["NGINX EN LA VM<br/>Recibe HTTPS y reenvía la petición a Directus"]
-  N4["DIRECTUS<br/>Aplica los permisos y consulta MariaDB"]
-  N5["MARIADB<br/>Entrega los registros a Directus"]
-  N6["DIRECTUS<br/>Devuelve JSON al celular a través del proxy HTTPS"]
-  N7["APP IONIC<br/>Recibe los datos y actualiza la pantalla"]
-  N0 --> N1
-  N1 --> N2
-  N2 --> N3
-  N3 --> N4
-  N4 --> N5
-  N5 --> N6
-  N6 --> N7
+  BUILD["En la computadora: ng build genera www"]
+  SYNC["cap sync android copia archivos y plugins"]
+  APK["Gradle crea la APK"]
+  INSTALL["El usuario instala la APK en Android"]
+  APP["La app utiliza la URL HTTPS pública de Directus"]
+  HTTPS["Nginx de la VM recibe la petición HTTPS"]
+  API["Directus aplica los permisos y procesa la operación"]
+  DB["MariaDB consulta o guarda los datos"]
+  FILES["Volumen persistente de archivos"]
+  RESPONSE["Directus devuelve JSON a través de Nginx"]
+  SCREEN["La app recibe los datos y actualiza la pantalla"]
+  BUILD --> SYNC
+  SYNC --> APK
+  APK --> INSTALL
+  INSTALL --> APP
+  APP -->|"Petición desde el celular"| HTTPS
+  HTTPS --> API
+  API --> DB
+  DB -.-> API
+  API --> FILES
+  FILES -.-> API
+  API -->|"Respuesta de la API"| RESPONSE
+  RESPONSE -->|"HTTPS"| SCREEN

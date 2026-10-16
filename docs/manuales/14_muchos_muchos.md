@@ -462,7 +462,7 @@ La figura 1 muestra el formulario real de Ionic con dos categorías seleccionada
 La figura 2 muestra el recorrido de arriba hacia abajo.
 
 <p align="center">
-  <img src="imagenes/flujo-14-categorias.png" alt="Guardar un producto con categorías" width="390"><br>
+  <img src="imagenes/flujo-14-categorias-ramas.png" alt="Guardar un producto con categorías" width="1000"><br>
   <em>Figura 2. Guardar un producto con categorías.</em>
 </p>
 

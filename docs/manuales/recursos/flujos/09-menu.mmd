@@ -1,12 +1,15 @@
 flowchart TD
-  N0["USUARIO<br/>Presiona el botón del menú"]
-  N1["APP IONIC<br/>Abre ion-menu principal"]
-  N2["USUARIO<br/>Elige una opción"]
-  N3["APP IONIC<br/>routerLink cambia la ruta"]
-  N4["APP IONIC<br/>ion-router-outlet muestra la página"]
-  N5["APP IONIC<br/>ion-menu-toggle cierra el menú"]
-  N0 --> N1
-  N1 --> N2
-  N2 --> N3
-  N3 --> N4
-  N4 --> N5
+  A["El usuario presiona el botón del menú"]
+  MENU["ion-menu abre las opciones"]
+  CHOOSE["El usuario elige una opción"]
+  ROUTE["routerLink cambia la ruta"]
+  OUTLET["ion-router-outlet muestra la página"]
+  CLOSE["ion-menu-toggle cierra el menú"]
+  END["La página elegida queda visible"]
+  A --> MENU
+  MENU --> CHOOSE
+  CHOOSE -->|"Navegación"| ROUTE
+  CHOOSE -->|"Cierre del menú"| CLOSE
+  ROUTE --> OUTLET
+  OUTLET --> END
+  CLOSE --> END

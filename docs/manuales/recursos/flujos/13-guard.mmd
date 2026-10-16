@@ -1,14 +1,17 @@
 flowchart TD
-  N0["USUARIO<br/>Solicita una ruta protegida"]
-  N1["APP IONIC<br/>authGuard llama a AuthService"]
-  N2["APP IONIC<br/>Valida la sesión con Directus<br/>Si es válida, abre directamente la página solicitada."]
-  N3["APP IONIC<br/>Si no es válida, abre Login con returnUrl"]
-  N4["USUARIO<br/>Ingresa sus credenciales"]
-  N5["DIRECTUS<br/>Autentica la cuenta"]
-  N6["APP IONIC<br/>Vuelve a validar y abre la ruta solicitada"]
-  N0 --> N1
-  N1 --> N2
-  N2 --> N3
-  N3 --> N4
-  N4 --> N5
-  N5 --> N6
+  A["El usuario solicita una ruta protegida"]
+  GUARD["authGuard llama a validarSesion()"]
+  CHECK["AuthService comprueba la sesión con Directus"]
+  VALID{"¿Sesión válida?"}
+  PAGE["Permite abrir la página solicitada"]
+  LOGIN["Devuelve Login con returnUrl"]
+  AUTH["El usuario inicia sesión"]
+  RETURN["Router vuelve al destino y ejecuta el guard"]
+  A --> GUARD
+  GUARD --> CHECK
+  CHECK --> VALID
+  VALID -->|"Sí"| PAGE
+  VALID -->|"No"| LOGIN
+  LOGIN --> AUTH
+  AUTH --> RETURN
+  RETURN -.->|"Revalidar"| GUARD

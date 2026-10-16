@@ -1,0 +1,35 @@
+digraph Flujo {
+  graph [rankdir=TB, bgcolor="#181818", pad="0.24", nodesep="0.42", ranksep="0.55", splines=spline, outputorder=edgesfirst];
+  node [shape=box, style="rounded,filled", fillcolor="#0e2a4d", color="#304b67", fontcolor="#b5d3f6", fontname="Arial", fontsize=17, penwidth=1.15, margin="0.22,0.20"];
+  edge [color="#89929c", fontcolor="#b5d3f6", fontname="Arial", fontsize=13, arrowsize=0.65, penwidth=1.15];
+  A [label="Se abre el formulario de\ncreación", group=main];
+  LOAD [label="CategoriasService consulta\nDirectus", group=main];
+  OPTIONS [label="La app recibe las\ncategorías disponibles", group=main];
+  FORM [label="El usuario completa los\ndatos del producto", group=main];
+  PLUS [label="+ agrega una fila al\nFormArray", group=main];
+  SELECT [label="El usuario elige la\ncategoría de cada fila", group=main];
+  TRASH [label="La papelera quita una fila"];
+  VALID [label="¿Formulario y\nselecciones válidos?", group=main, shape=diamond, style=filled, margin="0.12,0.08"];
+  INVALID [label="Muestra validaciones y\npermite corregir"];
+  JSON [label="Convierte IDs, elimina\nrepetidos con Set y prepara\nenlaces", group=main];
+  POST [label="Directus recibe POST del\nproducto con categorias", group=main];
+  DB [label="MariaDB guarda producto y\nfilas de\nproductos_categorias"];
+  DONE [label="La app muestra la\nconfirmación", group=main, penwidth=1.7];
+  subgraph cluster_row0 { style=invis; margin=8; {rank=same; POST; DB;} }
+  A -> LOAD [weight=12];
+  LOAD -> OPTIONS [weight=12];
+  OPTIONS -> FORM [weight=12];
+  FORM -> PLUS [weight=12];
+  PLUS -> SELECT [weight=12];
+  SELECT -> TRASH [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Quitar fila</TD></TR></TABLE>>, style=dashed];
+  TRASH -> SELECT [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Selecciones restantes</TD></TR></TABLE>>, constraint=false, style=dashed, color="#80a6c9"];
+  SELECT -> VALID [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Guardar</TD></TR></TABLE>>];
+  VALID -> INVALID [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>No</TD></TR></TABLE>>];
+  INVALID -> SELECT [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Corregir</TD></TR></TABLE>>, constraint=false, style=dashed, color="#80a6c9"];
+  VALID -> JSON [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Sí</TD></TR></TABLE>>];
+  JSON -> POST [weight=12];
+  POST -> DB [tailport=e, headport=w, constraint=false];
+  DB -> POST [tailport=s, headport=e, constraint=false, style=dashed, color="#80a6c9"];
+  POST -> DONE [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Creación exitosa</TD></TR></TABLE>>];
+  SELECT -> PLUS [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Agregar otra</TD></TR></TABLE>>, constraint=false, style=dashed, color="#80a6c9"];
+}

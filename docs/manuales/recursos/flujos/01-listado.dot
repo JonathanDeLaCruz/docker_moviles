@@ -1,0 +1,22 @@
+digraph Flujo {
+  graph [rankdir=TB, bgcolor="#181818", pad="0.24", nodesep="0.42", ranksep="0.55", splines=spline, outputorder=edgesfirst];
+  node [shape=box, style="rounded,filled", fillcolor="#0e2a4d", color="#304b67", fontcolor="#b5d3f6", fontname="Arial", fontsize=17, penwidth=1.15, margin="0.22,0.20"];
+  edge [color="#89929c", fontcolor="#b5d3f6", fontname="Arial", fontsize=13, arrowsize=0.65, penwidth=1.15];
+  A [label="El usuario abre Productos", group=main];
+  B [label="ngOnInit() inicia\ncargarProductos()", group=main];
+  C [label="Axios solicita los\nproductos", group=main];
+  D [label="Directus recibe la petición", group=main];
+  DB [label="MariaDB entrega los\nregistros"];
+  F [label="La app recibe el JSON: {\ndata: [...] }", group=main];
+  G [label="Guarda response.data.data\nen productos", group=main];
+  H [label="*ngFor muestra los\nproductos en pantalla", group=main, penwidth=1.7];
+  subgraph cluster_row0 { style=invis; margin=8; {rank=same; D; DB;} }
+  A -> B [weight=12];
+  B -> C [weight=12];
+  C -> D [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>GET /items/productos</TD></TR></TABLE>>];
+  D -> DB [tailport=e, headport=w, constraint=false];
+  DB -> D [tailport=s, headport=e, constraint=false, style=dashed, color="#80a6c9"];
+  D -> F [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Respuesta JSON</TD></TR></TABLE>>];
+  F -> G [weight=12];
+  G -> H [weight=12];
+}

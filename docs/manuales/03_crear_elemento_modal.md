@@ -798,7 +798,7 @@ El listado permanece debajo del modal. La app valida los datos, los envía a Dir
 La figura 6 muestra el recorrido de arriba hacia abajo.
 
 <p align="center">
-  <img src="imagenes/flujo-03-crear-modal.png" alt="Crear un producto mediante un modal" width="390"><br>
+  <img src="imagenes/flujo-03-crear-modal-ramas.png" alt="Crear un producto mediante un modal" width="1000"><br>
   <em>Figura 6. Crear un producto mediante un modal.</em>
 </p>
 

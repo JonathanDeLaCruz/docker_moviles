@@ -716,7 +716,7 @@ La app valida los datos antes de enviarlos. Directus crea el producto y la aplic
 La figura 6 muestra el recorrido de arriba hacia abajo.
 
 <p align="center">
-  <img src="imagenes/flujo-03-crear-pagina.png" alt="Crear un producto mediante una página" width="390"><br>
+  <img src="imagenes/flujo-03-crear-pagina-ramas.png" alt="Crear un producto mediante una página" width="1000"><br>
   <em>Figura 6. Crear un producto mediante una página.</em>
 </p>
 

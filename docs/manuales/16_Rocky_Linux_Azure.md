@@ -291,7 +291,7 @@ La huella y los datos de esta APK están en el [registro de compilación](recurs
 La figura 1 muestra cómo los datos viajan desde la aplicación instalada hasta la base de datos y regresan a la pantalla.
 
 <p align="center">
-  <img src="imagenes/flujo-16-despliegue.png" alt="Celular con APK consulta Directus en Azure y recibe datos de MariaDB" width="390"><br>
+  <img src="imagenes/flujo-16-despliegue-ramas.png" alt="Celular con APK consulta Directus en Azure y recibe datos de MariaDB" width="1000"><br>
   <em>Figura 1. Solicitud de la APK, consulta en Directus y respuesta al celular.</em>
 </p>
 

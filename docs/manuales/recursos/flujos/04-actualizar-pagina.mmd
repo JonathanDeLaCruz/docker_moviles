@@ -1,30 +1,31 @@
 flowchart TD
-  N0["USUARIO<br/>Presiona el lápiz del producto"]
-  N1["APP IONIC<br/>Lee el ID y crea el formulario"]
-  N2["APP IONIC<br/>Solicita GET /items/productos/{id}"]
-  N3["DIRECTUS<br/>Consulta el producto en MariaDB"]
-  N4["MARIADB<br/>Entrega el registro actual"]
-  N5["DIRECTUS<br/>Responde con JSON que contiene data"]
-  N6["APP IONIC<br/>patchValue() carga los campos"]
-  N7["USUARIO<br/>Modifica y presiona Actualizar"]
-  N8["APP IONIC<br/>Valida y envía PATCH /items/productos/{id}"]
-  N9["DIRECTUS<br/>Solicita actualizar el registro en MariaDB"]
-  N10["MARIADB<br/>Guarda los cambios"]
-  N11["DIRECTUS<br/>Responde con éxito"]
-  N12["APP IONIC<br/>Muestra Producto actualizado"]
-  N13["USUARIO<br/>Acepta; Router regresa al listado"]
-  N14["APP IONIC<br/>GET /items/productos obtiene la colección actualizada"]
-  N0 --> N1
-  N1 --> N2
-  N2 --> N3
-  N3 --> N4
-  N4 --> N5
-  N5 --> N6
-  N6 --> N7
-  N7 --> N8
-  N8 --> N9
-  N9 --> N10
-  N10 --> N11
-  N11 --> N12
-  N12 --> N13
-  N13 --> N14
+  A["El usuario presiona el lápiz"]
+  B["La página obtiene el ID desde la ruta"]
+  GET["Directus consulta el producto"]
+  DBR["MariaDB devuelve los datos actuales"]
+  FORM["patchValue() llena el formulario"]
+  EDIT["El usuario modifica y solicita actualizar"]
+  V{"¿Formulario válido?"}
+  INVALID["Muestra los mensajes de validación"]
+  PATCH["Directus recibe los cambios del producto"]
+  DBW["MariaDB guarda los cambios"]
+  OK["La app muestra Producto actualizado"]
+  RETURN["Aceptar: Router regresa al listado"]
+  LIST["ionViewWillEnter() recarga los productos"]
+  ERROR["catch muestra la alerta de error"]
+  A --> B
+  B -->|"GET por ID"| GET
+  GET --> DBR
+  DBR -.-> GET
+  GET -->|"Registro actual"| FORM
+  FORM --> EDIT
+  EDIT --> V
+  V -->|"No"| INVALID
+  INVALID -.->|"Corregir"| EDIT
+  V -->|"Sí: PATCH por ID"| PATCH
+  PATCH --> DBW
+  DBW -.-> PATCH
+  PATCH -->|"Actualización exitosa"| OK
+  OK --> RETURN
+  RETURN --> LIST
+  PATCH -.->|"Falla la actualización"| ERROR

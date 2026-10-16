@@ -257,7 +257,7 @@ La figura 1 muestra el resultado obtenido con el código de esta práctica. Las 
 La figura 2 muestra el recorrido de arriba hacia abajo.
 
 <p align="center">
-  <img src="imagenes/flujo-05-eliminar.png" alt="Eliminar un producto con confirmación" width="390"><br>
+  <img src="imagenes/flujo-05-eliminar-ramas.png" alt="Eliminar un producto con confirmación" width="1000"><br>
   <em>Figura 2. Eliminar un producto con confirmación.</em>
 </p>
 

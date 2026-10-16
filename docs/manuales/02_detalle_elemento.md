@@ -507,7 +507,7 @@ La app envía el ID del producto seleccionado a la página de detalle. Esta cons
 La figura 3 muestra el recorrido de arriba hacia abajo.
 
 <p align="center">
-  <img src="imagenes/flujo-02-detalle.png" alt="Consultar el detalle de un producto" width="390"><br>
+  <img src="imagenes/flujo-02-detalle-ramas.png" alt="Consultar el detalle de un producto" width="1000"><br>
   <em>Figura 3. Consultar el detalle de un producto.</em>
 </p>
 

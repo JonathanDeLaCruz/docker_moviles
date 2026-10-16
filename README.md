@@ -25,7 +25,7 @@ La figura 1 muestra la aplicación Ionic utilizada en las prácticas.
 La figura 2 resume la comunicación entre la aplicación, la API y la base de datos.
 
 <p align="center">
-  <img src="docs/manuales/imagenes/flujo-00-entorno.png" alt="Flujo vertical de Ionic, Directus y MariaDB" width="390"><br>
+  <img src="docs/manuales/imagenes/flujo-00-entorno-ramas.png" alt="Flujo vertical de Ionic, Directus y MariaDB" width="1000"><br>
   <em>Figura 2. Petición de Ionic, consulta de datos y respuesta a la aplicación.</em>
 </p>
 
@@ -88,7 +88,7 @@ Cada manual conserva la implementación en el **punto 3**. El punto 2 presenta l
 
 Al generar una página o componente, agrega manualmente `standalone: false` en `@Component` para declararlo en su NgModule. Cada práctica especifica los módulos que utiliza.
 
-Las capturas y los diagramas se incluyen como imágenes centradas con pie de figura en Markdown. Los flujos se presentan en vertical como PNG, para que su visualización no dependa de que el visor ejecute Mermaid. Los recursos de ejemplo se encuentran en `docs/manuales/recursos/`. El [registro de validación](docs/VALIDACION.md) detalla las comprobaciones ejecutadas y sus límites.
+Las capturas y los diagramas se incluyen como imágenes centradas con pie de figura en Markdown. Los flujos muestran el recorrido principal hacia abajo, con ramificaciones, decisiones y retornos. Se incluyen como PNG para que su visualización no dependa de que el visor ejecute Mermaid. En GitHub puedes abrir cada diagrama para ampliarlo. Los recursos de ejemplo se encuentran en `docs/manuales/recursos/`. El [registro de validación](docs/VALIDACION.md) detalla las comprobaciones ejecutadas y sus límites.
 
 ### Estado de las pruebas
 

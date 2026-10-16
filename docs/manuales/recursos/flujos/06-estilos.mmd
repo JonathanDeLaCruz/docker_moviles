@@ -1,14 +1,17 @@
 flowchart TD
-  N0["APP IONIC<br/>Carga el archivo TTF desde assets"]
-  N1["APP IONIC<br/>@font-face registra Young Serif"]
-  N2["APP IONIC<br/>La variable global de Ionic aplica la fuente"]
-  N3["APP IONIC<br/>El texto de las páginas usa la fuente"]
-  N4["APP IONIC<br/>Las variables definen el color personalizado<br/>Configuración del color, independiente de la carga de la fuente."]
-  N5["APP IONIC<br/>La clase ion-color-personalizado utiliza esas variables"]
-  N6["APP IONIC<br/>La barra muestra el color personalizado"]
-  N0 --> N1
-  N1 --> N2
-  N2 --> N3
-  N3 --> N4
-  N4 --> N5
-  N5 --> N6
+  A["La página carga los estilos globales"]
+  FONT["Archivo TTF en assets/font"]
+  FACE["@font-face registra Young Serif"]
+  VAR["--ion-font-family aplica la fuente"]
+  COLOR["Variables del color personalizado"]
+  CLASS["Clase .ion-color-personalizado"]
+  TOOL["ion-toolbar utiliza el color"]
+  END["Pantalla con fuente y barra personalizadas"]
+  A -->|"Fuente"| FONT
+  A -->|"Color"| COLOR
+  FONT --> FACE
+  FACE --> VAR
+  COLOR --> CLASS
+  CLASS --> TOOL
+  VAR --> END
+  TOOL --> END

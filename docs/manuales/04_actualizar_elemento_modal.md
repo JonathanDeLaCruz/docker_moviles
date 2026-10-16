@@ -564,7 +564,7 @@ La figura 1 muestra el resultado obtenido con el código de esta práctica. Las 
 La figura 2 muestra el recorrido de arriba hacia abajo.
 
 <p align="center">
-  <img src="imagenes/flujo-04-actualizar-modal.png" alt="Actualizar un producto mediante un modal" width="390"><br>
+  <img src="imagenes/flujo-04-actualizar-modal-ramas.png" alt="Actualizar un producto mediante un modal" width="1000"><br>
   <em>Figura 2. Actualizar un producto mediante un modal.</em>
 </p>
 

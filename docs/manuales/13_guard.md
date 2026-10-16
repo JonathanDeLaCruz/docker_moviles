@@ -295,7 +295,7 @@ La figura 1 muestra el resultado obtenido con el código de esta práctica. Las 
 La figura 2 muestra el recorrido de arriba hacia abajo.
 
 <p align="center">
-  <img src="imagenes/flujo-13-guard.png" alt="Proteger una ruta con la sesión" width="390"><br>
+  <img src="imagenes/flujo-13-guard-ramas.png" alt="Proteger una ruta con la sesión" width="1000"><br>
   <em>Figura 2. Proteger una ruta con la sesión.</em>
 </p>
 

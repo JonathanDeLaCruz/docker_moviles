@@ -374,7 +374,7 @@ El siguiente diagrama muestra la consulta completa, incluida la respuesta y su p
 La figura 2 muestra el recorrido de arriba hacia abajo.
 
 <p align="center">
-  <img src="imagenes/flujo-01-listado.png" alt="Consultar y mostrar productos" width="390"><br>
+  <img src="imagenes/flujo-01-listado-ramas.png" alt="Consultar y mostrar productos" width="1000"><br>
   <em>Figura 2. Consultar y mostrar productos.</em>
 </p>
 

@@ -470,7 +470,7 @@ La figura 2 muestra las validaciones del formulario de registro antes de enviar 
 La figura 3 muestra el recorrido de arriba hacia abajo.
 
 <p align="center">
-  <img src="imagenes/flujo-12-sesion.png" alt="Registrar una cuenta e iniciar sesión" width="390"><br>
+  <img src="imagenes/flujo-12-sesion-ramas.png" alt="Registrar una cuenta e iniciar sesión" width="1000"><br>
   <em>Figura 3. Registrar una cuenta e iniciar sesión.</em>
 </p>
 

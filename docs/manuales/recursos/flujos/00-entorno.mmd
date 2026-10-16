@@ -1,10 +1,13 @@
 flowchart TD
-  N0["APP IONIC<br/>Envía peticiones HTTP y recibe JSON"]
-  N1["DIRECTUS<br/>Recibe las peticiones y aplica los permisos<br/>Swagger UI consulta su especificación OpenAPI."]
-  N2["MARIADB<br/>Directus consulta y guarda los datos<br/>CloudBeaver permite administrar la base."]
-  N3["DIRECTUS<br/>Devuelve la respuesta a Ionic"]
-  N4["APP IONIC<br/>Actualiza la pantalla con el resultado"]
-  N0 --> N1
-  N1 --> N2
-  N2 --> N3
-  N3 --> N4
+  APP["Aplicación Ionic"]
+  API["Directus: API, sesión y permisos"]
+  DB["MariaDB: datos del proyecto"]
+  SWAGGER["Swagger UI consulta OpenAPI"]
+  CLOUD["CloudBeaver administra la base"]
+  VIEW["Ionic muestra el resultado en pantalla"]
+  APP -->|"HTTP / JSON"| API
+  API -->|"Consulta"| DB
+  DB -.->|"Datos"| API
+  API -->|"Respuesta JSON"| VIEW
+  SWAGGER -->|"Especificación OpenAPI"| API
+  CLOUD -->|"Administración"| DB

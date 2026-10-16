@@ -1,0 +1,21 @@
+digraph Flujo {
+  graph [rankdir=TB, bgcolor="#181818", pad="0.24", nodesep="0.42", ranksep="0.55", splines=spline, outputorder=edgesfirst];
+  node [shape=box, style="rounded,filled", fillcolor="#0e2a4d", color="#304b67", fontcolor="#b5d3f6", fontname="Arial", fontsize=17, penwidth=1.15, margin="0.22,0.20"];
+  edge [color="#89929c", fontcolor="#b5d3f6", fontname="Arial", fontsize=13, arrowsize=0.65, penwidth=1.15];
+  A [label="La página utiliza\napp-toolbar", group=main];
+  INPUT [label="La página asigna nombre y\ncolor", group=main];
+  PROPS [label="@Input() recibe los valores", group=main];
+  BUTTON [label="La página coloca sus\nbotones dentro del\ncomponente"];
+  CONTENT [label="ng-content proyecta los\nbotones"];
+  TOOL [label="La plantilla configura\nion-toolbar y ion-title", group=main];
+  END [label="La barra muestra título,\ncolor y botones", group=main, penwidth=1.7];
+  subgraph cluster_row0 { style=invis; margin=8; {rank=same; INPUT; BUTTON;} }
+  subgraph cluster_row1 { style=invis; margin=8; {rank=same; PROPS; CONTENT;} }
+  A -> INPUT [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Propiedades</TD></TR></TABLE>>];
+  A -> BUTTON [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Contenido</TD></TR></TABLE>>];
+  INPUT -> PROPS [weight=12];
+  BUTTON -> CONTENT;
+  PROPS -> TOOL [weight=12];
+  CONTENT -> TOOL;
+  TOOL -> END [weight=12];
+}

@@ -790,6 +790,6 @@ Al volver al listado, `ionViewWillEnter()` ejecuta `cargarProductos()`. Esta nue
 La figura 4 muestra el recorrido de arriba hacia abajo.
 
 <p align="center">
-  <img src="imagenes/flujo-04-actualizar-pagina.png" alt="Actualizar un producto mediante una página" width="390"><br>
+  <img src="imagenes/flujo-04-actualizar-pagina-ramas.png" alt="Actualizar un producto mediante una página" width="1000"><br>
   <em>Figura 4. Actualizar un producto mediante una página.</em>
 </p>

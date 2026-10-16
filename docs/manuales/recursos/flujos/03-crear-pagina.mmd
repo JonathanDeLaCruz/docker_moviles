@@ -1,26 +1,26 @@
 flowchart TD
-  N0["USUARIO<br/>Presiona +"]
-  N1["APP IONIC<br/>Router abre /productos-form"]
-  N2["APP IONIC<br/>ngOnInit() crea el formulario reactivo"]
-  N3["USUARIO<br/>Captura los datos y presiona Guardar"]
-  N4["APP IONIC<br/>Valida el formulario<br/>Si es inválido, markAllAsTouched() permite mostrar getError(); el usuario corrige los datos."]
-  N5["APP IONIC<br/>Prepara el JSON y envía POST /items/productos"]
-  N6["DIRECTUS<br/>Valida y solicita guardar el producto"]
-  N7["MARIADB<br/>Guarda el producto y genera ID y fecha"]
-  N8["DIRECTUS<br/>Devuelve la creación exitosa"]
-  N9["APP IONIC<br/>Muestra Producto guardado"]
-  N10["USUARIO<br/>Acepta la confirmación"]
-  N11["APP IONIC<br/>Router vuelve al listado; ionViewWillEnter() consulta GET /items/productos"]
-  N12["APP IONIC<br/>Muestra la colección actualizada"]
-  N0 --> N1
-  N1 --> N2
-  N2 --> N3
-  N3 --> N4
-  N4 --> N5
-  N5 --> N6
-  N6 --> N7
-  N7 --> N8
-  N8 --> N9
-  N9 --> N10
-  N10 --> N11
-  N11 --> N12
+  A["El usuario presiona +"]
+  B["Router abre productos-form"]
+  C["El usuario captura los datos y presiona Guardar"]
+  V{"¿Formulario válido?"}
+  INVALID["markAllAsTouched() y getError() muestran los mensajes"]
+  SEND["Axios envía los datos del producto"]
+  API["Directus recibe el nuevo producto"]
+  DB["MariaDB guarda el registro, su ID y fecha"]
+  OK["La app muestra Producto guardado"]
+  ACCEPT["Aceptar: Router regresa al listado"]
+  LIST["ionViewWillEnter() recarga el listado"]
+  END["El listado muestra el producto nuevo"]
+  A --> B
+  B --> C
+  C --> V
+  V -->|"No"| INVALID
+  INVALID -.->|"Corregir datos"| C
+  V -->|"Sí"| SEND
+  SEND -->|"POST /items/productos"| API
+  API --> DB
+  DB -.-> API
+  API -->|"Creación exitosa"| OK
+  OK --> ACCEPT
+  ACCEPT --> LIST
+  LIST --> END

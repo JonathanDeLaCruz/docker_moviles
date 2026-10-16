@@ -1,0 +1,30 @@
+digraph Flujo {
+  graph [rankdir=TB, bgcolor="#181818", pad="0.24", nodesep="0.42", ranksep="0.55", splines=spline, outputorder=edgesfirst];
+  node [shape=box, style="rounded,filled", fillcolor="#0e2a4d", color="#304b67", fontcolor="#b5d3f6", fontname="Arial", fontsize=17, penwidth=1.15, margin="0.22,0.20"];
+  edge [color="#89929c", fontcolor="#b5d3f6", fontname="Arial", fontsize=13, arrowsize=0.65, penwidth=1.15];
+  BUILD [label="En la computadora: ng build\ngenera www", group=main];
+  SYNC [label="cap sync android copia\narchivos y plugins", group=main];
+  APK [label="Gradle crea la APK", group=main];
+  INSTALL [label="El usuario instala la APK\nen Android", group=main];
+  APP [label="La app utiliza la URL HTTPS\npública de Directus", group=main];
+  HTTPS [label="Nginx de la VM recibe la\npetición HTTPS", group=main];
+  API [label="Directus aplica los\npermisos y procesa la\noperación", group=main];
+  DB [label="MariaDB consulta o guarda\nlos datos"];
+  FILES [label="Volumen persistente de\narchivos"];
+  RESPONSE [label="Directus devuelve JSON a\ntravés de Nginx", group=main];
+  SCREEN [label="La app recibe los datos y\nactualiza la pantalla", group=main, penwidth=1.7];
+  subgraph cluster_row0 { style=invis; margin=8; {rank=same; API; DB;} }
+  subgraph cluster_row1 { style=invis; margin=8; {rank=same; RESPONSE; FILES;} }
+  BUILD -> SYNC [weight=12];
+  SYNC -> APK [weight=12];
+  APK -> INSTALL [weight=12];
+  INSTALL -> APP [weight=12];
+  APP -> HTTPS [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Petición desde el<BR/>celular</TD></TR></TABLE>>];
+  HTTPS -> API [weight=12];
+  API -> DB [tailport=e, headport=w, constraint=false];
+  DB -> API [tailport=s, headport=e, constraint=false, style=dashed, color="#80a6c9"];
+  API -> FILES [constraint=false];
+  FILES -> API [constraint=false, style=dashed, color="#80a6c9"];
+  API -> RESPONSE [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Respuesta de la API</TD></TR></TABLE>>];
+  RESPONSE -> SCREEN [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>HTTPS</TD></TR></TABLE>>];
+}

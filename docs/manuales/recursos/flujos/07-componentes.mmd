@@ -1,10 +1,15 @@
 flowchart TD
-  N0["APP IONIC<br/>La página configura el título y el color"]
-  N1["APP IONIC<br/>El selector app-toolbar crea el componente"]
-  N2["APP IONIC<br/>@Input recibe los valores"]
-  N3["APP IONIC<br/>ng-content proyecta los botones de la página"]
-  N4["APP IONIC<br/>La barra muestra título, color y botones"]
-  N0 --> N1
-  N1 --> N2
-  N2 --> N3
-  N3 --> N4
+  A["La página utiliza app-toolbar"]
+  INPUT["La página asigna nombre y color"]
+  PROPS["@Input() recibe los valores"]
+  BUTTON["La página coloca sus botones dentro del componente"]
+  CONTENT["ng-content proyecta los botones"]
+  TOOL["La plantilla configura ion-toolbar y ion-title"]
+  END["La barra muestra título, color y botones"]
+  A -->|"Propiedades"| INPUT
+  A -->|"Contenido"| BUTTON
+  INPUT --> PROPS
+  BUTTON --> CONTENT
+  PROPS --> TOOL
+  CONTENT --> TOOL
+  TOOL --> END

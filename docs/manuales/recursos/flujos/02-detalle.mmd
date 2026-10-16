@@ -1,20 +1,28 @@
 flowchart TD
-  N0["USUARIO<br/>Presiona el icono de ojo"]
-  N1["APP IONIC<br/>routerLink abre /productos-view/1"]
-  N2["APP IONIC<br/>ngOnInit() llama a cargarProducto()"]
-  N3["APP IONIC<br/>ActivatedRoute obtiene el ID y se muestra la carga"]
-  N4["APP IONIC<br/>Axios solicita GET /items/productos/1"]
-  N5["DIRECTUS<br/>Consulta el producto por ID"]
-  N6["MARIADB<br/>Entrega el registro a Directus"]
-  N7["DIRECTUS<br/>Devuelve un objeto dentro de data"]
-  N8["APP IONIC<br/>Guarda response.data.data en producto"]
-  N9["APP IONIC<br/>ngIf muestra la tarjeta; finally cierra la carga"]
-  N0 --> N1
-  N1 --> N2
-  N2 --> N3
-  N3 --> N4
-  N4 --> N5
-  N5 --> N6
-  N6 --> N7
-  N7 --> N8
-  N8 --> N9
+  A["El usuario presiona el icono de ojo"]
+  B["Router abre productos-view/:id"]
+  C["ngOnInit() llama a cargarProducto()"]
+  ID["ActivatedRoute obtiene el ID"]
+  V{"¿Existe el ID?"}
+  NO["Muestra el mensaje de ID no válido"]
+  GET["Axios solicita el producto y activa la carga"]
+  API["Directus consulta el producto por ID"]
+  DB["MariaDB entrega el registro"]
+  R["La app guarda response.data.data en producto"]
+  FIN["finally cierra el indicador de carga"]
+  OK["La vista muestra el producto o el mensaje de error"]
+  ERR["catch muestra el mensaje de error"]
+  A --> B
+  B --> C
+  C --> ID
+  ID --> V
+  V -->|"No"| NO
+  V -->|"Sí"| GET
+  GET -->|"GET /items/productos/{id}"| API
+  API --> DB
+  DB -.-> API
+  API -->|"JSON con data"| R
+  GET -.->|"Falla la consulta"| ERR
+  R --> FIN
+  FIN --> OK
+  ERR -->|"Finaliza la carga"| FIN

@@ -1,0 +1,32 @@
+digraph Flujo {
+  graph [rankdir=TB, bgcolor="#181818", pad="0.24", nodesep="0.42", ranksep="0.55", splines=spline, outputorder=edgesfirst];
+  node [shape=box, style="rounded,filled", fillcolor="#0e2a4d", color="#304b67", fontcolor="#b5d3f6", fontname="Arial", fontsize=17, penwidth=1.15, margin="0.22,0.20"];
+  edge [color="#89929c", fontcolor="#b5d3f6", fontname="Arial", fontsize=13, arrowsize=0.65, penwidth=1.15];
+  A [label="El usuario abre la app", group=main];
+  CHOOSE [label="¿Tiene una cuenta\nactiva?", group=main, shape=diamond, style=filled, margin="0.12,0.08"];
+  REG [label="Valida y envía el\nformulario de registro"];
+  REGISTER [label="Directus recibe POST\n/users/register"];
+  VERIFY [label="Verifica el correo si se\nrequiere"];
+  LOGIN [label="Valida el formulario de\nacceso", group=main];
+  AUTH [label="AuthService envía POST\n/auth/login", group=main];
+  VALID [label="¿Acceso aceptado?", group=main, shape=diamond, style=filled, margin="0.12,0.08"];
+  ERROR [label="Muestra el mensaje de\nacceso fallido"];
+  SESSION [label="Guarda los tokens y su\nvigencia en memoria", group=main];
+  NAV [label="Abre el destino o el\nlistado", group=main, penwidth=1.7];
+  BEARER [label="El cliente agrega Bearer a\nlas consultas", group=main];
+  PERMS [label="Directus aplica los\npermisos de la cuenta", group=main];
+  subgraph cluster_row0 { style=invis; margin=8; {rank=same; REG; LOGIN;} }
+  A -> CHOOSE [weight=12];
+  CHOOSE -> REG [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>No: Crear cuenta</TD></TR></TABLE>>];
+  CHOOSE -> LOGIN [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Sí</TD></TR></TABLE>>];
+  REG -> REGISTER;
+  REGISTER -> VERIFY;
+  VERIFY -> LOGIN [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Continuar al acceso</TD></TR></TABLE>>, constraint=false, style=dashed, color="#80a6c9"];
+  LOGIN -> AUTH [weight=12];
+  AUTH -> VALID [weight=12];
+  VALID -> ERROR [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>No</TD></TR></TABLE>>];
+  VALID -> SESSION [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Sí</TD></TR></TABLE>>];
+  SESSION -> NAV [weight=12];
+  NAV -> BEARER [weight=12];
+  BEARER -> PERMS [weight=12];
+}

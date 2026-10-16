@@ -1,14 +1,22 @@
 flowchart TD
-  N0["USUARIO<br/>Escribe en el buscador"]
-  N1["APP IONIC<br/>ionInput se ejecuta después de debounce"]
-  N2["APP IONIC<br/>Guarda la búsqueda y vuelve a la página 1"]
-  N3["DIRECTUS<br/>Cuenta los productos usando filter"]
-  N4["APP IONIC<br/>Solicita GET paginado con el mismo filter"]
-  N5["DIRECTUS<br/>Devuelve los registros coincidentes"]
-  N6["APP IONIC<br/>Muestra las coincidencias y el total filtrado"]
-  N0 --> N1
-  N1 --> N2
-  N2 --> N3
-  N3 --> N4
-  N4 --> N5
-  N5 --> N6
+  A["El usuario escribe en el buscador"]
+  INPUT["ionInput se ejecuta después de debounce"]
+  SAVE["handleInput() guarda el texto y vuelve a página 1"]
+  FILTER{"¿Hay texto después de trim()?"}
+  YES["Crea filter con nombre y descripción"]
+  NO["Utiliza un filtro vacío"]
+  COUNT["Directus cuenta con ese filtro"]
+  GET["Directus consulta la página con el mismo filtro"]
+  DB["MariaDB aplica la búsqueda y devuelve registros"]
+  END["La app muestra coincidencias y total filtrado"]
+  A --> INPUT
+  INPUT --> SAVE
+  SAVE --> FILTER
+  FILTER -->|"Sí"| YES
+  FILTER -->|"No"| NO
+  YES --> COUNT
+  NO --> COUNT
+  COUNT --> GET
+  GET --> DB
+  DB -.-> GET
+  GET -->|"Respuesta JSON"| END

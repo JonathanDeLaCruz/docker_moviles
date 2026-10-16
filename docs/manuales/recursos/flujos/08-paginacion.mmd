@@ -1,16 +1,22 @@
 flowchart TD
-  N0["USUARIO<br/>Abre el listado"]
-  N1["DIRECTUS<br/>Cuenta los productos"]
-  N2["APP IONIC<br/>Ajusta la página actual"]
-  N3["APP IONIC<br/>Envía GET con limit, page y sort"]
-  N4["DIRECTUS<br/>Consulta los registros de esa página en MariaDB"]
-  N5["APP IONIC<br/>Muestra la lista y los botones de paginación"]
-  N6["USUARIO<br/>Selecciona otra página"]
-  N7["APP IONIC<br/>paginaCambio actualiza paginaActual<br/>Repite la consulta GET con el nuevo valor de page."]
-  N0 --> N1
-  N1 --> N2
-  N2 --> N3
-  N3 --> N4
-  N4 --> N5
-  N5 --> N6
-  N6 --> N7
+  A["El usuario abre el listado"]
+  COUNT["cargarTotal() solicita el conteo a Directus"]
+  TOTAL["La app ajusta total y paginaActual"]
+  GET["Directus procesa GET con limit, page y sort"]
+  DB["MariaDB entrega los registros solicitados"]
+  VIEW["La app muestra la lista y app-paginacion"]
+  SELECT["El usuario selecciona otra página"]
+  V{"¿Página válida y distinta?"}
+  NO["El componente no emite ningún cambio"]
+  CHANGE["paginaCambio actualiza paginaActual"]
+  A --> COUNT
+  COUNT --> TOTAL
+  TOTAL --> GET
+  GET --> DB
+  DB -.-> GET
+  GET -->|"Registros de la página"| VIEW
+  VIEW --> SELECT
+  SELECT --> V
+  V -->|"No"| NO
+  V -->|"Sí"| CHANGE
+  CHANGE -.->|"Nueva consulta"| GET

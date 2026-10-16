@@ -276,7 +276,7 @@ La figura 1 documenta el intento real con la cuenta de prueba: la falta de permi
 La figura 2 muestra el recorrido de arriba hacia abajo.
 
 <p align="center">
-  <img src="imagenes/flujo-15-archivos.png" alt="Subir y asociar una imagen" width="390"><br>
+  <img src="imagenes/flujo-15-archivos-ramas.png" alt="Subir y asociar una imagen" width="1000"><br>
   <em>Figura 2. Flujo previsto de subida y asociación; prueba completa pendiente.</em>
 </p>
 

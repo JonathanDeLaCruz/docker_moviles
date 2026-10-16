@@ -1,0 +1,24 @@
+digraph Flujo {
+  graph [rankdir=TB, bgcolor="#181818", pad="0.24", nodesep="0.42", ranksep="0.55", splines=spline, outputorder=edgesfirst];
+  node [shape=box, style="rounded,filled", fillcolor="#0e2a4d", color="#304b67", fontcolor="#b5d3f6", fontname="Arial", fontsize=17, penwidth=1.15, margin="0.22,0.20"];
+  edge [color="#89929c", fontcolor="#b5d3f6", fontname="Arial", fontsize=13, arrowsize=0.65, penwidth=1.15];
+  A [label="El usuario presiona la\npapelera", group=main];
+  B [label="La alerta identifica el\nproducto por nombre e ID", group=main];
+  V [label="¿Qué elige el\nusuario?", group=main, shape=diamond, style=filled, margin="0.12,0.08"];
+  CANCEL [label="Cancelar cierra la alerta\nsin enviar una petición"];
+  DEL [label="Directus recibe DELETE del\nproducto", group=main];
+  DB [label="MariaDB elimina el registro"];
+  OK [label="La app muestra Producto\neliminado", group=main];
+  LIST [label="Aceptar: cargarProductos()\nactualiza el listado", group=main, penwidth=1.7];
+  ERR [label="catch muestra la alerta de\nerror"];
+  subgraph cluster_row0 { style=invis; margin=8; {rank=same; DEL; DB;} }
+  A -> B [weight=12];
+  B -> V [weight=12];
+  V -> CANCEL [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Cancelar</TD></TR></TABLE>>];
+  V -> DEL [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Eliminar</TD></TR></TABLE>>];
+  DEL -> DB [tailport=e, headport=w, constraint=false];
+  DB -> DEL [tailport=s, headport=e, constraint=false, style=dashed, color="#80a6c9"];
+  DEL -> OK [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Respuesta exitosa</TD></TR></TABLE>>];
+  OK -> LIST [weight=12];
+  DEL -> ERR [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Falla la petición</TD></TR></TABLE>>, style=dashed];
+}

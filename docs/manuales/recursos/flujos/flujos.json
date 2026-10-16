@@ -2,779 +2,2605 @@
   {
     "nombre": "01-listado",
     "titulo": "Consultar y mostrar productos",
-    "pasos": [
+    "nodos": [
       {
-        "area": "USUARIO",
-        "texto": "Abre Productos"
+        "id": "A",
+        "texto": "El usuario abre Productos",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "ngOnInit() llama a cargarProductos()"
+        "id": "B",
+        "texto": "ngOnInit() inicia cargarProductos()",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Axios solicita GET /items/productos"
+        "id": "C",
+        "texto": "Axios solicita los productos",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Recibe la petición y consulta la colección"
+        "id": "D",
+        "texto": "Directus recibe la petición",
+        "tipo": "proceso"
       },
       {
-        "area": "MARIADB",
-        "texto": "Entrega los registros a Directus"
+        "id": "DB",
+        "texto": "MariaDB entrega los registros",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Responde con JSON: { data: [...] }"
+        "id": "F",
+        "texto": "La app recibe el JSON: { data: [...] }",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Guarda response.data.data en productos"
+        "id": "G",
+        "texto": "Guarda response.data.data en productos",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "*ngFor recorre el arreglo"
-      },
-      {
-        "area": "APP IONIC",
-        "texto": "Muestra los productos en el listado"
+        "id": "H",
+        "texto": "*ngFor muestra los productos en pantalla",
+        "tipo": "pantalla"
       }
-    ]
+    ],
+    "aristas": [
+      {
+        "de": "A",
+        "a": "B"
+      },
+      {
+        "de": "B",
+        "a": "C"
+      },
+      {
+        "de": "C",
+        "a": "D",
+        "texto": "GET /items/productos"
+      },
+      {
+        "de": "D",
+        "a": "DB",
+        "influye": false,
+        "salida": "e",
+        "entrada": "w",
+        "descripcion": "Consulta"
+      },
+      {
+        "de": "DB",
+        "a": "D",
+        "influye": false,
+        "tipo": "retorno",
+        "salida": "s",
+        "entrada": "e",
+        "descripcion": "Datos"
+      },
+      {
+        "de": "D",
+        "a": "F",
+        "texto": "Respuesta JSON"
+      },
+      {
+        "de": "F",
+        "a": "G"
+      },
+      {
+        "de": "G",
+        "a": "H"
+      }
+    ],
+    "filas": [
+      [
+        "D",
+        "DB"
+      ]
+    ],
+    "principal": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "F",
+      "G",
+      "H"
+    ],
+    "imagen": "flujo-01-listado-ramas.png"
   },
   {
     "nombre": "02-detalle",
     "titulo": "Consultar el detalle de un producto",
-    "pasos": [
+    "nodos": [
       {
-        "area": "USUARIO",
-        "texto": "Presiona el icono de ojo"
+        "id": "A",
+        "texto": "El usuario presiona el icono de ojo",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "routerLink abre /productos-view/1"
+        "id": "B",
+        "texto": "Router abre productos-view/:id",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "ngOnInit() llama a cargarProducto()"
+        "id": "C",
+        "texto": "ngOnInit() llama a cargarProducto()",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "ActivatedRoute obtiene el ID y se muestra la carga"
+        "id": "ID",
+        "texto": "ActivatedRoute obtiene el ID",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Axios solicita GET /items/productos/1"
+        "id": "V",
+        "texto": "¿Existe el ID?",
+        "tipo": "decision"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Consulta el producto por ID"
+        "id": "NO",
+        "texto": "Muestra el mensaje de ID no válido",
+        "tipo": "proceso"
       },
       {
-        "area": "MARIADB",
-        "texto": "Entrega el registro a Directus"
+        "id": "GET",
+        "texto": "Axios solicita el producto y activa la carga",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Devuelve un objeto dentro de data"
+        "id": "API",
+        "texto": "Directus consulta el producto por ID",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Guarda response.data.data en producto"
+        "id": "DB",
+        "texto": "MariaDB entrega el registro",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "ngIf muestra la tarjeta; finally cierra la carga"
+        "id": "R",
+        "texto": "La app guarda response.data.data en producto",
+        "tipo": "proceso"
+      },
+      {
+        "id": "FIN",
+        "texto": "finally cierra el indicador de carga",
+        "tipo": "proceso"
+      },
+      {
+        "id": "OK",
+        "texto": "La vista muestra el producto o el mensaje de error",
+        "tipo": "pantalla"
+      },
+      {
+        "id": "ERR",
+        "texto": "catch muestra el mensaje de error",
+        "tipo": "proceso"
       }
-    ]
+    ],
+    "aristas": [
+      {
+        "de": "A",
+        "a": "B"
+      },
+      {
+        "de": "B",
+        "a": "C"
+      },
+      {
+        "de": "C",
+        "a": "ID"
+      },
+      {
+        "de": "ID",
+        "a": "V"
+      },
+      {
+        "de": "V",
+        "a": "NO",
+        "texto": "No"
+      },
+      {
+        "de": "V",
+        "a": "GET",
+        "texto": "Sí"
+      },
+      {
+        "de": "GET",
+        "a": "API",
+        "texto": "GET /items/productos/{id}"
+      },
+      {
+        "de": "API",
+        "a": "DB",
+        "influye": false,
+        "salida": "e",
+        "entrada": "w",
+        "descripcion": "Consulta"
+      },
+      {
+        "de": "DB",
+        "a": "API",
+        "influye": false,
+        "tipo": "retorno",
+        "salida": "s",
+        "entrada": "e",
+        "descripcion": "Datos"
+      },
+      {
+        "de": "API",
+        "a": "R",
+        "texto": "JSON con data"
+      },
+      {
+        "de": "GET",
+        "a": "ERR",
+        "texto": "Falla la consulta",
+        "tipo": "error"
+      },
+      {
+        "de": "R",
+        "a": "FIN"
+      },
+      {
+        "de": "FIN",
+        "a": "OK"
+      },
+      {
+        "de": "ERR",
+        "a": "FIN",
+        "texto": "Finaliza la carga"
+      }
+    ],
+    "filas": [
+      [
+        "GET",
+        "NO"
+      ],
+      [
+        "API",
+        "DB"
+      ]
+    ],
+    "principal": [
+      "A",
+      "B",
+      "C",
+      "ID",
+      "V",
+      "GET",
+      "API",
+      "R",
+      "FIN",
+      "OK"
+    ],
+    "imagen": "flujo-02-detalle-ramas.png"
   },
   {
     "nombre": "03-crear-modal",
     "titulo": "Crear un producto mediante un modal",
-    "pasos": [
+    "nodos": [
       {
-        "area": "USUARIO",
-        "texto": "Presiona + en el listado"
+        "id": "A",
+        "texto": "El usuario presiona +",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "nuevoProducto() crea y presenta el modal",
-        "nota": "Cancelar: dismiss devuelve guardado: false; no crea ni recarga productos."
+        "id": "B",
+        "texto": "nuevoProducto() presenta el modal",
+        "tipo": "proceso"
       },
       {
-        "area": "USUARIO",
-        "texto": "Captura los datos y presiona Guardar"
+        "id": "C",
+        "texto": "El usuario captura los datos y presiona Guardar",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Valida el formulario",
-        "nota": "Si es inválido, getError() muestra mensajes y el usuario corrige los datos."
+        "id": "V",
+        "texto": "¿Formulario válido?",
+        "tipo": "decision"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Axios envía POST /items/productos"
+        "id": "INVALID",
+        "texto": "markAllAsTouched() y getError() muestran los mensajes",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Valida y solicita guardar el producto"
+        "id": "SEND",
+        "texto": "Axios envía los datos del producto",
+        "tipo": "proceso"
       },
       {
-        "area": "MARIADB",
-        "texto": "Guarda el registro y genera ID y fecha"
+        "id": "API",
+        "texto": "Directus recibe el nuevo producto",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Devuelve la creación exitosa"
+        "id": "DB",
+        "texto": "MariaDB guarda el registro, su ID y fecha",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Muestra Producto guardado"
+        "id": "OK",
+        "texto": "La app muestra Producto guardado",
+        "tipo": "proceso"
       },
       {
-        "area": "USUARIO",
-        "texto": "Acepta; dismiss devuelve guardado: true"
+        "id": "ACCEPT",
+        "texto": "Aceptar: dismiss devuelve guardado: true",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "onDidDismiss() recibe el resultado y consulta el listado"
+        "id": "LIST",
+        "texto": "onDidDismiss() recibe guardado: true y recarga",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Muestra el producto nuevo"
+        "id": "END",
+        "texto": "El listado muestra el producto nuevo",
+        "tipo": "pantalla"
+      },
+      {
+        "id": "CANCEL",
+        "texto": "Cancelar: dismiss devuelve guardado: false",
+        "tipo": "proceso"
+      },
+      {
+        "id": "CLOSE",
+        "texto": "Se cierra sin crear ni recargar",
+        "tipo": "proceso"
       }
-    ]
+    ],
+    "aristas": [
+      {
+        "de": "A",
+        "a": "B"
+      },
+      {
+        "de": "B",
+        "a": "C"
+      },
+      {
+        "de": "C",
+        "a": "V"
+      },
+      {
+        "de": "V",
+        "a": "INVALID",
+        "texto": "No"
+      },
+      {
+        "de": "INVALID",
+        "a": "C",
+        "texto": "Corregir datos",
+        "tipo": "retorno",
+        "influye": false
+      },
+      {
+        "de": "V",
+        "a": "SEND",
+        "texto": "Sí"
+      },
+      {
+        "de": "SEND",
+        "a": "API",
+        "texto": "POST /items/productos"
+      },
+      {
+        "de": "API",
+        "a": "DB",
+        "influye": false,
+        "salida": "e",
+        "entrada": "w",
+        "descripcion": "Guardar"
+      },
+      {
+        "de": "DB",
+        "a": "API",
+        "influye": false,
+        "tipo": "retorno",
+        "salida": "s",
+        "entrada": "e",
+        "descripcion": "Creado"
+      },
+      {
+        "de": "API",
+        "a": "OK",
+        "texto": "Creación exitosa"
+      },
+      {
+        "de": "OK",
+        "a": "ACCEPT"
+      },
+      {
+        "de": "ACCEPT",
+        "a": "LIST"
+      },
+      {
+        "de": "LIST",
+        "a": "END"
+      },
+      {
+        "de": "B",
+        "a": "CANCEL",
+        "texto": "Cancelar",
+        "tipo": "alternativa"
+      },
+      {
+        "de": "CANCEL",
+        "a": "CLOSE"
+      }
+    ],
+    "filas": [
+      [
+        "API",
+        "DB"
+      ]
+    ],
+    "principal": [
+      "A",
+      "B",
+      "C",
+      "V",
+      "SEND",
+      "API",
+      "OK",
+      "ACCEPT",
+      "LIST",
+      "END"
+    ],
+    "imagen": "flujo-03-crear-modal-ramas.png"
   },
   {
     "nombre": "03-crear-pagina",
     "titulo": "Crear un producto mediante una página",
-    "pasos": [
+    "nodos": [
       {
-        "area": "USUARIO",
-        "texto": "Presiona +"
+        "id": "A",
+        "texto": "El usuario presiona +",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Router abre /productos-form"
+        "id": "B",
+        "texto": "Router abre productos-form",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "ngOnInit() crea el formulario reactivo"
+        "id": "C",
+        "texto": "El usuario captura los datos y presiona Guardar",
+        "tipo": "proceso"
       },
       {
-        "area": "USUARIO",
-        "texto": "Captura los datos y presiona Guardar"
+        "id": "V",
+        "texto": "¿Formulario válido?",
+        "tipo": "decision"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Valida el formulario",
-        "nota": "Si es inválido, markAllAsTouched() permite mostrar getError(); el usuario corrige los datos."
+        "id": "INVALID",
+        "texto": "markAllAsTouched() y getError() muestran los mensajes",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Prepara el JSON y envía POST /items/productos"
+        "id": "SEND",
+        "texto": "Axios envía los datos del producto",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Valida y solicita guardar el producto"
+        "id": "API",
+        "texto": "Directus recibe el nuevo producto",
+        "tipo": "proceso"
       },
       {
-        "area": "MARIADB",
-        "texto": "Guarda el producto y genera ID y fecha"
+        "id": "DB",
+        "texto": "MariaDB guarda el registro, su ID y fecha",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Devuelve la creación exitosa"
+        "id": "OK",
+        "texto": "La app muestra Producto guardado",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Muestra Producto guardado"
+        "id": "ACCEPT",
+        "texto": "Aceptar: Router regresa al listado",
+        "tipo": "proceso"
       },
       {
-        "area": "USUARIO",
-        "texto": "Acepta la confirmación"
+        "id": "LIST",
+        "texto": "ionViewWillEnter() recarga el listado",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Router vuelve al listado; ionViewWillEnter() consulta GET /items/productos"
-      },
-      {
-        "area": "APP IONIC",
-        "texto": "Muestra la colección actualizada"
+        "id": "END",
+        "texto": "El listado muestra el producto nuevo",
+        "tipo": "pantalla"
       }
-    ]
+    ],
+    "aristas": [
+      {
+        "de": "A",
+        "a": "B"
+      },
+      {
+        "de": "B",
+        "a": "C"
+      },
+      {
+        "de": "C",
+        "a": "V"
+      },
+      {
+        "de": "V",
+        "a": "INVALID",
+        "texto": "No"
+      },
+      {
+        "de": "INVALID",
+        "a": "C",
+        "texto": "Corregir datos",
+        "tipo": "retorno",
+        "influye": false
+      },
+      {
+        "de": "V",
+        "a": "SEND",
+        "texto": "Sí"
+      },
+      {
+        "de": "SEND",
+        "a": "API",
+        "texto": "POST /items/productos"
+      },
+      {
+        "de": "API",
+        "a": "DB",
+        "influye": false,
+        "salida": "e",
+        "entrada": "w",
+        "descripcion": "Guardar"
+      },
+      {
+        "de": "DB",
+        "a": "API",
+        "influye": false,
+        "tipo": "retorno",
+        "salida": "s",
+        "entrada": "e",
+        "descripcion": "Creado"
+      },
+      {
+        "de": "API",
+        "a": "OK",
+        "texto": "Creación exitosa"
+      },
+      {
+        "de": "OK",
+        "a": "ACCEPT"
+      },
+      {
+        "de": "ACCEPT",
+        "a": "LIST"
+      },
+      {
+        "de": "LIST",
+        "a": "END"
+      }
+    ],
+    "filas": [
+      [
+        "API",
+        "DB"
+      ]
+    ],
+    "principal": [
+      "A",
+      "B",
+      "C",
+      "V",
+      "SEND",
+      "API",
+      "OK",
+      "ACCEPT",
+      "LIST",
+      "END"
+    ],
+    "imagen": "flujo-03-crear-pagina-ramas.png"
   },
   {
     "nombre": "04-actualizar-modal",
     "titulo": "Actualizar un producto mediante un modal",
-    "pasos": [
+    "nodos": [
       {
-        "area": "USUARIO",
-        "texto": "Presiona el lápiz del producto"
+        "id": "A",
+        "texto": "El usuario presiona el lápiz",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Abre el modal con componentProps.id"
+        "id": "B",
+        "texto": "El modal recibe el ID en componentProps",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Solicita GET del producto por ID"
+        "id": "GET",
+        "texto": "Directus consulta el producto",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Consulta el registro en MariaDB"
+        "id": "DBR",
+        "texto": "MariaDB devuelve los datos actuales",
+        "tipo": "proceso"
       },
       {
-        "area": "MARIADB",
-        "texto": "Entrega el registro actual"
+        "id": "FORM",
+        "texto": "patchValue() llena el formulario",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Responde con los datos del producto"
+        "id": "EDIT",
+        "texto": "El usuario modifica y solicita actualizar",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "patchValue() llena el formulario"
+        "id": "V",
+        "texto": "¿Formulario válido?",
+        "tipo": "decision"
       },
       {
-        "area": "USUARIO",
-        "texto": "Edita los datos y solicita guardar"
+        "id": "INVALID",
+        "texto": "Muestra los mensajes de validación",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Valida y envía PATCH a Directus"
+        "id": "PATCH",
+        "texto": "Directus recibe los cambios del producto",
+        "tipo": "proceso"
       },
       {
-        "area": "MARIADB",
-        "texto": "Directus solicita guardar los cambios"
+        "id": "DBW",
+        "texto": "MariaDB guarda los cambios",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Recibe la confirmación y dismiss devuelve guardado: true"
+        "id": "OK",
+        "texto": "La app muestra Producto actualizado",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "El listado vuelve a consultar Directus"
+        "id": "RETURN",
+        "texto": "Aceptar: dismiss devuelve guardado: true",
+        "tipo": "proceso"
+      },
+      {
+        "id": "LIST",
+        "texto": "onDidDismiss() recarga los productos",
+        "tipo": "proceso"
+      },
+      {
+        "id": "ERROR",
+        "texto": "catch muestra la alerta de error",
+        "tipo": "proceso"
       }
-    ]
+    ],
+    "aristas": [
+      {
+        "de": "A",
+        "a": "B"
+      },
+      {
+        "de": "B",
+        "a": "GET",
+        "texto": "GET por ID"
+      },
+      {
+        "de": "GET",
+        "a": "DBR",
+        "influye": false,
+        "salida": "e",
+        "entrada": "w",
+        "descripcion": "Consulta"
+      },
+      {
+        "de": "DBR",
+        "a": "GET",
+        "influye": false,
+        "tipo": "retorno",
+        "salida": "s",
+        "entrada": "e",
+        "descripcion": "Datos"
+      },
+      {
+        "de": "GET",
+        "a": "FORM",
+        "texto": "Registro actual"
+      },
+      {
+        "de": "FORM",
+        "a": "EDIT"
+      },
+      {
+        "de": "EDIT",
+        "a": "V"
+      },
+      {
+        "de": "V",
+        "a": "INVALID",
+        "texto": "No"
+      },
+      {
+        "de": "INVALID",
+        "a": "EDIT",
+        "texto": "Corregir",
+        "tipo": "retorno",
+        "influye": false
+      },
+      {
+        "de": "V",
+        "a": "PATCH",
+        "texto": "Sí: PATCH por ID"
+      },
+      {
+        "de": "PATCH",
+        "a": "DBW",
+        "influye": false,
+        "salida": "e",
+        "entrada": "w",
+        "descripcion": "Actualizar"
+      },
+      {
+        "de": "DBW",
+        "a": "PATCH",
+        "influye": false,
+        "tipo": "retorno",
+        "salida": "s",
+        "entrada": "e",
+        "descripcion": "Confirmación"
+      },
+      {
+        "de": "PATCH",
+        "a": "OK",
+        "texto": "Actualización exitosa"
+      },
+      {
+        "de": "OK",
+        "a": "RETURN"
+      },
+      {
+        "de": "RETURN",
+        "a": "LIST"
+      },
+      {
+        "de": "PATCH",
+        "a": "ERROR",
+        "texto": "Falla la actualización",
+        "tipo": "error"
+      }
+    ],
+    "filas": [
+      [
+        "GET",
+        "DBR"
+      ],
+      [
+        "PATCH",
+        "DBW"
+      ]
+    ],
+    "principal": [
+      "A",
+      "B",
+      "GET",
+      "FORM",
+      "EDIT",
+      "V",
+      "PATCH",
+      "OK",
+      "RETURN",
+      "LIST"
+    ],
+    "imagen": "flujo-04-actualizar-modal-ramas.png"
   },
   {
     "nombre": "04-actualizar-pagina",
     "titulo": "Actualizar un producto mediante una página",
-    "pasos": [
+    "nodos": [
       {
-        "area": "USUARIO",
-        "texto": "Presiona el lápiz del producto"
+        "id": "A",
+        "texto": "El usuario presiona el lápiz",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Lee el ID y crea el formulario"
+        "id": "B",
+        "texto": "La página obtiene el ID desde la ruta",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Solicita GET /items/productos/{id}"
+        "id": "GET",
+        "texto": "Directus consulta el producto",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Consulta el producto en MariaDB"
+        "id": "DBR",
+        "texto": "MariaDB devuelve los datos actuales",
+        "tipo": "proceso"
       },
       {
-        "area": "MARIADB",
-        "texto": "Entrega el registro actual"
+        "id": "FORM",
+        "texto": "patchValue() llena el formulario",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Responde con JSON que contiene data"
+        "id": "EDIT",
+        "texto": "El usuario modifica y solicita actualizar",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "patchValue() carga los campos"
+        "id": "V",
+        "texto": "¿Formulario válido?",
+        "tipo": "decision"
       },
       {
-        "area": "USUARIO",
-        "texto": "Modifica y presiona Actualizar"
+        "id": "INVALID",
+        "texto": "Muestra los mensajes de validación",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Valida y envía PATCH /items/productos/{id}"
+        "id": "PATCH",
+        "texto": "Directus recibe los cambios del producto",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Solicita actualizar el registro en MariaDB"
+        "id": "DBW",
+        "texto": "MariaDB guarda los cambios",
+        "tipo": "proceso"
       },
       {
-        "area": "MARIADB",
-        "texto": "Guarda los cambios"
+        "id": "OK",
+        "texto": "La app muestra Producto actualizado",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Responde con éxito"
+        "id": "RETURN",
+        "texto": "Aceptar: Router regresa al listado",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Muestra Producto actualizado"
+        "id": "LIST",
+        "texto": "ionViewWillEnter() recarga los productos",
+        "tipo": "proceso"
       },
       {
-        "area": "USUARIO",
-        "texto": "Acepta; Router regresa al listado"
-      },
-      {
-        "area": "APP IONIC",
-        "texto": "GET /items/productos obtiene la colección actualizada"
+        "id": "ERROR",
+        "texto": "catch muestra la alerta de error",
+        "tipo": "proceso"
       }
-    ]
+    ],
+    "aristas": [
+      {
+        "de": "A",
+        "a": "B"
+      },
+      {
+        "de": "B",
+        "a": "GET",
+        "texto": "GET por ID"
+      },
+      {
+        "de": "GET",
+        "a": "DBR",
+        "influye": false,
+        "salida": "e",
+        "entrada": "w",
+        "descripcion": "Consulta"
+      },
+      {
+        "de": "DBR",
+        "a": "GET",
+        "influye": false,
+        "tipo": "retorno",
+        "salida": "s",
+        "entrada": "e",
+        "descripcion": "Datos"
+      },
+      {
+        "de": "GET",
+        "a": "FORM",
+        "texto": "Registro actual"
+      },
+      {
+        "de": "FORM",
+        "a": "EDIT"
+      },
+      {
+        "de": "EDIT",
+        "a": "V"
+      },
+      {
+        "de": "V",
+        "a": "INVALID",
+        "texto": "No"
+      },
+      {
+        "de": "INVALID",
+        "a": "EDIT",
+        "texto": "Corregir",
+        "tipo": "retorno",
+        "influye": false
+      },
+      {
+        "de": "V",
+        "a": "PATCH",
+        "texto": "Sí: PATCH por ID"
+      },
+      {
+        "de": "PATCH",
+        "a": "DBW",
+        "influye": false,
+        "salida": "e",
+        "entrada": "w",
+        "descripcion": "Actualizar"
+      },
+      {
+        "de": "DBW",
+        "a": "PATCH",
+        "influye": false,
+        "tipo": "retorno",
+        "salida": "s",
+        "entrada": "e",
+        "descripcion": "Confirmación"
+      },
+      {
+        "de": "PATCH",
+        "a": "OK",
+        "texto": "Actualización exitosa"
+      },
+      {
+        "de": "OK",
+        "a": "RETURN"
+      },
+      {
+        "de": "RETURN",
+        "a": "LIST"
+      },
+      {
+        "de": "PATCH",
+        "a": "ERROR",
+        "texto": "Falla la actualización",
+        "tipo": "error"
+      }
+    ],
+    "filas": [
+      [
+        "GET",
+        "DBR"
+      ],
+      [
+        "PATCH",
+        "DBW"
+      ]
+    ],
+    "principal": [
+      "A",
+      "B",
+      "GET",
+      "FORM",
+      "EDIT",
+      "V",
+      "PATCH",
+      "OK",
+      "RETURN",
+      "LIST"
+    ],
+    "imagen": "flujo-04-actualizar-pagina-ramas.png"
   },
   {
     "nombre": "05-eliminar",
     "titulo": "Eliminar un producto con confirmación",
-    "pasos": [
+    "nodos": [
       {
-        "area": "USUARIO",
-        "texto": "Presiona la papelera del producto"
+        "id": "A",
+        "texto": "El usuario presiona la papelera",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Muestra la confirmación con nombre e ID",
-        "nota": "Cancelar: cierra la confirmación sin enviar ninguna petición."
+        "id": "B",
+        "texto": "La alerta identifica el producto por nombre e ID",
+        "tipo": "proceso"
       },
       {
-        "area": "USUARIO",
-        "texto": "Confirma Eliminar"
+        "id": "V",
+        "texto": "¿Qué elige el usuario?",
+        "tipo": "decision"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Envía DELETE a Directus"
+        "id": "CANCEL",
+        "texto": "Cancelar cierra la alerta sin enviar una petición",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Solicita eliminar el registro"
+        "id": "DEL",
+        "texto": "Directus recibe DELETE del producto",
+        "tipo": "proceso"
       },
       {
-        "area": "MARIADB",
-        "texto": "Elimina el producto"
+        "id": "DB",
+        "texto": "MariaDB elimina el registro",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Recibe el éxito y muestra la alerta"
+        "id": "OK",
+        "texto": "La app muestra Producto eliminado",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "GET obtiene el listado actualizado"
+        "id": "LIST",
+        "texto": "Aceptar: cargarProductos() actualiza el listado",
+        "tipo": "pantalla"
+      },
+      {
+        "id": "ERR",
+        "texto": "catch muestra la alerta de error",
+        "tipo": "proceso"
       }
-    ]
+    ],
+    "aristas": [
+      {
+        "de": "A",
+        "a": "B"
+      },
+      {
+        "de": "B",
+        "a": "V"
+      },
+      {
+        "de": "V",
+        "a": "CANCEL",
+        "texto": "Cancelar"
+      },
+      {
+        "de": "V",
+        "a": "DEL",
+        "texto": "Eliminar"
+      },
+      {
+        "de": "DEL",
+        "a": "DB",
+        "influye": false,
+        "salida": "e",
+        "entrada": "w",
+        "descripcion": "Eliminar"
+      },
+      {
+        "de": "DB",
+        "a": "DEL",
+        "influye": false,
+        "tipo": "retorno",
+        "salida": "s",
+        "entrada": "e",
+        "descripcion": "Confirmación"
+      },
+      {
+        "de": "DEL",
+        "a": "OK",
+        "texto": "Respuesta exitosa"
+      },
+      {
+        "de": "OK",
+        "a": "LIST"
+      },
+      {
+        "de": "DEL",
+        "a": "ERR",
+        "texto": "Falla la petición",
+        "tipo": "error"
+      }
+    ],
+    "filas": [
+      [
+        "DEL",
+        "DB"
+      ]
+    ],
+    "principal": [
+      "A",
+      "B",
+      "V",
+      "DEL",
+      "OK",
+      "LIST"
+    ],
+    "imagen": "flujo-05-eliminar-ramas.png"
   },
   {
     "nombre": "06-estilos",
     "titulo": "Aplicar la fuente y el color",
-    "pasos": [
+    "nodos": [
       {
-        "area": "APP IONIC",
-        "texto": "Carga el archivo TTF desde assets"
+        "id": "A",
+        "texto": "La página carga los estilos globales",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "@font-face registra Young Serif"
+        "id": "FONT",
+        "texto": "Archivo TTF en assets/font",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "La variable global de Ionic aplica la fuente"
+        "id": "FACE",
+        "texto": "@font-face registra Young Serif",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "El texto de las páginas usa la fuente"
+        "id": "VAR",
+        "texto": "--ion-font-family aplica la fuente",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Las variables definen el color personalizado",
-        "nota": "Configuración del color, independiente de la carga de la fuente."
+        "id": "COLOR",
+        "texto": "Variables del color personalizado",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "La clase ion-color-personalizado utiliza esas variables"
+        "id": "CLASS",
+        "texto": "Clase .ion-color-personalizado",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "La barra muestra el color personalizado"
+        "id": "TOOL",
+        "texto": "ion-toolbar utiliza el color",
+        "tipo": "proceso"
+      },
+      {
+        "id": "END",
+        "texto": "Pantalla con fuente y barra personalizadas",
+        "tipo": "pantalla"
       }
-    ]
+    ],
+    "aristas": [
+      {
+        "de": "A",
+        "a": "FONT",
+        "texto": "Fuente"
+      },
+      {
+        "de": "A",
+        "a": "COLOR",
+        "texto": "Color"
+      },
+      {
+        "de": "FONT",
+        "a": "FACE"
+      },
+      {
+        "de": "FACE",
+        "a": "VAR"
+      },
+      {
+        "de": "COLOR",
+        "a": "CLASS"
+      },
+      {
+        "de": "CLASS",
+        "a": "TOOL"
+      },
+      {
+        "de": "VAR",
+        "a": "END"
+      },
+      {
+        "de": "TOOL",
+        "a": "END"
+      }
+    ],
+    "filas": [
+      [
+        "FONT",
+        "COLOR"
+      ],
+      [
+        "FACE",
+        "CLASS"
+      ],
+      [
+        "VAR",
+        "TOOL"
+      ]
+    ],
+    "principal": [
+      "A",
+      "FONT",
+      "FACE",
+      "VAR",
+      "END"
+    ],
+    "imagen": "flujo-06-estilos-ramas.png"
   },
   {
     "nombre": "07-componentes",
     "titulo": "Mostrar una barra reutilizable",
-    "pasos": [
+    "nodos": [
       {
-        "area": "APP IONIC",
-        "texto": "La página configura el título y el color"
+        "id": "A",
+        "texto": "La página utiliza app-toolbar",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "El selector app-toolbar crea el componente"
+        "id": "INPUT",
+        "texto": "La página asigna nombre y color",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "@Input recibe los valores"
+        "id": "PROPS",
+        "texto": "@Input() recibe los valores",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "ng-content proyecta los botones de la página"
+        "id": "BUTTON",
+        "texto": "La página coloca sus botones dentro del componente",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "La barra muestra título, color y botones"
+        "id": "CONTENT",
+        "texto": "ng-content proyecta los botones",
+        "tipo": "proceso"
+      },
+      {
+        "id": "TOOL",
+        "texto": "La plantilla configura ion-toolbar y ion-title",
+        "tipo": "proceso"
+      },
+      {
+        "id": "END",
+        "texto": "La barra muestra título, color y botones",
+        "tipo": "pantalla"
       }
-    ]
+    ],
+    "aristas": [
+      {
+        "de": "A",
+        "a": "INPUT",
+        "texto": "Propiedades"
+      },
+      {
+        "de": "A",
+        "a": "BUTTON",
+        "texto": "Contenido"
+      },
+      {
+        "de": "INPUT",
+        "a": "PROPS"
+      },
+      {
+        "de": "BUTTON",
+        "a": "CONTENT"
+      },
+      {
+        "de": "PROPS",
+        "a": "TOOL"
+      },
+      {
+        "de": "CONTENT",
+        "a": "TOOL"
+      },
+      {
+        "de": "TOOL",
+        "a": "END"
+      }
+    ],
+    "filas": [
+      [
+        "INPUT",
+        "BUTTON"
+      ],
+      [
+        "PROPS",
+        "CONTENT"
+      ]
+    ],
+    "principal": [
+      "A",
+      "INPUT",
+      "PROPS",
+      "TOOL",
+      "END"
+    ],
+    "imagen": "flujo-07-componentes-ramas.png"
   },
   {
     "nombre": "08-paginacion",
     "titulo": "Consultar productos por página",
-    "pasos": [
+    "nodos": [
       {
-        "area": "USUARIO",
-        "texto": "Abre el listado"
+        "id": "A",
+        "texto": "El usuario abre el listado",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Cuenta los productos"
+        "id": "COUNT",
+        "texto": "cargarTotal() solicita el conteo a Directus",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Ajusta la página actual"
+        "id": "TOTAL",
+        "texto": "La app ajusta total y paginaActual",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Envía GET con limit, page y sort"
+        "id": "GET",
+        "texto": "Directus procesa GET con limit, page y sort",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Consulta los registros de esa página en MariaDB"
+        "id": "DB",
+        "texto": "MariaDB entrega los registros solicitados",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Muestra la lista y los botones de paginación"
+        "id": "VIEW",
+        "texto": "La app muestra la lista y app-paginacion",
+        "tipo": "pantalla"
       },
       {
-        "area": "USUARIO",
-        "texto": "Selecciona otra página"
+        "id": "SELECT",
+        "texto": "El usuario selecciona otra página",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
+        "id": "V",
+        "texto": "¿Página válida y distinta?",
+        "tipo": "decision"
+      },
+      {
+        "id": "NO",
+        "texto": "El componente no emite ningún cambio",
+        "tipo": "proceso"
+      },
+      {
+        "id": "CHANGE",
         "texto": "paginaCambio actualiza paginaActual",
-        "nota": "Repite la consulta GET con el nuevo valor de page."
+        "tipo": "proceso"
       }
-    ]
+    ],
+    "aristas": [
+      {
+        "de": "A",
+        "a": "COUNT"
+      },
+      {
+        "de": "COUNT",
+        "a": "TOTAL"
+      },
+      {
+        "de": "TOTAL",
+        "a": "GET"
+      },
+      {
+        "de": "GET",
+        "a": "DB",
+        "influye": false,
+        "salida": "e",
+        "entrada": "w",
+        "descripcion": "Consulta"
+      },
+      {
+        "de": "DB",
+        "a": "GET",
+        "influye": false,
+        "tipo": "retorno",
+        "salida": "s",
+        "entrada": "e",
+        "descripcion": "Datos"
+      },
+      {
+        "de": "GET",
+        "a": "VIEW",
+        "texto": "Registros de la página"
+      },
+      {
+        "de": "VIEW",
+        "a": "SELECT"
+      },
+      {
+        "de": "SELECT",
+        "a": "V"
+      },
+      {
+        "de": "V",
+        "a": "NO",
+        "texto": "No"
+      },
+      {
+        "de": "V",
+        "a": "CHANGE",
+        "texto": "Sí"
+      },
+      {
+        "de": "CHANGE",
+        "a": "GET",
+        "texto": "Nueva consulta",
+        "tipo": "retorno",
+        "influye": false
+      }
+    ],
+    "filas": [
+      [
+        "GET",
+        "DB"
+      ]
+    ],
+    "principal": [
+      "A",
+      "COUNT",
+      "TOTAL",
+      "GET",
+      "VIEW",
+      "SELECT",
+      "V",
+      "CHANGE"
+    ],
+    "imagen": "flujo-08-paginacion-ramas.png"
   },
   {
     "nombre": "09-menu",
     "titulo": "Navegar mediante el menú",
-    "pasos": [
+    "nodos": [
       {
-        "area": "USUARIO",
-        "texto": "Presiona el botón del menú"
+        "id": "A",
+        "texto": "El usuario presiona el botón del menú",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Abre ion-menu principal"
+        "id": "MENU",
+        "texto": "ion-menu abre las opciones",
+        "tipo": "proceso"
       },
       {
-        "area": "USUARIO",
-        "texto": "Elige una opción"
+        "id": "CHOOSE",
+        "texto": "El usuario elige una opción",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "routerLink cambia la ruta"
+        "id": "ROUTE",
+        "texto": "routerLink cambia la ruta",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "ion-router-outlet muestra la página"
+        "id": "OUTLET",
+        "texto": "ion-router-outlet muestra la página",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "ion-menu-toggle cierra el menú"
+        "id": "CLOSE",
+        "texto": "ion-menu-toggle cierra el menú",
+        "tipo": "proceso"
+      },
+      {
+        "id": "END",
+        "texto": "La página elegida queda visible",
+        "tipo": "pantalla"
       }
-    ]
+    ],
+    "aristas": [
+      {
+        "de": "A",
+        "a": "MENU"
+      },
+      {
+        "de": "MENU",
+        "a": "CHOOSE"
+      },
+      {
+        "de": "CHOOSE",
+        "a": "ROUTE",
+        "texto": "Navegación"
+      },
+      {
+        "de": "CHOOSE",
+        "a": "CLOSE",
+        "texto": "Cierre del menú"
+      },
+      {
+        "de": "ROUTE",
+        "a": "OUTLET"
+      },
+      {
+        "de": "OUTLET",
+        "a": "END"
+      },
+      {
+        "de": "CLOSE",
+        "a": "END"
+      }
+    ],
+    "filas": [
+      [
+        "ROUTE",
+        "CLOSE"
+      ]
+    ],
+    "principal": [
+      "A",
+      "MENU",
+      "CHOOSE",
+      "ROUTE",
+      "OUTLET",
+      "END"
+    ],
+    "imagen": "flujo-09-menu-ramas.png"
   },
   {
     "nombre": "10-busqueda",
     "titulo": "Filtrar los productos",
-    "pasos": [
+    "nodos": [
       {
-        "area": "USUARIO",
-        "texto": "Escribe en el buscador"
+        "id": "A",
+        "texto": "El usuario escribe en el buscador",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "ionInput se ejecuta después de debounce"
+        "id": "INPUT",
+        "texto": "ionInput se ejecuta después de debounce",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Guarda la búsqueda y vuelve a la página 1"
+        "id": "SAVE",
+        "texto": "handleInput() guarda el texto y vuelve a página 1",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Cuenta los productos usando filter"
+        "id": "FILTER",
+        "texto": "¿Hay texto después de trim()?",
+        "tipo": "decision"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Solicita GET paginado con el mismo filter"
+        "id": "YES",
+        "texto": "Crea filter con nombre y descripción",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Devuelve los registros coincidentes"
+        "id": "NO",
+        "texto": "Utiliza un filtro vacío",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Muestra las coincidencias y el total filtrado"
+        "id": "COUNT",
+        "texto": "Directus cuenta con ese filtro",
+        "tipo": "proceso"
+      },
+      {
+        "id": "GET",
+        "texto": "Directus consulta la página con el mismo filtro",
+        "tipo": "proceso"
+      },
+      {
+        "id": "DB",
+        "texto": "MariaDB aplica la búsqueda y devuelve registros",
+        "tipo": "proceso"
+      },
+      {
+        "id": "END",
+        "texto": "La app muestra coincidencias y total filtrado",
+        "tipo": "pantalla"
       }
-    ]
+    ],
+    "aristas": [
+      {
+        "de": "A",
+        "a": "INPUT"
+      },
+      {
+        "de": "INPUT",
+        "a": "SAVE"
+      },
+      {
+        "de": "SAVE",
+        "a": "FILTER"
+      },
+      {
+        "de": "FILTER",
+        "a": "YES",
+        "texto": "Sí"
+      },
+      {
+        "de": "FILTER",
+        "a": "NO",
+        "texto": "No"
+      },
+      {
+        "de": "YES",
+        "a": "COUNT"
+      },
+      {
+        "de": "NO",
+        "a": "COUNT"
+      },
+      {
+        "de": "COUNT",
+        "a": "GET"
+      },
+      {
+        "de": "GET",
+        "a": "DB",
+        "influye": false,
+        "salida": "e",
+        "entrada": "w",
+        "descripcion": "Consulta"
+      },
+      {
+        "de": "DB",
+        "a": "GET",
+        "influye": false,
+        "tipo": "retorno",
+        "salida": "s",
+        "entrada": "e",
+        "descripcion": "Datos"
+      },
+      {
+        "de": "GET",
+        "a": "END",
+        "texto": "Respuesta JSON"
+      }
+    ],
+    "filas": [
+      [
+        "YES",
+        "NO"
+      ],
+      [
+        "GET",
+        "DB"
+      ]
+    ],
+    "principal": [
+      "A",
+      "INPUT",
+      "SAVE",
+      "FILTER",
+      "YES",
+      "COUNT",
+      "GET",
+      "END"
+    ],
+    "imagen": "flujo-10-busqueda-ramas.png"
   },
   {
     "nombre": "11-servicios",
     "titulo": "Consultar datos mediante un servicio",
-    "pasos": [
+    "nodos": [
       {
-        "area": "APP IONIC",
-        "texto": "La página llama a ProductosService"
+        "id": "A",
+        "texto": "La página llama a ProductosService",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "El servicio devuelve un Observable con la llamada Axios"
+        "id": "OBS",
+        "texto": "El servicio devuelve un Observable",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Recibe la petición y consulta MariaDB"
+        "id": "SUB",
+        "texto": "firstValueFrom() se suscribe",
+        "tipo": "proceso"
       },
       {
-        "area": "MARIADB",
-        "texto": "Entrega los datos a Directus"
+        "id": "CALL",
+        "texto": "defer() ejecuta la llamada Axios",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Devuelve la respuesta"
+        "id": "API",
+        "texto": "Directus procesa la operación",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "map extrae el dato del cuerpo"
+        "id": "DB",
+        "texto": "MariaDB consulta o modifica los datos",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "firstValueFrom entrega el resultado a la página"
+        "id": "MAP",
+        "texto": "map() extrae o transforma la respuesta",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "La página actualiza su vista"
+        "id": "RESULT",
+        "texto": "firstValueFrom() resuelve la promesa",
+        "tipo": "proceso"
+      },
+      {
+        "id": "VIEW",
+        "texto": "La página actualiza su vista",
+        "tipo": "pantalla"
+      },
+      {
+        "id": "ERROR",
+        "texto": "La promesa se rechaza y el catch de la página maneja el error",
+        "tipo": "proceso"
       }
-    ]
+    ],
+    "aristas": [
+      {
+        "de": "A",
+        "a": "OBS"
+      },
+      {
+        "de": "OBS",
+        "a": "SUB"
+      },
+      {
+        "de": "SUB",
+        "a": "CALL"
+      },
+      {
+        "de": "CALL",
+        "a": "API",
+        "texto": "Petición HTTP"
+      },
+      {
+        "de": "API",
+        "a": "DB",
+        "influye": false,
+        "salida": "e",
+        "entrada": "w",
+        "descripcion": "Operación"
+      },
+      {
+        "de": "DB",
+        "a": "API",
+        "influye": false,
+        "tipo": "retorno",
+        "salida": "s",
+        "entrada": "e",
+        "descripcion": "Resultado"
+      },
+      {
+        "de": "API",
+        "a": "MAP",
+        "texto": "Respuesta"
+      },
+      {
+        "de": "MAP",
+        "a": "RESULT"
+      },
+      {
+        "de": "RESULT",
+        "a": "VIEW"
+      },
+      {
+        "de": "CALL",
+        "a": "ERROR",
+        "texto": "Falla la petición",
+        "tipo": "error"
+      }
+    ],
+    "filas": [
+      [
+        "API",
+        "DB"
+      ]
+    ],
+    "principal": [
+      "A",
+      "OBS",
+      "SUB",
+      "CALL",
+      "API",
+      "MAP",
+      "RESULT",
+      "VIEW"
+    ],
+    "imagen": "flujo-11-servicios-ramas.png"
   },
   {
     "nombre": "12-sesion",
     "titulo": "Registrar una cuenta e iniciar sesión",
-    "pasos": [
+    "nodos": [
       {
-        "area": "USUARIO",
-        "texto": "Completa el formulario de registro",
-        "nota": "Este recorrido comienza con registro; una cuenta activa puede ir directamente al acceso."
+        "id": "A",
+        "texto": "El usuario abre la app",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Envía POST /users/register"
+        "id": "CHOOSE",
+        "texto": "¿Tiene una cuenta activa?",
+        "tipo": "decision"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Procesa la solicitud de registro",
-        "nota": "La verificación depende de la configuración de Directus."
+        "id": "REG",
+        "texto": "Valida y envía el formulario de registro",
+        "tipo": "proceso"
       },
       {
-        "area": "USUARIO",
-        "texto": "Completa la verificación, si se solicita, y abre el acceso"
+        "id": "REGISTER",
+        "texto": "Directus recibe POST /users/register",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Valida correo y contraseña; envía POST /auth/login"
+        "id": "VERIFY",
+        "texto": "Verifica el correo si se requiere",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Devuelve una sesión con vigencia"
+        "id": "LOGIN",
+        "texto": "Valida el formulario de acceso",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "El cliente agrega Bearer a las consultas"
+        "id": "AUTH",
+        "texto": "AuthService envía POST /auth/login",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Aplica los permisos de la cuenta"
+        "id": "VALID",
+        "texto": "¿Acceso aceptado?",
+        "tipo": "decision"
+      },
+      {
+        "id": "ERROR",
+        "texto": "Muestra el mensaje de acceso fallido",
+        "tipo": "proceso"
+      },
+      {
+        "id": "SESSION",
+        "texto": "Guarda los tokens y su vigencia en memoria",
+        "tipo": "proceso"
+      },
+      {
+        "id": "NAV",
+        "texto": "Abre el destino o el listado",
+        "tipo": "pantalla"
+      },
+      {
+        "id": "BEARER",
+        "texto": "El cliente agrega Bearer a las consultas",
+        "tipo": "proceso"
+      },
+      {
+        "id": "PERMS",
+        "texto": "Directus aplica los permisos de la cuenta",
+        "tipo": "proceso"
       }
-    ]
+    ],
+    "aristas": [
+      {
+        "de": "A",
+        "a": "CHOOSE"
+      },
+      {
+        "de": "CHOOSE",
+        "a": "REG",
+        "texto": "No: Crear cuenta"
+      },
+      {
+        "de": "CHOOSE",
+        "a": "LOGIN",
+        "texto": "Sí"
+      },
+      {
+        "de": "REG",
+        "a": "REGISTER"
+      },
+      {
+        "de": "REGISTER",
+        "a": "VERIFY"
+      },
+      {
+        "de": "VERIFY",
+        "a": "LOGIN",
+        "texto": "Continuar al acceso",
+        "tipo": "retorno",
+        "influye": false
+      },
+      {
+        "de": "LOGIN",
+        "a": "AUTH"
+      },
+      {
+        "de": "AUTH",
+        "a": "VALID"
+      },
+      {
+        "de": "VALID",
+        "a": "ERROR",
+        "texto": "No"
+      },
+      {
+        "de": "VALID",
+        "a": "SESSION",
+        "texto": "Sí"
+      },
+      {
+        "de": "SESSION",
+        "a": "NAV"
+      },
+      {
+        "de": "NAV",
+        "a": "BEARER"
+      },
+      {
+        "de": "BEARER",
+        "a": "PERMS"
+      }
+    ],
+    "filas": [
+      [
+        "REG",
+        "LOGIN"
+      ]
+    ],
+    "principal": [
+      "A",
+      "CHOOSE",
+      "LOGIN",
+      "AUTH",
+      "VALID",
+      "SESSION",
+      "NAV",
+      "BEARER",
+      "PERMS"
+    ],
+    "imagen": "flujo-12-sesion-ramas.png"
   },
   {
     "nombre": "13-guard",
     "titulo": "Proteger una ruta con la sesión",
-    "pasos": [
+    "nodos": [
       {
-        "area": "USUARIO",
-        "texto": "Solicita una ruta protegida"
+        "id": "A",
+        "texto": "El usuario solicita una ruta protegida",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "authGuard llama a AuthService"
+        "id": "GUARD",
+        "texto": "authGuard llama a validarSesion()",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Valida la sesión con Directus",
-        "nota": "Si es válida, abre directamente la página solicitada."
+        "id": "CHECK",
+        "texto": "AuthService comprueba la sesión con Directus",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Si no es válida, abre Login con returnUrl"
+        "id": "VALID",
+        "texto": "¿Sesión válida?",
+        "tipo": "decision"
       },
       {
-        "area": "USUARIO",
-        "texto": "Ingresa sus credenciales"
+        "id": "PAGE",
+        "texto": "Permite abrir la página solicitada",
+        "tipo": "pantalla"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Autentica la cuenta"
+        "id": "LOGIN",
+        "texto": "Devuelve Login con returnUrl",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Vuelve a validar y abre la ruta solicitada"
+        "id": "AUTH",
+        "texto": "El usuario inicia sesión",
+        "tipo": "proceso"
+      },
+      {
+        "id": "RETURN",
+        "texto": "Router vuelve al destino y ejecuta el guard",
+        "tipo": "proceso"
       }
-    ]
+    ],
+    "aristas": [
+      {
+        "de": "A",
+        "a": "GUARD"
+      },
+      {
+        "de": "GUARD",
+        "a": "CHECK"
+      },
+      {
+        "de": "CHECK",
+        "a": "VALID"
+      },
+      {
+        "de": "VALID",
+        "a": "PAGE",
+        "texto": "Sí"
+      },
+      {
+        "de": "VALID",
+        "a": "LOGIN",
+        "texto": "No"
+      },
+      {
+        "de": "LOGIN",
+        "a": "AUTH"
+      },
+      {
+        "de": "AUTH",
+        "a": "RETURN"
+      },
+      {
+        "de": "RETURN",
+        "a": "GUARD",
+        "texto": "Revalidar",
+        "tipo": "retorno",
+        "influye": false
+      }
+    ],
+    "filas": [
+      [
+        "PAGE",
+        "LOGIN"
+      ]
+    ],
+    "principal": [
+      "A",
+      "GUARD",
+      "CHECK",
+      "VALID",
+      "PAGE"
+    ],
+    "imagen": "flujo-13-guard-ramas.png"
   },
   {
     "nombre": "14-categorias",
     "titulo": "Guardar un producto con categorías",
-    "pasos": [
+    "nodos": [
       {
-        "area": "USUARIO",
-        "texto": "Selecciona categorías en el FormArray"
+        "id": "A",
+        "texto": "Se abre el formulario de creación",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Obtiene los IDs seleccionados sin repetir"
+        "id": "LOAD",
+        "texto": "CategoriasService consulta Directus",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Envía POST del producto con sus enlaces"
+        "id": "OPTIONS",
+        "texto": "La app recibe las categorías disponibles",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Valida los datos y la relación"
+        "id": "FORM",
+        "texto": "El usuario completa los datos del producto",
+        "tipo": "proceso"
       },
       {
-        "area": "MARIADB",
-        "texto": "Guarda el producto y las filas de unión"
+        "id": "PLUS",
+        "texto": "+ agrega una fila al FormArray",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Confirma la creación"
+        "id": "SELECT",
+        "texto": "El usuario elige la categoría de cada fila",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Muestra la confirmación de guardado"
+        "id": "TRASH",
+        "texto": "La papelera quita una fila",
+        "tipo": "proceso"
+      },
+      {
+        "id": "VALID",
+        "texto": "¿Formulario y selecciones válidos?",
+        "tipo": "decision"
+      },
+      {
+        "id": "INVALID",
+        "texto": "Muestra validaciones y permite corregir",
+        "tipo": "proceso"
+      },
+      {
+        "id": "JSON",
+        "texto": "Convierte IDs, elimina repetidos con Set y prepara enlaces",
+        "tipo": "proceso"
+      },
+      {
+        "id": "POST",
+        "texto": "Directus recibe POST del producto con categorias",
+        "tipo": "proceso"
+      },
+      {
+        "id": "DB",
+        "texto": "MariaDB guarda producto y filas de productos_categorias",
+        "tipo": "proceso"
+      },
+      {
+        "id": "DONE",
+        "texto": "La app muestra la confirmación",
+        "tipo": "pantalla"
       }
-    ]
+    ],
+    "aristas": [
+      {
+        "de": "A",
+        "a": "LOAD"
+      },
+      {
+        "de": "LOAD",
+        "a": "OPTIONS"
+      },
+      {
+        "de": "OPTIONS",
+        "a": "FORM"
+      },
+      {
+        "de": "FORM",
+        "a": "PLUS"
+      },
+      {
+        "de": "PLUS",
+        "a": "SELECT"
+      },
+      {
+        "de": "SELECT",
+        "a": "TRASH",
+        "texto": "Quitar fila",
+        "tipo": "alternativa"
+      },
+      {
+        "de": "TRASH",
+        "a": "SELECT",
+        "texto": "Selecciones restantes",
+        "tipo": "retorno",
+        "influye": false
+      },
+      {
+        "de": "SELECT",
+        "a": "VALID",
+        "texto": "Guardar"
+      },
+      {
+        "de": "VALID",
+        "a": "INVALID",
+        "texto": "No"
+      },
+      {
+        "de": "INVALID",
+        "a": "SELECT",
+        "texto": "Corregir",
+        "tipo": "retorno",
+        "influye": false
+      },
+      {
+        "de": "VALID",
+        "a": "JSON",
+        "texto": "Sí"
+      },
+      {
+        "de": "JSON",
+        "a": "POST"
+      },
+      {
+        "de": "POST",
+        "a": "DB",
+        "influye": false,
+        "salida": "e",
+        "entrada": "w",
+        "descripcion": "Consulta"
+      },
+      {
+        "de": "DB",
+        "a": "POST",
+        "influye": false,
+        "tipo": "retorno",
+        "salida": "s",
+        "entrada": "e",
+        "descripcion": "Datos"
+      },
+      {
+        "de": "POST",
+        "a": "DONE",
+        "texto": "Creación exitosa"
+      },
+      {
+        "de": "SELECT",
+        "a": "PLUS",
+        "texto": "Agregar otra",
+        "tipo": "retorno",
+        "influye": false
+      }
+    ],
+    "filas": [
+      [
+        "POST",
+        "DB"
+      ]
+    ],
+    "principal": [
+      "A",
+      "LOAD",
+      "OPTIONS",
+      "FORM",
+      "PLUS",
+      "SELECT",
+      "VALID",
+      "JSON",
+      "POST",
+      "DONE"
+    ],
+    "imagen": "flujo-14-categorias-ramas.png"
   },
   {
     "nombre": "15-archivos",
     "titulo": "Subir y asociar una imagen",
-    "pasos": [
+    "nodos": [
       {
-        "area": "USUARIO",
-        "texto": "Selecciona un archivo de imagen"
+        "id": "A",
+        "texto": "El usuario abre Imagen del producto y elige un archivo",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Agrega el File a FormData"
+        "id": "V",
+        "texto": "¿Archivo e ID válidos?",
+        "tipo": "decision"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Envía POST /files a Directus"
+        "id": "NO",
+        "texto": "No inicia la subida",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Guarda el archivo y sus metadatos",
-        "nota": "Requiere los permisos de archivos propios descritos en el manual."
+        "id": "FORM",
+        "texto": "FormData agrega el archivo en file",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Recibe el ID y envía PATCH del producto"
+        "id": "UPLOAD",
+        "texto": "POST /files envía el archivo a Directus",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Guarda el ID en productos.imagen"
+        "id": "STORE",
+        "texto": "Archivo en almacenamiento y metadatos en Directus",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Solicita GET /assets/{id} con autenticación"
+        "id": "PATCH",
+        "texto": "PATCH guarda el ID en productos.imagen",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Convierte el Blob en URL y muestra la imagen"
+        "id": "GET",
+        "texto": "GET /assets/{id} solicita la imagen autenticada",
+        "tipo": "proceso"
+      },
+      {
+        "id": "BLOB",
+        "texto": "Blob y createObjectURL() preparan la vista",
+        "tipo": "proceso"
+      },
+      {
+        "id": "VIEW",
+        "texto": "Muestra la imagen y confirma el guardado",
+        "tipo": "pantalla"
+      },
+      {
+        "id": "ERROR",
+        "texto": "Si falla una petición, catch muestra el error",
+        "tipo": "proceso"
       }
-    ]
+    ],
+    "aristas": [
+      {
+        "de": "A",
+        "a": "V",
+        "texto": "Subir imagen"
+      },
+      {
+        "de": "V",
+        "a": "NO",
+        "texto": "No"
+      },
+      {
+        "de": "V",
+        "a": "FORM",
+        "texto": "Sí"
+      },
+      {
+        "de": "FORM",
+        "a": "UPLOAD"
+      },
+      {
+        "de": "UPLOAD",
+        "a": "STORE",
+        "influye": false,
+        "salida": "e",
+        "entrada": "w",
+        "descripcion": "Archivo"
+      },
+      {
+        "de": "STORE",
+        "a": "UPLOAD",
+        "influye": false,
+        "tipo": "retorno",
+        "salida": "s",
+        "entrada": "e",
+        "descripcion": "ID del archivo"
+      },
+      {
+        "de": "UPLOAD",
+        "a": "PATCH",
+        "texto": "ID del archivo"
+      },
+      {
+        "de": "PATCH",
+        "a": "GET"
+      },
+      {
+        "de": "GET",
+        "a": "BLOB"
+      },
+      {
+        "de": "BLOB",
+        "a": "VIEW"
+      },
+      {
+        "de": "UPLOAD",
+        "a": "ERROR",
+        "tipo": "error"
+      },
+      {
+        "de": "PATCH",
+        "a": "ERROR",
+        "tipo": "error",
+        "influye": false
+      },
+      {
+        "de": "GET",
+        "a": "ERROR",
+        "tipo": "error",
+        "influye": false
+      }
+    ],
+    "filas": [
+      [
+        "UPLOAD",
+        "STORE"
+      ]
+    ],
+    "principal": [
+      "A",
+      "V",
+      "FORM",
+      "UPLOAD",
+      "PATCH",
+      "GET",
+      "BLOB",
+      "VIEW"
+    ],
+    "imagen": "flujo-15-archivos-ramas.png"
   },
   {
     "nombre": "16-despliegue",
     "titulo": "La APK consulta Directus en Azure",
-    "pasos": [
+    "nodos": [
       {
-        "area": "CELULAR ANDROID",
-        "texto": "El usuario abre la APK instalada"
+        "id": "BUILD",
+        "texto": "En la computadora: ng build genera www",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "environment.apiUrl contiene la URL HTTPS pública de Directus"
+        "id": "SYNC",
+        "texto": "cap sync android copia archivos y plugins",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Envía la petición HTTPS desde el celular"
+        "id": "APK",
+        "texto": "Gradle crea la APK",
+        "tipo": "proceso"
       },
       {
-        "area": "NGINX EN LA VM",
-        "texto": "Recibe HTTPS y reenvía la petición a Directus"
+        "id": "INSTALL",
+        "texto": "El usuario instala la APK en Android",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Aplica los permisos y consulta MariaDB"
+        "id": "APP",
+        "texto": "La app utiliza la URL HTTPS pública de Directus",
+        "tipo": "proceso"
       },
       {
-        "area": "MARIADB",
-        "texto": "Entrega los registros a Directus"
+        "id": "HTTPS",
+        "texto": "Nginx de la VM recibe la petición HTTPS",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Devuelve JSON al celular a través del proxy HTTPS"
+        "id": "API",
+        "texto": "Directus aplica los permisos y procesa la operación",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Recibe los datos y actualiza la pantalla"
+        "id": "DB",
+        "texto": "MariaDB consulta o guarda los datos",
+        "tipo": "proceso"
+      },
+      {
+        "id": "FILES",
+        "texto": "Volumen persistente de archivos",
+        "tipo": "proceso"
+      },
+      {
+        "id": "RESPONSE",
+        "texto": "Directus devuelve JSON a través de Nginx",
+        "tipo": "proceso"
+      },
+      {
+        "id": "SCREEN",
+        "texto": "La app recibe los datos y actualiza la pantalla",
+        "tipo": "pantalla"
       }
-    ]
+    ],
+    "aristas": [
+      {
+        "de": "BUILD",
+        "a": "SYNC"
+      },
+      {
+        "de": "SYNC",
+        "a": "APK"
+      },
+      {
+        "de": "APK",
+        "a": "INSTALL"
+      },
+      {
+        "de": "INSTALL",
+        "a": "APP"
+      },
+      {
+        "de": "APP",
+        "a": "HTTPS",
+        "texto": "Petición desde el celular"
+      },
+      {
+        "de": "HTTPS",
+        "a": "API"
+      },
+      {
+        "de": "API",
+        "a": "DB",
+        "influye": false,
+        "salida": "e",
+        "entrada": "w",
+        "descripcion": "Consulta"
+      },
+      {
+        "de": "DB",
+        "a": "API",
+        "influye": false,
+        "tipo": "retorno",
+        "salida": "s",
+        "entrada": "e",
+        "descripcion": "Datos"
+      },
+      {
+        "de": "API",
+        "a": "FILES",
+        "influye": false,
+        "descripcion": "Solo operaciones de archivos"
+      },
+      {
+        "de": "FILES",
+        "a": "API",
+        "influye": false,
+        "tipo": "retorno",
+        "descripcion": "Contenido del archivo"
+      },
+      {
+        "de": "API",
+        "a": "RESPONSE",
+        "texto": "Respuesta de la API"
+      },
+      {
+        "de": "RESPONSE",
+        "a": "SCREEN",
+        "texto": "HTTPS"
+      }
+    ],
+    "filas": [
+      [
+        "API",
+        "DB"
+      ],
+      [
+        "RESPONSE",
+        "FILES"
+      ]
+    ],
+    "principal": [
+      "BUILD",
+      "SYNC",
+      "APK",
+      "INSTALL",
+      "APP",
+      "HTTPS",
+      "API",
+      "RESPONSE",
+      "SCREEN"
+    ],
+    "imagen": "flujo-16-despliegue-ramas.png"
   },
   {
     "nombre": "00-entorno",
     "titulo": "Comunicación de la aplicación con los servicios",
-    "pasos": [
+    "nodos": [
       {
-        "area": "APP IONIC",
-        "texto": "Envía peticiones HTTP y recibe JSON"
+        "id": "APP",
+        "texto": "Aplicación Ionic",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Recibe las peticiones y aplica los permisos",
-        "nota": "Swagger UI consulta su especificación OpenAPI."
+        "id": "API",
+        "texto": "Directus: API, sesión y permisos",
+        "tipo": "proceso"
       },
       {
-        "area": "MARIADB",
-        "texto": "Directus consulta y guarda los datos",
-        "nota": "CloudBeaver permite administrar la base."
+        "id": "DB",
+        "texto": "MariaDB: datos del proyecto",
+        "tipo": "proceso"
       },
       {
-        "area": "DIRECTUS",
-        "texto": "Devuelve la respuesta a Ionic"
+        "id": "SWAGGER",
+        "texto": "Swagger UI consulta OpenAPI",
+        "tipo": "proceso"
       },
       {
-        "area": "APP IONIC",
-        "texto": "Actualiza la pantalla con el resultado"
+        "id": "CLOUD",
+        "texto": "CloudBeaver administra la base",
+        "tipo": "proceso"
+      },
+      {
+        "id": "VIEW",
+        "texto": "Ionic muestra el resultado en pantalla",
+        "tipo": "pantalla"
       }
-    ]
+    ],
+    "aristas": [
+      {
+        "de": "APP",
+        "a": "API",
+        "texto": "HTTP / JSON"
+      },
+      {
+        "de": "API",
+        "a": "DB",
+        "texto": "Consulta"
+      },
+      {
+        "de": "DB",
+        "a": "API",
+        "texto": "Datos",
+        "tipo": "retorno",
+        "influye": false
+      },
+      {
+        "de": "API",
+        "a": "VIEW",
+        "texto": "Respuesta JSON"
+      },
+      {
+        "de": "SWAGGER",
+        "a": "API",
+        "texto": "Especificación OpenAPI"
+      },
+      {
+        "de": "CLOUD",
+        "a": "DB",
+        "texto": "Administración"
+      }
+    ],
+    "filas": [
+      [
+        "APP",
+        "SWAGGER"
+      ],
+      [
+        "API",
+        "CLOUD"
+      ]
+    ],
+    "principal": [
+      "APP",
+      "API",
+      "VIEW"
+    ],
+    "imagen": "flujo-00-entorno-ramas.png"
   }
 ]

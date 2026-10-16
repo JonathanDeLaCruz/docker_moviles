@@ -1,0 +1,24 @@
+digraph Flujo {
+  graph [rankdir=TB, bgcolor="#181818", pad="0.24", nodesep="0.42", ranksep="0.55", splines=spline, outputorder=edgesfirst];
+  node [shape=box, style="rounded,filled", fillcolor="#0e2a4d", color="#304b67", fontcolor="#b5d3f6", fontname="Arial", fontsize=17, penwidth=1.15, margin="0.22,0.20"];
+  edge [color="#89929c", fontcolor="#b5d3f6", fontname="Arial", fontsize=13, arrowsize=0.65, penwidth=1.15];
+  A [label="La página carga los estilos\nglobales", group=main];
+  FONT [label="Archivo TTF en assets/font", group=main];
+  FACE [label="@font-face registra Young\nSerif", group=main];
+  VAR [label="--ion-font-family aplica la\nfuente", group=main];
+  COLOR [label="Variables del color\npersonalizado"];
+  CLASS [label="Clase\n.ion-color-personalizado"];
+  TOOL [label="ion-toolbar utiliza el\ncolor"];
+  END [label="Pantalla con fuente y barra\npersonalizadas", group=main, penwidth=1.7];
+  subgraph cluster_row0 { style=invis; margin=8; {rank=same; FONT; COLOR;} }
+  subgraph cluster_row1 { style=invis; margin=8; {rank=same; FACE; CLASS;} }
+  subgraph cluster_row2 { style=invis; margin=8; {rank=same; VAR; TOOL;} }
+  A -> FONT [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Fuente</TD></TR></TABLE>>];
+  A -> COLOR [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Color</TD></TR></TABLE>>];
+  FONT -> FACE [weight=12];
+  FACE -> VAR [weight=12];
+  COLOR -> CLASS;
+  CLASS -> TOOL;
+  VAR -> END [weight=12];
+  TOOL -> END;
+}

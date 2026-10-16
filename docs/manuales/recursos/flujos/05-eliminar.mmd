@@ -1,16 +1,19 @@
 flowchart TD
-  N0["USUARIO<br/>Presiona la papelera del producto"]
-  N1["APP IONIC<br/>Muestra la confirmación con nombre e ID<br/>Cancelar: cierra la confirmación sin enviar ninguna petición."]
-  N2["USUARIO<br/>Confirma Eliminar"]
-  N3["APP IONIC<br/>Envía DELETE a Directus"]
-  N4["DIRECTUS<br/>Solicita eliminar el registro"]
-  N5["MARIADB<br/>Elimina el producto"]
-  N6["APP IONIC<br/>Recibe el éxito y muestra la alerta"]
-  N7["APP IONIC<br/>GET obtiene el listado actualizado"]
-  N0 --> N1
-  N1 --> N2
-  N2 --> N3
-  N3 --> N4
-  N4 --> N5
-  N5 --> N6
-  N6 --> N7
+  A["El usuario presiona la papelera"]
+  B["La alerta identifica el producto por nombre e ID"]
+  V{"¿Qué elige el usuario?"}
+  CANCEL["Cancelar cierra la alerta sin enviar una petición"]
+  DEL["Directus recibe DELETE del producto"]
+  DB["MariaDB elimina el registro"]
+  OK["La app muestra Producto eliminado"]
+  LIST["Aceptar: cargarProductos() actualiza el listado"]
+  ERR["catch muestra la alerta de error"]
+  A --> B
+  B --> V
+  V -->|"Cancelar"| CANCEL
+  V -->|"Eliminar"| DEL
+  DEL --> DB
+  DB -.-> DEL
+  DEL -->|"Respuesta exitosa"| OK
+  OK --> LIST
+  DEL -.->|"Falla la petición"| ERR

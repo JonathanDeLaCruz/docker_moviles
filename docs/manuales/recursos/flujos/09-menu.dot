@@ -1,0 +1,20 @@
+digraph Flujo {
+  graph [rankdir=TB, bgcolor="#181818", pad="0.24", nodesep="0.42", ranksep="0.55", splines=spline, outputorder=edgesfirst];
+  node [shape=box, style="rounded,filled", fillcolor="#0e2a4d", color="#304b67", fontcolor="#b5d3f6", fontname="Arial", fontsize=17, penwidth=1.15, margin="0.22,0.20"];
+  edge [color="#89929c", fontcolor="#b5d3f6", fontname="Arial", fontsize=13, arrowsize=0.65, penwidth=1.15];
+  A [label="El usuario presiona el\nbotón del menú", group=main];
+  MENU [label="ion-menu abre las opciones", group=main];
+  CHOOSE [label="El usuario elige una opción", group=main];
+  ROUTE [label="routerLink cambia la ruta", group=main];
+  OUTLET [label="ion-router-outlet muestra\nla página", group=main];
+  CLOSE [label="ion-menu-toggle cierra el\nmenú"];
+  END [label="La página elegida queda\nvisible", group=main, penwidth=1.7];
+  subgraph cluster_row0 { style=invis; margin=8; {rank=same; ROUTE; CLOSE;} }
+  A -> MENU [weight=12];
+  MENU -> CHOOSE [weight=12];
+  CHOOSE -> ROUTE [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Navegación</TD></TR></TABLE>>];
+  CHOOSE -> CLOSE [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Cierre del menú</TD></TR></TABLE>>];
+  ROUTE -> OUTLET [weight=12];
+  OUTLET -> END [weight=12];
+  CLOSE -> END;
+}

@@ -53,3 +53,9 @@ Se generó app-debug.apk con la aplicación de prácticas: 5 392 871 bytes, paqu
 La compilación se ejecutó con JDK 21 y el wrapper de Linux en un contenedor temporal de herramientas; el proyecto Android se generó con cap add android y se actualizó con cap sync android. No se instalaron herramientas de compilación en el servidor de Azure.
 
 El Compose corregido validó únicamente los servicios db y api. nginx -t comprobó la sintaxis de su proxy usando un certificado temporal de prueba, sin iniciar un servidor. El dominio real y su certificado todavía no están disponibles. La APK utiliza una URL de ejemplo, por lo que no se presenta como una aplicación conectada a Azure ni como instalada y probada en un celular.
+
+## Diseño de los diagramas con ramificaciones
+
+Se revisaron visualmente los 19 diagramas: los 18 de los manuales y el del README. Se contrastaron sus pasos con los ejemplos de código y las explicaciones de cada práctica. El recorrido principal se orienta hacia abajo; las decisiones, cancelaciones, intercambios con MariaDB y ciclos de retorno mantienen conexiones propias. Las figuras siguen centradas y con pie de figura.
+
+Las imágenes PNG conservan la visualización independiente de Mermaid. Las fuentes JSON, DOT y Mermaid reflejan los nodos y las aristas del flujo. Las herramientas locales de generación permanecen fuera del repositorio. Esta revisión de diagramas no constituye una nueva ejecución de las pruebas de Ionic, Android o Azure registradas en las secciones anteriores.

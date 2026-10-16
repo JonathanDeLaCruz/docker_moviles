@@ -1,14 +1,30 @@
 flowchart TD
-  N0["USUARIO<br/>Selecciona categorías en el FormArray"]
-  N1["APP IONIC<br/>Obtiene los IDs seleccionados sin repetir"]
-  N2["APP IONIC<br/>Envía POST del producto con sus enlaces"]
-  N3["DIRECTUS<br/>Valida los datos y la relación"]
-  N4["MARIADB<br/>Guarda el producto y las filas de unión"]
-  N5["DIRECTUS<br/>Confirma la creación"]
-  N6["APP IONIC<br/>Muestra la confirmación de guardado"]
-  N0 --> N1
-  N1 --> N2
-  N2 --> N3
-  N3 --> N4
-  N4 --> N5
-  N5 --> N6
+  A["Se abre el formulario de creación"]
+  LOAD["CategoriasService consulta Directus"]
+  OPTIONS["La app recibe las categorías disponibles"]
+  FORM["El usuario completa los datos del producto"]
+  PLUS["+ agrega una fila al FormArray"]
+  SELECT["El usuario elige la categoría de cada fila"]
+  TRASH["La papelera quita una fila"]
+  VALID{"¿Formulario y selecciones válidos?"}
+  INVALID["Muestra validaciones y permite corregir"]
+  JSON["Convierte IDs, elimina repetidos con Set y prepara enlaces"]
+  POST["Directus recibe POST del producto con categorias"]
+  DB["MariaDB guarda producto y filas de productos_categorias"]
+  DONE["La app muestra la confirmación"]
+  A --> LOAD
+  LOAD --> OPTIONS
+  OPTIONS --> FORM
+  FORM --> PLUS
+  PLUS --> SELECT
+  SELECT -->|"Quitar fila"| TRASH
+  TRASH -.->|"Selecciones restantes"| SELECT
+  SELECT -->|"Guardar"| VALID
+  VALID -->|"No"| INVALID
+  INVALID -.->|"Corregir"| SELECT
+  VALID -->|"Sí"| JSON
+  JSON --> POST
+  POST --> DB
+  DB -.-> POST
+  POST -->|"Creación exitosa"| DONE
+  SELECT -.->|"Agregar otra"| PLUS

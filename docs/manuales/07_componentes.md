@@ -276,7 +276,7 @@ La figura 1 muestra el resultado obtenido con el código de esta práctica. Las 
 La figura 2 muestra el recorrido de arriba hacia abajo.
 
 <p align="center">
-  <img src="imagenes/flujo-07-componentes.png" alt="Mostrar una barra reutilizable" width="390"><br>
+  <img src="imagenes/flujo-07-componentes-ramas.png" alt="Mostrar una barra reutilizable" width="1000"><br>
   <em>Figura 2. Mostrar una barra reutilizable.</em>
 </p>
 
