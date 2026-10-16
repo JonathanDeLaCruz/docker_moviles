@@ -17,6 +17,8 @@ services:
   api:
     image: directus/directus:12.3.1
     restart: unless-stopped
+    ports:
+      - "127.0.0.1:8055:8055"
     environment:
       SECRET: ${DIRECTUS_SECRET:?Define DIRECTUS_SECRET}
       ADMIN_EMAIL: ${ADMIN_EMAIL:?Define ADMIN_EMAIL}
@@ -27,26 +29,17 @@ services:
       DB_DATABASE: moviles
       DB_USER: moviles
       DB_PASSWORD: ${DB_PASSWORD}
-      PUBLIC_URL: https://${DOMAIN:?Define DOMAIN}/api
+      PUBLIC_URL: https://${DOMAIN:?Define DOMAIN}
+      CORS_ENABLED: "true"
+      CORS_ORIGIN: "https://localhost"
+      CORS_METHODS: "GET,POST,PATCH,DELETE,OPTIONS"
+      CORS_ALLOWED_HEADERS: "Content-Type,Authorization"
     volumes:
       - archivos:/directus/uploads
       - extensiones:/directus/extensions
     depends_on:
       db:
         condition: service_healthy
-  web:
-    build:
-      context: ../../../..
-      dockerfile: docs/manuales/recursos/despliegue/Dockerfile
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./certs:/etc/nginx/certs:ro
-    depends_on:
-      - api
 volumes:
   datos:
   archivos:

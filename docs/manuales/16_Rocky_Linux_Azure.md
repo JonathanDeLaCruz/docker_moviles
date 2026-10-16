@@ -1,42 +1,42 @@
-# Publicar Ionic y Directus en Rocky Linux sobre Azure
+# Publicar Directus en Azure y generar la APK de Ionic
 
-Prepararás los archivos para servir la aplicación compilada y la API mediante Nginx, con MariaDB y los volúmenes persistentes de Directus.
+Publicarás Directus y MariaDB en una máquina virtual de Rocky Linux. La aplicación Ionic se empaqueta como APK, se instala en Android y consulta la URL pública de Directus desde el celular.
 
 ## 1. Antes de comenzar
 
-Necesitas una VM de Rocky Linux ya creada, acceso SSH, dominio y certificado HTTPS. Este manual proporciona los archivos de despliegue; la creación de la VM y la emisión del certificado se realizan con tu infraestructura. Completa primero los manuales que utilizará la aplicación.
+Para el servidor necesitas una VM de Rocky Linux, acceso SSH, dominio apuntando a su IP pública y un certificado HTTPS válido. La creación de la VM y la emisión del certificado corresponden a tu infraestructura.
 
-Las rutas pertenecen al proyecto Ionic en `mobile/`. Ejecuta los comandos Docker desde la carpeta que contiene `docker-compose.yml`. Al generar páginas o componentes, configura manualmente `standalone: false` en `@Component`; este curso utiliza NgModules.
+Para crear la APK en tu computadora necesitas el proyecto Ionic de los manuales anteriores, Node.js 22 o superior, JDK 21 y Android SDK Platform 36. Instala Android Studio 2025.2.1 o posterior y, en su SDK Manager, Android SDK Platform 36, Build-Tools 35.0.0 y Platform-Tools. Acepta las licencias del SDK durante su instalación. Configura JAVA_HOME con la ruta del JDK 21 y ANDROID_HOME con la ruta del SDK. Comprueba que java -version muestre la versión 21 antes de compilar. Consulta los [requisitos de Capacitor 8](https://capacitorjs.com/docs/getting-started/environment-setup).
+
+Los pasos del servidor se ejecutan en la VM. Los pasos de la APK se ejecutan en tu computadora. El directorio android se genera con Capacitor; no debes escribir sus archivos manualmente.
 
 ## 2. Conceptos y métodos que utilizarás
 
 | Elemento | Uso | Resultado |
 | --- | --- | --- |
-| Compilación de producción | `ng build --configuration production` | Genera los archivos de Ionic. |
-| Nginx | Sirve archivos y reenvía `/api/`. | Publica aplicación y API en un dominio. |
-| Docker Compose | Define `web`, `api` y `db`. | Administra los servicios. |
-| Volúmenes | Conservan base, archivos y extensiones. | Mantienen datos entre reinicios. |
-| TLS | Certificado del dominio. | Habilita HTTPS. |
+| Docker Compose | Ejecuta db y api. | MariaDB y Directus en el servidor. |
+| Nginx en Rocky Linux | Termina HTTPS y reenvía las peticiones a Directus. | Una URL HTTPS para la API y su panel. |
+| environment.prod.ts | Guarda la URL pública de Directus. | La APK consulta el servidor correcto. |
+| ng build | Compila Ionic en www. | Prepara los archivos que llevará la aplicación. |
+| cap add android | Genera el proyecto nativo una vez. | Crea mobile/android. |
+| cap sync android | Copia www y sincroniza plugins. | Actualiza el contenido del proyecto Android. |
+| assembleDebug | Compila y firma una APK de depuración. | Genera app-debug.apk para las prácticas. |
 
 ## 3. Implementación paso a paso
 
 ### Paso 1. Preparar Rocky Linux
 
-En una máquina virtual ya disponible, con acceso SSH y permisos de administración, ejecuta:
+Conéctate por SSH a la VM y ejecuta:
 
 ```bash
-sudo dnf -y install dnf-plugins-core git firewalld
+sudo dnf -y install dnf-plugins-core git firewalld nginx
 sudo dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo
 sudo dnf -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 sudo systemctl enable --now docker
 sudo systemctl enable --now firewalld
 ```
 
-Las instrucciones de instalación corresponden a la [documentación de Rocky Linux](https://docs.rockylinux.org/gemstones/containers/docker/).
-
-### Paso 2. Preparar red y dominio
-
-En el grupo de seguridad de red de la VM de Azure permite SSH desde tu equipo y tráfico web en 80 y 443, según las [reglas de conexión de Azure](https://learn.microsoft.com/en-us/azure/virtual-machines/linux-vm-connect). Apunta el dominio de la aplicación a su IP pública. En Rocky Linux ejecuta:
+La instalación de Docker sigue la [guía de Rocky Linux](https://docs.rockylinux.org/gemstones/containers/docker/). En el grupo de seguridad de Azure permite SSH desde tu equipo y tráfico en 80 y 443; configura el registro DNS del dominio con la IP pública de la VM. Consulta las [conexiones a una VM Linux de Azure](https://learn.microsoft.com/en-us/azure/virtual-machines/linux-vm-connect).
 
 ```bash
 sudo firewall-cmd --permanent --add-service=http
@@ -44,7 +44,9 @@ sudo firewall-cmd --permanent --add-service=https
 sudo firewall-cmd --reload
 ```
 
-### Paso 3. Descargar y configurar
+### Paso 2. Configurar MariaDB y Directus
+
+En la VM descarga el proyecto y prepara el archivo de variables:
 
 ```bash
 git clone https://github.com/JonathanDeLaCruz/docker_moviles.git
@@ -52,74 +54,98 @@ cd docker_moviles
 cp docs/manuales/recursos/despliegue/.env.example docs/manuales/recursos/despliegue/.env
 ```
 
-Completa `.env` con tu dominio y credenciales propias. En `mobile/src/environments/environment.prod.ts`, configura `apiUrl: '/api'` junto a `production: true`. La aplicación y la API compartirán el dominio.
-
-### Paso 4. Colocar el certificado
-
-Crea `docs/manuales/recursos/despliegue/certs/` y coloca el certificado válido del dominio como `fullchain.pem` y su clave como `privkey.pem`. Estos archivos corresponden al certificado emitido para tu dominio y se montan en Nginx.
-
-### Paso 5. Construir y arrancar
-
-Desde la raíz del repositorio ejecuta:
+Edita .env: sustituye api.example.com por tu dominio y define tus credenciales y secreto. El Compose completo está en la sección 4. Sus únicos servicios son db y api. MariaDB se comunica con Directus por la red de Docker. El puerto 8055 de la API queda accesible desde la propia VM para que Nginx le reenvíe las peticiones.
 
 ```bash
 sudo docker compose --env-file docs/manuales/recursos/despliegue/.env -f docs/manuales/recursos/despliegue/compose.yaml config --quiet
-sudo docker compose --env-file docs/manuales/recursos/despliegue/.env -f docs/manuales/recursos/despliegue/compose.yaml up -d --build
+sudo docker compose --env-file docs/manuales/recursos/despliegue/.env -f docs/manuales/recursos/despliegue/compose.yaml up -d
+sudo docker compose --env-file docs/manuales/recursos/despliegue/.env -f docs/manuales/recursos/despliegue/compose.yaml ps
 ```
 
-Después abre `https://TU_DOMINIO/api/admin`, configura el modelo y las políticas de los manuales que vayas a utilizar y carga sus datos de práctica. El SQL inicial prepara `productos`; las relaciones adicionales corresponden a sus manuales.
+El SQL inicial prepara productos en la base moviles. Los volúmenes datos, archivos y extensiones conservan los datos de MariaDB y los recursos de Directus.
 
-### Paso 6. Conservar datos y consultar el servicio
+### Paso 3. Configurar HTTPS para Directus
 
-Los volúmenes `datos`, `archivos` y `extensiones` conservan la base y los recursos de Directus. Para consultar el estado y los mensajes de inicio utiliza el mismo comando Compose con `ps` o `logs --tail 100`.
+Nginx se instala en Rocky Linux como proxy HTTPS de Directus. No aloja los archivos de Ionic: esos archivos viajarán dentro de la APK. Copia la configuración de la sección 4:
+
+```bash
+sudo cp docs/manuales/recursos/despliegue/nginx.conf /etc/nginx/conf.d/directus.conf
+sudo mkdir -p /etc/pki/tls/private
+```
+
+Edita /etc/nginx/conf.d/directus.conf y cambia api.example.com por el mismo dominio de .env. Coloca el certificado del dominio y su clave en las rutas indicadas por ssl_certificate y ssl_certificate_key. Protege la clave y valida la configuración antes de iniciar Nginx:
+
+```bash
+sudo chown root:root /etc/pki/tls/private/moviles-privkey.pem
+sudo chmod 600 /etc/pki/tls/private/moviles-privkey.pem
+sudo setsebool -P httpd_can_network_connect 1
+sudo nginx -t
+sudo systemctl enable --now nginx
+sudo systemctl reload nginx
+```
+
+Abre https://TU_DOMINIO/admin e ingresa con la cuenta administrativa de ese entorno. Configura las colecciones, políticas y datos que necesitan las prácticas. La API quedará en https://TU_DOMINIO; por ejemplo, el listado consultará https://TU_DOMINIO/items/productos.
+
+### Paso 4. Configurar la dirección de la API en Ionic
+
+En tu computadora abre mobile/src/environments/environment.prod.ts y coloca la URL HTTPS real de Directus, como muestra la sección 4. api.example.com es únicamente un marcador: debes sustituirlo antes de instalar una APK que vaya a consultar tu servidor.
+
+En el celular, localhost identifica al propio celular. La aplicación empaquetada utiliza una dirección absoluta para la API. El Compose permite el origen https://localhost que utiliza la WebView de Capacitor Android; conserva la configuración Capacitor de la sección 4.
+
+### Paso 5. Compilar y preparar Android
+
+En una terminal de tu computadora, desde la carpeta mobile del repositorio, ejecuta:
+
+```powershell
+npm ci
+npx ng build --configuration production
+```
+
+La compilación debe terminar correctamente y generar www. Si todavía no existe la carpeta android, créala una sola vez:
+
+```powershell
+npx cap add android
+```
+
+Después sincroniza los archivos y plugins:
+
+```powershell
+npx cap sync android
+```
+
+Cada vez que cambies el código Ionic o la URL de la API, vuelve a ejecutar ng build y cap sync antes de generar otra APK.
+
+### Paso 6. Crear la APK
+
+Con el SDK de Android y JDK 21 configurados, desde mobile ejecuta en PowerShell:
+
+```powershell
+cd android
+.\gradlew.bat assembleDebug
+Get-Item .\app\build\outputs\apk\debug\app-debug.apk
+cd ..
+```
+
+En Linux o macOS, la tarea equivalente desde mobile/android es ./gradlew assembleDebug. Espera el mensaje BUILD SUCCESSFUL y comprueba que exista mobile/android/app/build/outputs/apk/debug/app-debug.apk. La APK debug ya está firmada para instalarla como prueba del curso; no corresponde a una publicación en Google Play. Consulta la [compilación por línea de comandos de Android](https://developer.android.com/build/building-cmdline).
+
+### Paso 7. Instalar y consultar desde el celular
+
+Transfiere app-debug.apk a tu Android y abre el archivo para instalarlo, autorizando la instalación desde esa aplicación si Android lo solicita. También puedes conectar por USB, habilitar la depuración USB y ejecutar desde mobile, con adb disponible:
+
+```powershell
+adb devices
+adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+Abre la app instalada, inicia sesión si la práctica lo requiere y consulta Productos. Para comprobar el acceso al servidor público, prueba desde datos móviles. En la VM puedes observar las peticiones con:
+
+```bash
+sudo docker compose --env-file docs/manuales/recursos/despliegue/.env -f docs/manuales/recursos/despliegue/compose.yaml logs --tail 100 -f api
+```
 
 ## 4. Código completo de referencia
 
-### `docs/manuales/recursos/despliegue/Dockerfile`
-
-```dockerfile
-FROM node:22-alpine AS compilacion
-WORKDIR /app
-COPY mobile/package.json mobile/package-lock.json ./
-RUN npm ci
-COPY mobile/ ./
-RUN npx ng build --configuration production
-FROM nginx:1.28-alpine
-COPY --from=compilacion /app/www /usr/share/nginx/html
-```
-
-### `docs/manuales/recursos/despliegue/nginx.conf`
-
-```nginx
-server {
-  listen 80;
-  server_name _;
-  return 301 https://$host$request_uri;
-}
-server {
-  listen 443 ssl;
-  server_name _;
-  ssl_certificate /etc/nginx/certs/fullchain.pem;
-  ssl_certificate_key /etc/nginx/certs/privkey.pem;
-  root /usr/share/nginx/html;
-  index index.html;
-  client_max_body_size 25m;
-  location /api/ {
-    proxy_pass http://api:8055/;
-    proxy_http_version 1.1;
-    proxy_set_header Host $host;
-    proxy_set_header X-Forwarded-Proto $scheme;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection "upgrade";
-  }
-  location / {
-    try_files $uri $uri/ /index.html;
-  }
-}
-```
-
-### `docs/manuales/recursos/despliegue/compose.yaml`
+### docs/manuales/recursos/despliegue/compose.yaml
 
 ```yaml
 services:
@@ -141,6 +167,8 @@ services:
   api:
     image: directus/directus:12.3.1
     restart: unless-stopped
+    ports:
+      - "127.0.0.1:8055:8055"
     environment:
       SECRET: ${DIRECTUS_SECRET:?Define DIRECTUS_SECRET}
       ADMIN_EMAIL: ${ADMIN_EMAIL:?Define ADMIN_EMAIL}
@@ -151,36 +179,51 @@ services:
       DB_DATABASE: moviles
       DB_USER: moviles
       DB_PASSWORD: ${DB_PASSWORD}
-      PUBLIC_URL: https://${DOMAIN:?Define DOMAIN}/api
+      PUBLIC_URL: https://${DOMAIN:?Define DOMAIN}
+      CORS_ENABLED: "true"
+      CORS_ORIGIN: "https://localhost"
+      CORS_METHODS: "GET,POST,PATCH,DELETE,OPTIONS"
+      CORS_ALLOWED_HEADERS: "Content-Type,Authorization"
     volumes:
       - archivos:/directus/uploads
       - extensiones:/directus/extensions
     depends_on:
       db:
         condition: service_healthy
-  web:
-    build:
-      context: ../../../..
-      dockerfile: docs/manuales/recursos/despliegue/Dockerfile
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./certs:/etc/nginx/certs:ro
-    depends_on:
-      - api
 volumes:
   datos:
   archivos:
   extensiones:
 ```
 
-### `docs/manuales/recursos/despliegue/.env.example`
+### docs/manuales/recursos/despliegue/nginx.conf
+
+```nginx
+server {
+  listen 80;
+  server_name api.example.com;
+  return 301 https://$host$request_uri;
+}
+server {
+  listen 443 ssl;
+  server_name api.example.com;
+  ssl_certificate /etc/pki/tls/certs/moviles-fullchain.pem;
+  ssl_certificate_key /etc/pki/tls/private/moviles-privkey.pem;
+  client_max_body_size 25m;
+  location / {
+    proxy_pass http://127.0.0.1:8055;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  }
+}
+```
+
+### docs/manuales/recursos/despliegue/.env.example
 
 ```dotenv
-DOMAIN=moviles.example.com
+DOMAIN=api.example.com
 ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=DEFINIR_UNA_CONTRASENA_PROPIA
 DB_ROOT_PASSWORD=DEFINIR_CLAVE_ROOT
@@ -188,36 +231,72 @@ DB_PASSWORD=DEFINIR_CLAVE_DE_APLICACION
 DIRECTUS_SECRET=DEFINIR_UN_SECRETO_ALEATORIO_DE_AL_MENOS_32_CARACTERES
 ```
 
-### `mobile/src/environments/environment.prod.ts`
+### mobile/src/environments/environment.prod.ts
 
 ```typescript
 export const environment = {
   production: true,
-  apiUrl: '/api'
+  // Sustituye este dominio por la URL HTTPS pública de tu Directus.
+  apiUrl: 'https://api.example.com'
 };
+```
+
+### mobile/capacitor.config.ts
+
+```typescript
+import type { CapacitorConfig } from '@capacitor/cli';
+
+const config: CapacitorConfig = {
+  appId: 'mx.edu.moviles',
+  appName: 'Moviles',
+  webDir: 'www'
+};
+
+export default config;
 ```
 
 ## 5. Comprobar el resultado
 
-1. Verifica que los tres servicios estén en ejecución con `docker compose ... ps`.
-2. Abre el dominio: debe mostrar Ionic y permitir navegar directamente a una ruta interna.
-3. Abre `/api/admin` e inicia sesión con la cuenta creada para ese entorno.
-4. Comprueba el acceso, el listado y una operación con un registro de prueba, de acuerdo con sus políticas.
-5. Verifica que las imágenes cargadas se conserven después de reiniciar los servicios.
+1. En la VM, Compose debe mostrar db y api en ejecución. Abre https://TU_DOMINIO/admin y verifica la cuenta y las políticas de práctica.
+2. En tu computadora, la compilación Android debe terminar con BUILD SUCCESSFUL y crear app-debug.apk en la ruta indicada.
+3. Instala la APK en el celular y comprueba que abra la interfaz de Ionic.
+4. Con la URL pública real configurada, consulta el listado y un detalle. Confirma las peticiones en los registros de Directus.
+5. Repite la consulta con datos móviles para comprobar el acceso al servidor desde otra red.
 
-La validación en Azure requiere la VM, el dominio y el certificado reales. La comprobación local de los archivos no acredita un despliegue remoto.
+### Resultado comprobado de la compilación
+
+Se creó una APK real ejecutando la tarea assembleDebug en Linux con JDK 21, Gradle 8.14.3 y SDK 36. El resultado fue:
+
+```text
+BUILD SUCCESSFUL in 2m 33s
+213 actionable tasks: 213 executed
+```
+
+| Comprobación | Resultado |
+| --- | --- |
+| Archivo | mobile/android/app/build/outputs/apk/debug/app-debug.apk |
+| Tamaño | 5 392 871 bytes |
+| Paquete | mx.edu.moviles, versión 1.0 |
+| SDK mínimo / destino | 24 / 36 |
+| Firma | Verificada con apksigner, esquema v2 |
+| Contenido | AndroidManifest.xml, classes.dex y archivos de Ionic presentes |
+| Red | Permiso INTERNET presente y URL de ejemplo incluida |
+
+La huella y los datos de esta APK están en el [registro de compilación](recursos/android/validacion-apk.json). Esta comprobación utilizó el wrapper de Linux; el comando de PowerShell del paso 6 ejecuta la misma tarea mediante gradlew.bat.
+
+**Alcance de esta revisión:** el servidor aún no está publicado. La compilación de comprobación utiliza https://api.example.com; esa dirección no acredita una conexión real. La prueba de despliegue remoto, instalación y peticiones desde el teléfono queda pendiente.
 
 ## 6. Explicación detallada del flujo
 
-La figura 1 muestra el recorrido de arriba hacia abajo.
+La figura 1 muestra cómo los datos viajan desde la aplicación instalada hasta la base de datos y regresan a la pantalla.
 
 <p align="center">
-  <img src="imagenes/flujo-16-despliegue.png" alt="Servir Ionic y Directus con HTTPS" width="390"><br>
-  <em>Figura 1. Servir Ionic y Directus con HTTPS.</em>
+  <img src="imagenes/flujo-16-despliegue.png" alt="Celular con APK consulta Directus en Azure y recibe datos de MariaDB" width="390"><br>
+  <em>Figura 1. Solicitud de la APK, consulta en Directus y respuesta al celular.</em>
 </p>
 
-El Dockerfile compila Ionic durante la construcción y copia `www` a la imagen que sirve Nginx. El `apiUrl` de producción dirige las peticiones a `/api` en el mismo dominio.
+ng build genera los archivos de Ionic en www. cap sync android los copia al proyecto Android y sincroniza los plugins. Gradle compila el proyecto y los incorpora en una APK instalable.
 
-Nginx sirve las rutas de la aplicación con `try_files` y reenvía las peticiones de `/api/` al servicio interno de Directus. La barra final de `proxy_pass` retira ese prefijo antes de entregar la ruta a la API. Los encabezados reenviados conservan el contexto HTTPS.
+Al abrir la aplicación, Capacitor muestra esos archivos dentro de su WebView. El código utiliza environment.apiUrl para enviar las peticiones HTTPS al dominio público de Directus. Nginx atiende HTTPS en la VM y reenvía las peticiones a Directus, que aplica sus permisos y consulta MariaDB por la red interna de Docker.
 
-Directus utiliza la base `moviles`, configurada con el mismo usuario y contraseña de MariaDB. Los servicios se comunican por la red de Compose. El entorno remoto tiene sus propias credenciales, datos y políticas. Los certificados y `.env` se mantienen en el servidor y deben renovarse según su emisor.
+Directus responde con JSON; Nginx devuelve la respuesta al celular y Angular actualiza la pantalla. Las credenciales de MariaDB y el secreto de Directus permanecen en el servidor. La APK contiene la URL de la API y utiliza las cuentas y permisos configurados en Directus.

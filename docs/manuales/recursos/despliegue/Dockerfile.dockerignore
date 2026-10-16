@@ -1,7 +1,0 @@
-mobile/node_modules
-mobile/.angular
-mobile/www
-.git
-.revision-repo-antiguo
-**/.env
-**/certs/

@@ -713,33 +713,35 @@
   },
   {
     "nombre": "16-despliegue",
-    "titulo": "Servir Ionic y Directus con HTTPS",
+    "titulo": "La APK consulta Directus en Azure",
     "pasos": [
       {
-        "area": "USUARIO",
-        "texto": "Abre el dominio mediante HTTPS"
+        "area": "CELULAR ANDROID",
+        "texto": "El usuario abre la APK instalada"
       },
       {
-        "area": "NGINX",
-        "texto": "Recibe la petición",
-        "nota": "Aplicación: sirve los archivos compilados de Ionic."
+        "area": "APP IONIC",
+        "texto": "environment.apiUrl contiene la URL HTTPS pública de Directus"
       },
       {
-        "area": "NGINX",
-        "texto": "Las peticiones /api/ se reenvían a Directus"
+        "area": "APP IONIC",
+        "texto": "Envía la petición HTTPS desde el celular"
+      },
+      {
+        "area": "NGINX EN LA VM",
+        "texto": "Recibe HTTPS y reenvía la petición a Directus"
       },
       {
         "area": "DIRECTUS",
-        "texto": "Consulta los datos en MariaDB",
-        "nota": "Los archivos utilizan el volumen persistente de Directus."
+        "texto": "Aplica los permisos y consulta MariaDB"
       },
       {
         "area": "MARIADB",
-        "texto": "Entrega los registros consultados"
+        "texto": "Entrega los registros a Directus"
       },
       {
         "area": "DIRECTUS",
-        "texto": "Devuelve la respuesta a través de Nginx"
+        "texto": "Devuelve JSON al celular a través del proxy HTTPS"
       },
       {
         "area": "APP IONIC",

@@ -24,11 +24,11 @@ Ionic 8.8.17, Angular 20.3.30, Node.js 22 en el contenedor móvil, Directus 12.3
 | 13 | Redirección de ruta protegida, retorno tras acceso y cierre de sesión. | Comprobado en Ionic. Se corrigió la navegación con replaceUrl. |
 | 14 | Creación con dos categorías y consulta de los enlaces persistidos. | Comprobado: producto de prueba 11, categorías Periféricos y Accesorios. |
 | 15 | Compilación, selección real de archivo e intento de carga. | Pendiente: Directus rechazó las reglas de archivos propios con RESOURCE_RESTRICTED / custom_permission_rules_enabled. No se concedió lectura pública ni acceso administrativo a la cuenta de prueba. |
-| 16 | Validación de Compose y compilación de producción con apiUrl /api. | Comprobaciones locales satisfactorias; despliegue en Azure pendiente de VM, dominio y certificado. |
+| 16 | Compose con db y api, sintaxis de Nginx y compilación para Android. | Compose y Nginx comprobados localmente. APK debug creada y firma verificada; servidor público, instalación y solicitudes desde el celular pendientes. |
 
 ## Compilación
 
-La aplicación con las prácticas hasta el manual 15 compiló en desarrollo. También se comprobó la compilación de producción con la ruta /api y se restauró después la configuración local. Los avisos de deprecación de Sass sobre @import no impidieron compilar.
+La aplicación con las prácticas hasta el manual 15 compiló en desarrollo. La compilación de producción para Android utiliza una URL HTTPS absoluta; en la comprobación se usó https://api.example.com porque aún no existe un servidor público. Los avisos de deprecación de Sass sobre @import no impidieron compilar.
 
 ## Evidencia y límites
 
@@ -45,3 +45,11 @@ Se reemplazaron los bloques Mermaid visibles por 19 imágenes PNG: 18 de los man
 La comprobación de referencias abarcó 20 documentos y 49 figuras, sin recursos ausentes ni párrafos HTML sin cierre. Se inspeccionaron visualmente los PNG de los manuales 01 y 13. La apertura del README en Codex quedó en cola; no se pudo confirmar su vista previa desde esta herramienta. La presentación de los nuevos flujos en la aplicación GitHub móvil queda pendiente de comprobación en ese visor.
 
 Después de publicar, se comprobó el README en la vista Markdown de GitHub: sus dos imágenes cargaron y quedaron centradas. En el manual 14 se comprobó la captura y el flujo PNG con ancho de navegador de 390 px: ambas imágenes cargaron, se ajustaron a 309 px dentro del contenido y quedaron centradas. Esto verifica el navegador con tamaño móvil; no constituye una prueba en la aplicación nativa de GitHub.
+
+## Compilación Android del manual 16
+
+Se generó app-debug.apk con la aplicación de prácticas: 5 392 871 bytes, paquete mx.edu.moviles, mínimo SDK 24 y destino SDK 36. Gradle terminó con BUILD SUCCESSFUL in 2m 33s y 213 tareas ejecutadas. apksigner verificó la firma v2; se comprobó la presencia de AndroidManifest.xml, classes.dex y la URL https://api.example.com en los archivos empaquetados. El [registro de la APK](manuales/recursos/android/validacion-apk.json) incluye la huella SHA-256.
+
+La compilación se ejecutó con JDK 21 y el wrapper de Linux en un contenedor temporal de herramientas; el proyecto Android se generó con cap add android y se actualizó con cap sync android. No se instalaron herramientas de compilación en el servidor de Azure.
+
+El Compose corregido validó únicamente los servicios db y api. nginx -t comprobó la sintaxis de su proxy usando un certificado temporal de prueba, sin iniciar un servidor. El dominio real y su certificado todavía no están disponibles. La APK utiliza una URL de ejemplo, por lo que no se presenta como una aplicación conectada a Azure ni como instalada y probada en un celular.

@@ -1,0 +1,29 @@
+{
+  "fecha": "2026-10-16",
+  "resultado": "BUILD SUCCESSFUL in 2m 33s",
+  "tareas": 213,
+  "comando": "./gradlew --no-daemon --max-workers=2 --console=plain assembleDebug",
+  "entorno": "Linux, Eclipse Temurin JDK 21, Gradle 8.14.3, Android Gradle Plugin 8.13.0",
+  "android": {
+    "minSdk": 24,
+    "targetSdk": 36,
+    "compileSdk": 36,
+    "buildTools": "35.0.0"
+  },
+  "apk": {
+    "ruta": "mobile/android/app/build/outputs/apk/debug/app-debug.apk",
+    "bytes": 5392871,
+    "sha256": "ce22afa3ac64ee9cc731115af22fa6309eb5b227c2eea17b27652ff55fdd08b2",
+    "paquete": "mx.edu.moviles",
+    "version": "1.0",
+    "firma": "APK Signature Scheme v2 verificada",
+    "manifest": true,
+    "dex": true,
+    "permisoInternet": true,
+    "apiUrl": "https://api.example.com"
+  },
+  "limites": [
+    "URL de ejemplo: el servidor aún no está publicado.",
+    "No se comprobó instalación en un celular ni solicitudes a una API pública."
+  ]
+}

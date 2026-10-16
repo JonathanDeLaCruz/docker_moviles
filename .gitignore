@@ -3,3 +3,5 @@
 **/certs/
 .revision-repo-antiguo/
 docs/manuales/recursos/flujos/generar.ps1
+.android-tools/
+artifacts/
