@@ -1,0 +1,20 @@
+flowchart TD
+  N0["USUARIO<br/>Presiona el icono de ojo"] 
+  N1["APP IONIC<br/>routerLink abre /productos-view/1"]
+  N2["APP IONIC<br/>ngOnInit() llama a cargarProducto()"]
+  N3["APP IONIC<br/>ActivatedRoute obtiene el ID y se muestra la carga"]
+  N4["APP IONIC<br/>Axios solicita GET /items/productos/1"]
+  N5["DIRECTUS<br/>Consulta el producto por ID"]
+  N6["MARIADB<br/>Entrega el registro a Directus"]
+  N7["DIRECTUS<br/>Devuelve un objeto dentro de data"]
+  N8["APP IONIC<br/>Guarda response.data.data en producto"]
+  N9["APP IONIC<br/>ngIf muestra la tarjeta; finally cierra la carga"]
+  N0 --> N1
+  N1 --> N2
+  N2 --> N3
+  N3 --> N4
+  N4 --> N5
+  N5 --> N6
+  N6 --> N7
+  N7 --> N8
+  N8 --> N9

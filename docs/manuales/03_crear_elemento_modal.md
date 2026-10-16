@@ -795,26 +795,12 @@ Prueba el icono **+** en la ubicación elegida. Debe abrir el formulario sin cam
 
 El listado permanece debajo del modal. La app valida los datos, los envía a Directus y, al cerrar el formulario después de guardar, recibe el resultado que indica que debe recargar los productos.
 
-```mermaid
-flowchart TD
-    A["📱 El usuario presiona + en el listado"] --> B["nuevoProducto() crea y presenta el modal"]
-    B --> C["El formulario se abre sobre productos-list"]
-    C --> D["El usuario captura los datos y presiona Guardar"]
-    D --> E{"¿El formulario es válido?"}
-    E -->|"No"| F["getError() muestra los mensajes de validación"]
-    F --> D
-    E -->|"Sí"| G["Axios envía el JSON del producto"]
-    G -->|"POST /items/productos"| H["🌐 Directus recibe la petición"]
-    H --> I["🗄️ MariaDB guarda el registro y genera su ID y fecha"]
-    I --> H
-    H -->|"Creación exitosa"| J["📱 La app muestra Producto guardado"]
-    J --> K["El usuario acepta y dismiss devuelve guardado: true"]
-    K --> L["El listado recibe el resultado en onDidDismiss()"]
-    L -->|"GET /items/productos"| M["Directus devuelve la colección actualizada"]
-    M --> N["📱 El listado muestra Mouse modal"]
-    C -->|"Cancelar"| O["dismiss devuelve guardado: false"]
-    O --> P["El modal se cierra sin crear ni recargar productos"]
-```
+La figura 6 muestra el recorrido de arriba hacia abajo.
+
+<p align="center">
+  <img src="imagenes/flujo-03-crear-modal.png" alt="Crear un producto mediante un modal" width="390"><br>
+  <em>Figura 6. Crear un producto mediante un modal.</em>
+</p>
 
 ### Cómo se abre y se ajusta el modal
 

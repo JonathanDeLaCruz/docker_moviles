@@ -1,0 +1,24 @@
+flowchart TD
+  N0["USUARIO<br/>Presiona + en el listado"] 
+  N1["APP IONIC<br/>nuevoProducto() crea y presenta el modal<br/>Cancelar: dismiss devuelve guardado: false; no crea ni recarga productos."]
+  N2["USUARIO<br/>Captura los datos y presiona Guardar"]
+  N3["APP IONIC<br/>Valida el formulario<br/>Si es inválido, getError() muestra mensajes y el usuario corrige los datos."]
+  N4["APP IONIC<br/>Axios envía POST /items/productos"]
+  N5["DIRECTUS<br/>Valida y solicita guardar el producto"]
+  N6["MARIADB<br/>Guarda el registro y genera ID y fecha"]
+  N7["DIRECTUS<br/>Devuelve la creación exitosa"]
+  N8["APP IONIC<br/>Muestra Producto guardado"]
+  N9["USUARIO<br/>Acepta; dismiss devuelve guardado: true"]
+  N10["APP IONIC<br/>onDidDismiss() recibe el resultado y consulta el listado"]
+  N11["APP IONIC<br/>Muestra el producto nuevo"]
+  N0 --> N1
+  N1 --> N2
+  N2 --> N3
+  N3 --> N4
+  N4 --> N5
+  N5 --> N6
+  N6 --> N7
+  N7 --> N8
+  N8 --> N9
+  N9 --> N10
+  N10 --> N11

@@ -504,22 +504,12 @@ Estas pruebas se realizan en el navegador de la computadora donde se ejecuta Doc
 
 La app envía el ID del producto seleccionado a la página de detalle. Esta consulta Directus, recibe un objeto y lo muestra en una tarjeta.
 
-```mermaid
-flowchart TD
-    A["📱 El usuario presiona el icono de ojo"] --> B["routerLink abre /productos-view/1"]
-    B --> C["ngOnInit() llama a cargarProducto()"]
-    C --> D["ActivatedRoute obtiene el ID de la ruta"]
-    D --> E["La app muestra Cargando producto..."]
-    E --> F["Axios solicita el producto"]
-    F -->|"GET /items/productos/1"| G["🌐 Directus recibe la petición"]
-    G --> H["🗄️ MariaDB entrega el registro"]
-    H --> G
-    G -->|"Respuesta JSON: un objeto dentro de data"| I["📱 La app recibe la respuesta"]
-    I --> J["Guarda response.data.data en producto"]
-    J --> K["ngIf muestra la tarjeta con los datos"]
-    K --> L["finally cierra el indicador de carga"]
-    L --> M["📱 Detalle del producto<br/><br/>Laptop · Producto #1<br/>Precio: $15000.00<br/>Stock: 5"]
-```
+La figura 3 muestra el recorrido de arriba hacia abajo.
+
+<p align="center">
+  <img src="imagenes/flujo-02-detalle.png" alt="Consultar el detalle de un producto" width="390"><br>
+  <em>Figura 3. Consultar el detalle de un producto.</em>
+</p>
 
 ### Cómo se envía y se lee el ID
 

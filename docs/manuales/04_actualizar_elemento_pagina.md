@@ -787,31 +787,9 @@ En edición, `PATCH /items/productos/{id}` actualiza el registro señalado por l
 
 Al volver al listado, `ionViewWillEnter()` ejecuta `cargarProductos()`. Esta nueva consulta actualiza el arreglo de `*ngFor` y muestra los valores guardados sin recargar todo el navegador.
 
-```mermaid
-sequenceDiagram
-    actor Alumno
-    participant App as 📱 App Ionic
-    participant API as 🌐 Directus
-    participant DB as 🗄️ MariaDB
-    Alumno->>App: Pulsa el lápiz del producto
-    App->>App: Lee el ID y crea el formulario
-    App->>API: GET /items/productos/{id}
-    API->>DB: Consulta el producto
-    DB-->>API: Registro actual
-    API-->>App: JSON con data
-    App->>App: patchValue() carga los campos
-    Alumno->>App: Modifica y pulsa Actualizar
-    App->>App: Valida y prepara los cuatro campos
-    App->>API: PATCH /items/productos/{id}
-    API->>DB: Actualiza el registro
-    DB-->>API: Cambio guardado
-    API-->>App: Respuesta exitosa
-    App-->>Alumno: Producto actualizado
-    Alumno->>App: Acepta la confirmación
-    App->>App: Router regresa al listado
-    App->>API: GET /items/productos
-    API->>DB: Consulta la colección
-    DB-->>API: Productos actuales
-    API-->>App: JSON con data
-    App-->>Alumno: Listado actualizado
-```
+La figura 4 muestra el recorrido de arriba hacia abajo.
+
+<p align="center">
+  <img src="imagenes/flujo-04-actualizar-pagina.png" alt="Actualizar un producto mediante una página" width="390"><br>
+  <em>Figura 4. Actualizar un producto mediante una página.</em>
+</p>

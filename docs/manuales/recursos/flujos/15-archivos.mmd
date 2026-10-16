@@ -1,0 +1,16 @@
+flowchart TD
+  N0["USUARIO<br/>Selecciona un archivo de imagen"] 
+  N1["APP IONIC<br/>Agrega el File a FormData"]
+  N2["APP IONIC<br/>Envía POST /files a Directus"]
+  N3["DIRECTUS<br/>Guarda el archivo y sus metadatos<br/>Requiere los permisos de archivos propios descritos en el manual."]
+  N4["APP IONIC<br/>Recibe el ID y envía PATCH del producto"]
+  N5["DIRECTUS<br/>Guarda el ID en productos.imagen"]
+  N6["APP IONIC<br/>Solicita GET /assets/{id} con autenticación"]
+  N7["APP IONIC<br/>Convierte el Blob en URL y muestra la imagen"]
+  N0 --> N1
+  N1 --> N2
+  N2 --> N3
+  N3 --> N4
+  N4 --> N5
+  N5 --> N6
+  N6 --> N7

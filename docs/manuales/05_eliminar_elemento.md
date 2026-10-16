@@ -254,15 +254,12 @@ La figura 1 muestra el resultado obtenido con el código de esta práctica. Las 
 
 ## 6. Explicación detallada del flujo
 
-```mermaid
-flowchart LR
- A["📱 Papelera del producto"] --> B["Confirmación con nombre e ID"]
- B -->|Cancelar| C["Sin petición"]
- B -->|Eliminar| D["DELETE a Directus"]
- D --> E["🗄️ MariaDB elimina el registro"]
- E --> F["Alerta de éxito"]
- F --> G["GET del listado actualizado"]
-```
+La figura 2 muestra el recorrido de arriba hacia abajo.
+
+<p align="center">
+  <img src="imagenes/flujo-05-eliminar.png" alt="Eliminar un producto con confirmación" width="390"><br>
+  <em>Figura 2. Eliminar un producto con confirmación.</em>
+</p>
 
 `confirmarEliminar()` recibe el ID y el nombre de la fila. La alerta explica qué registro se eligió; la petición utiliza el ID. Cancelar tiene el rol `cancel` y no llama al método de eliminación.
 

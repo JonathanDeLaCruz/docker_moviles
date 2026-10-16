@@ -561,18 +561,12 @@ La figura 1 muestra el resultado obtenido con el código de esta práctica. Las 
 
 ## 6. Explicación detallada del flujo
 
-```mermaid
-flowchart LR
- A["📱 Lápiz del producto"] --> B["Modal con componentProps.id"]
- B --> C["GET por ID a Directus"]
- C --> D["🗄️ MariaDB entrega el registro"]
- D --> E["📱 patchValue llena el formulario"]
- E --> F["Usuario edita y valida"]
- F --> G["PATCH a Directus"]
- G --> H["MariaDB guarda los cambios"]
- H --> I["Confirmación y dismiss guardado true"]
- I --> J["Listado vuelve a consultar Directus"]
-```
+La figura 2 muestra el recorrido de arriba hacia abajo.
+
+<p align="center">
+  <img src="imagenes/flujo-04-actualizar-modal.png" alt="Actualizar un producto mediante un modal" width="390"><br>
+  <em>Figura 2. Actualizar un producto mediante un modal.</em>
+</p>
 
 ### Cómo llega el identificador
 

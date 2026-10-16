@@ -1,537 +1,123 @@
-# Desarrollo de Aplicaciones Móviles - Entorno Docker
+# Desarrollo de Aplicaciones Móviles con Ionic
 
-Este repositorio contiene el entorno de desarrollo utilizado en la materia **Desarrollo de Aplicaciones Móviles**.
+Entorno del curso con Ionic, Angular, Directus y MariaDB dentro de Docker. Los manuales reúnen la implementación, el código completo, las comprobaciones y la explicación del flujo. El registro de validación indica qué pruebas se ejecutaron y cuáles están pendientes.
 
-El objetivo es que todos los estudiantes trabajen con el mismo entorno, las mismas herramientas y las mismas versiones, evitando problemas de configuración local como diferencias entre versiones de Node.js, Ionic, bases de datos o dependencias.
+La figura 1 muestra la aplicación Ionic utilizada en las prácticas.
 
-El entorno completo se ejecuta mediante **Docker Compose**.
+<p align="center">
+  <img src="docs/manuales/imagenes/vista-general-ionic.jpg" alt="Aplicación Ionic del curso con productos, búsqueda y paginación" width="390"><br>
+  <em>Figura 1. Aplicación ejecutada con los datos de práctica.</em>
+</p>
 
----
+## Entorno
 
-## Tecnologías utilizadas
-
-| Tecnología | Función |
+| Componente | Función |
 | --- | --- |
-| **Docker** | Ejecutar y aislar los servicios del proyecto |
-| **Docker Compose** | Administrar todos los contenedores como un solo entorno |
-| **Ionic 8** | Desarrollo de la aplicación móvil |
-| **Angular 20** | Framework utilizado por Ionic |
-| **Capacitor 8** | Integración de la aplicación con Android, iOS y funcionalidades nativas |
-| **Directus** | Backend y API REST |
-| **OpenAPI** | Especificación de la API generada por Directus |
-| **Swagger UI** | Documentación interactiva de la API |
-| **MariaDB** | Base de datos |
-| **CloudBeaver** | Administración gráfica de MariaDB |
+| Ionic 8 y Angular 20 | Interfaz y navegación |
+| Capacitor 8 | Integración de la aplicación con plataformas móviles |
+| Directus | API, autenticación, archivos y permisos |
+| MariaDB | Persistencia de datos |
+| CloudBeaver | Administración de la base |
+| Swagger UI | Consulta de la especificación OpenAPI |
 
----
+`mobile/package.json` contiene las versiones del proyecto. El entorno comprobado utiliza Ionic 8.8.17, Angular 20.3.30 y Capacitor 8.5.0.
 
-## Arquitectura
+La figura 2 resume la comunicación entre la aplicación, la API y la base de datos.
 
-El proyecto utiliza una arquitectura separada por servicios.
+<p align="center">
+  <img src="docs/manuales/imagenes/flujo-00-entorno.png" alt="Flujo vertical de Ionic, Directus y MariaDB" width="390"><br>
+  <em>Figura 2. Petición de Ionic, consulta de datos y respuesta a la aplicación.</em>
+</p>
 
-```text
-                    ┌──────────────────────────────┐
-                    │         Swagger UI           │
-                    │ Documentación de la API      │
-                    │ Puerto 8081                  │
-                    └──────────────┬───────────────┘
-                                   │
-                                   │ OpenAPI
-                                   ▼
-┌──────────────────────────────┐   ┌──────────────────────────────┐
-│           Ionic              │   │          Directus            │
-│ Ionic 8 + Angular 20         │──▶│ Backend / API REST           │
-│ Capacitor 8                  │   │ Puerto 8000                  │
-│ Puerto 8100                  │   └──────────────┬───────────────┘
-└──────────────────────────────┘                  │
-                                                 │ SQL
-                                                 ▼
-                                  ┌──────────────────────────────┐
-                                  │          MariaDB             │
-                                  │ Base de datos                │
-                                  │ Puerto interno 3306          │
-                                  └──────────────┬───────────────┘
-                                                 ▲
-                                                 │
-                                  ┌──────────────┴───────────────┐
-                                  │        CloudBeaver           │
-                                  │ Administración de BD         │
-                                  │ Puerto 8978                  │
-                                  └──────────────────────────────┘
-```
+## Preparar el proyecto
 
-### Ionic
-
-Ionic contiene la aplicación que utilizará el usuario.
-
-Durante el desarrollo puede visualizarse desde el navegador, pero el proyecto está preparado para trabajar como aplicación móvil mediante **Capacitor**, permitiendo posteriormente generar aplicaciones para Android e iOS y utilizar funcionalidades nativas del dispositivo.
-
-### Directus
-
-Directus funciona como backend del proyecto.
-
-Se conecta directamente con MariaDB y genera una API a partir de las colecciones y tablas disponibles en la base de datos.
-
-Por esta razón no es necesario desarrollar y mantener una API independiente dentro del repositorio.
-
-### OpenAPI y Swagger UI
-
-Directus genera automáticamente una especificación **OpenAPI** de la API disponible en el proyecto.
-
-La especificación puede consultarse en:
-
-```text
-http://localhost:8000/server/specs/oas
-```
-
-Swagger UI utiliza esta especificación para proporcionar una interfaz gráfica en la que se pueden consultar y probar los endpoints disponibles.
-
-Swagger UI se encuentra disponible en:
-
-```text
-http://localhost:8081
-```
-
-La especificación generada por Directus depende del esquema y de los permisos disponibles en el proyecto.
-
-### MariaDB
-
-MariaDB almacena la información utilizada por la aplicación.
-
-Los datos se conservan mediante un volumen de Docker, por lo que detener o recrear un contenedor no elimina automáticamente la base de datos.
-
-### CloudBeaver
-
-CloudBeaver proporciona una interfaz gráfica para consultar y administrar MariaDB sin instalar un administrador de bases de datos directamente en Windows.
-
----
-
-## Docker
-
-Cada tecnología se ejecuta en su propio contenedor.
-
-```text
-Docker Compose
-│
-├── mobile
-│   └── Ionic
-│
-├── api
-│   └── Directus
-│
-├── swagger
-│   └── Swagger UI
-│
-├── db
-│   └── MariaDB
-│
-└── cloudbeaver
-    └── CloudBeaver
-```
-
-Los servicios pueden comunicarse entre sí utilizando la red interna creada por Docker Compose.
-
-Por ejemplo, Directus y CloudBeaver se conectan a MariaDB utilizando:
-
-```text
-Host: db
-Puerto: 3306
-```
-
-El nombre `db` corresponde al nombre del servicio definido en `docker-compose.yml`.
-
----
-
-## Estructura general
-
-```text
-docker_moviles/
-├── database/
-│   └── init/
-│
-├── docs/
-│   ├── correcciones/
-│   └── manuales/
-│
-├── mobile/
-│
-├── .gitignore
-├── README.md
-└── docker-compose.yml
-```
-
-### `database`
-
-Contiene los archivos necesarios para inicializar la base de datos.
-
-### `mobile`
-
-Contiene el proyecto Ionic.
-
-### `docs`
-
-Contiene la documentación utilizada durante el curso.
-
-```text
-docs/
-├── correcciones/
-└── manuales/
-```
-
----
-
-## Requisitos
-
-Para trabajar con este repositorio se requiere:
-
-- Docker Desktop
-- Visual Studio Code
-- Git
-
-No es necesario instalar directamente en Windows:
-
-- Node.js
-- npm
-- Ionic CLI
-- Angular CLI
-- Capacitor
-- MariaDB
-- Directus
-- Swagger UI
-- CloudBeaver
-- XAMPP
-
-Las herramientas necesarias se ejecutan dentro de Docker.
-
----
-
-## Descargar el proyecto
+Instala Docker Desktop, Git y tu editor. Los comandos de la aplicación se ejecutan dentro del servicio `mobile`.
 
 ```powershell
 git clone https://github.com/JonathanDeLaCruz/docker_moviles.git
-```
-
-Entrar al proyecto:
-
-```powershell
 cd docker_moviles
 ```
 
----
+**Antes del primer arranque de una instalación limpia**, revisa `api.environment` en `docker-compose.yml`: el SQL inicial crea la base `moviles`, por lo que configura `DB_DATABASE: "moviles"`, `DB_USER: "moviles"` y `DB_PASSWORD: "moviles123"`. Define también un correo administrativo válido, su contraseña inicial y el secreto del proyecto. La [configuración de Directus](docs/correcciones/01_cambio_fastapi_directus.md) reúne el bloque completo.
 
-## Primera ejecución
-
-Desde la carpeta donde se encuentra `docker-compose.yml`:
+Si ya tienes Directus configurado con una base existente, conserva esa conexión y la cuenta que utilizas. La configuración actual del servicio apunta a `especialidades`; cambiar variables de creación del administrador no cambia la contraseña de una cuenta existente.
 
 ```powershell
-docker compose up --build
-```
-
-La primera ejecución puede tardar algunos minutos porque Docker debe descargar las imágenes y preparar las dependencias necesarias.
-
----
-
-## Ejecuciones posteriores
-
-Para iniciar los servicios:
-
-```powershell
-docker compose up
-```
-
-Para ejecutarlos en segundo plano:
-
-```powershell
-docker compose up -d
-```
-
----
-
-## Servicios disponibles
-
-| Servicio | Dirección |
-| --- | --- |
-| Ionic | `http://localhost:8100` |
-| Directus | `http://localhost:8000` |
-| OpenAPI de Directus | `http://localhost:8000/server/specs/oas` |
-| Swagger UI | `http://localhost:8081` |
-| CloudBeaver | `http://localhost:8978` |
-
-MariaDB se utiliza principalmente mediante la red interna de Docker.
-
----
-
-## Acceso inicial a Directus
-
-```text
-Correo: admin@moviles.local
-Contraseña: admin123
-```
-
-Directus se conecta a MariaDB mediante:
-
-```text
-Host: db
-Puerto: 3306
-Base de datos: moviles
-Usuario: moviles
-Contraseña: moviles123
-```
-
----
-
-## Conexión de CloudBeaver
-
-Para conectarse a MariaDB desde CloudBeaver:
-
-```text
-Host: db
-Puerto: 3306
-Base de datos: moviles
-Usuario: moviles
-Contraseña: moviles123
-```
-
-Dentro de Docker no debe utilizarse `localhost` para comunicarse con MariaDB.
-
-`localhost` hace referencia al propio contenedor, mientras que `db` permite localizar el contenedor de MariaDB dentro de la red de Docker Compose.
-
----
-
-## Documentación interactiva de la API
-
-Directus genera la especificación OpenAPI del proyecto en:
-
-```text
-http://localhost:8000/server/specs/oas
-```
-
-Swagger UI utiliza esta especificación y presenta la documentación desde:
-
-```text
-http://localhost:8081
-```
-
-La relación es:
-
-```text
-Directus
-   │
-   │ genera
-   ▼
-OpenAPI
-   │
-   │ interpreta
-   ▼
-Swagger UI
-```
-
-Swagger UI no reemplaza a Directus. Su función es facilitar la consulta y prueba de la API que Directus genera.
-
----
-
-## Recarga automática de Ionic
-
-El entorno está configurado para detectar los cambios realizados en los archivos del proyecto mientras Ionic se ejecuta dentro de Docker.
-
-En `docker-compose.yml` se utilizan:
-
-```yaml
-environment:
-  CHOKIDAR_USEPOLLING: "true"
-  WATCHPACK_POLLING: "true"
-```
-
-Ionic también utiliza:
-
-```text
---poll=1000
-```
-
-Esto permite detectar modificaciones realizadas desde Windows y reconstruir automáticamente la aplicación.
-
-En los logs puede aparecer:
-
-```text
-Changes detected. Rebuilding...
-```
-
----
-
-## NgModules y componentes standalone
-
-Angular permite trabajar con componentes standalone o con componentes organizados mediante NgModules.
-
-Este proyecto utiliza **NgModules**, por lo que los componentes generados utilizan:
-
-```typescript
-standalone: false
-```
-
-Esta configuración se mantiene para trabajar con una estructura uniforme durante el curso.
-
----
-
-## Consultar el estado de los servicios
-
-```powershell
+docker compose up -d --build
 docker compose ps
 ```
 
----
+La inicialización SQL se ejecuta cuando se crea por primera vez el volumen de MariaDB. El repositorio ya contiene el proyecto de Ionic y su marcador `mobile/.ionic-setup-complete`.
 
-## Consultar logs
+## Servicios
 
-Todos los servicios:
+| Servicio | Dirección |
+| --- | --- |
+| Ionic | [localhost:8100](http://localhost:8100) |
+| Directus | [localhost:8000/admin](http://localhost:8000/admin) |
+| OpenAPI | [Especificación de la API](http://localhost:8000/server/specs/oas) |
+| Swagger UI | [localhost:8081](http://localhost:8081) |
+| CloudBeaver | [localhost:8978](http://localhost:8978) |
+
+Entre contenedores, MariaDB se localiza mediante `db:3306`. En una instalación nueva, CloudBeaver utiliza la base `moviles` y las credenciales definidas en el servicio `db`. Directus utiliza los valores de conexión de su servicio `api`.
+
+## Manuales
+
+Cada manual conserva la implementación en el **punto 3**. El punto 2 presenta los métodos; el 4 reúne el código completo; el 5 describe las comprobaciones y el 6 explica el flujo. En creación y actualización, elige la variante mediante página o mediante modal.
+
+| Manual | Práctica |
+| --- | --- |
+| 01 | [Listado de productos](docs/manuales/01_listado_elementos.md) |
+| 02 | [Detalle de un producto](docs/manuales/02_detalle_elemento.md) |
+| 03 | [Crear mediante página](docs/manuales/03_crear_elemento_pagina.md) |
+| 03 | [Crear mediante modal](docs/manuales/03_crear_elemento_modal.md) |
+| 04 | [Actualizar mediante página](docs/manuales/04_actualizar_elemento_pagina.md) |
+| 04 | [Actualizar mediante modal](docs/manuales/04_actualizar_elemento_modal.md) |
+| 05 | [Eliminar productos](docs/manuales/05_eliminar_elemento.md) |
+| 06 | [Fuentes y estilos](docs/manuales/06_fuentes_estilos.md) |
+| 07 | [Componentes reutilizables](docs/manuales/07_componentes.md) |
+| 08 | [Paginación](docs/manuales/08_paginacion.md) |
+| 09 | [Menú lateral](docs/manuales/09_menu.md) |
+| 10 | [Búsqueda](docs/manuales/10_busqueda.md) |
+| 11 | [Servicios](docs/manuales/11_servicios.md) |
+| 12 | [Inicio de sesión y registro](docs/manuales/12_login_registro.md) |
+| 13 | [Guardia de autenticación](docs/manuales/13_guard.md) |
+| 14 | [Relaciones muchos a muchos](docs/manuales/14_muchos_muchos.md) |
+| 15 | [Subida de imágenes](docs/manuales/15_subir_archivos.md) |
+| 16 | [Rocky Linux y Azure](docs/manuales/16_Rocky_Linux_Azure.md) |
+
+Al generar una página o componente, agrega manualmente `standalone: false` en `@Component` para declararlo en su NgModule. Cada práctica especifica los módulos que utiliza.
+
+Las capturas y los diagramas se incluyen como imágenes centradas con pie de figura en Markdown. Los flujos se presentan en vertical como PNG, para que su visualización no dependa de que el visor ejecute Mermaid. Los recursos de ejemplo se encuentran en `docs/manuales/recursos/`. El [registro de validación](docs/VALIDACION.md) detalla las comprobaciones ejecutadas y sus límites.
+
+### Estado de las pruebas
+
+- **09–11, 13 y 14:** pruebas realizadas con la aplicación y la API del entorno del curso.
+- **12:** acceso y validaciones comprobados; registro completo pendiente de habilitar el registro y configurar el correo de verificación.
+- **15:** carga pendiente de los permisos de archivos propios; el entorno actual rechaza esas reglas con `RESOURCE_RESTRICTED`.
+- **16:** Compose y compilación comprobados localmente; despliegue remoto pendiente de VM, dominio y certificado.
+
+Consulta el [registro de validación](docs/VALIDACION.md) para conocer el alcance de cada comprobación.
+
+## Configuración del entorno
+
+- [Directus y MariaDB](docs/correcciones/01_cambio_fastapi_directus.md).
+- [Ionic y detección de cambios](docs/correcciones/02_correccion_ionic.md).
+- [Swagger UI](docs/correcciones/03_agregar_swagger_ui.md).
+
+## Comandos de trabajo
 
 ```powershell
-docker compose logs -f
-```
-
-Ionic:
-
-```powershell
-docker compose logs -f mobile
-```
-
-Directus:
-
-```powershell
-docker compose logs -f api
-```
-
-Swagger UI:
-
-```powershell
-docker compose logs -f swagger
-```
-
-MariaDB:
-
-```powershell
-docker compose logs -f db
-```
-
-CloudBeaver:
-
-```powershell
-docker compose logs -f cloudbeaver
-```
-
----
-
-## Detener los servicios
-
-Para detener los contenedores sin eliminarlos:
-
-```powershell
+docker compose up -d
+docker compose logs --tail 60 mobile
+docker compose exec mobile npx ng build --configuration development
 docker compose stop
 ```
 
-Para volver a iniciarlos:
+## Autor
 
-```powershell
-docker compose start
-```
-
----
-
-## Eliminar los contenedores
-
-```powershell
-docker compose down
-```
-
-Este comando elimina los contenedores y la red creada por Docker Compose, pero no elimina los volúmenes nombrados.
-
-Para eliminar también los volúmenes:
-
-```powershell
-docker compose down -v
-```
-
-> **Importante:** `docker compose down -v` elimina los datos persistentes almacenados en los volúmenes del proyecto, incluida la información de MariaDB.
-
----
-
-## Reconstruir Ionic
-
-Si se modifica el `Dockerfile` de `mobile`:
-
-```powershell
-docker compose build --no-cache mobile
-```
-
-Después:
-
-```powershell
-docker compose up -d mobile
-```
-
-Para revisar el inicio:
-
-```powershell
-docker compose logs -f mobile
-```
-
----
-
-## Flujo general de la aplicación
-
-La comunicación principal del proyecto será:
-
-```text
-Usuario
-   │
-   ▼
-Ionic
-   │
-   │ HTTP / JSON
-   ▼
-Directus
-   │
-   │ SQL
-   ▼
-MariaDB
-```
-
-Ionic no debe acceder directamente a MariaDB.
-
-La aplicación se comunica con Directus mediante HTTP y Directus se encarga del acceso a la base de datos, permisos y exposición de la API.
-
-De forma complementaria:
-
-```text
-CloudBeaver -> Administración de MariaDB
-Swagger UI -> Documentación y pruebas de la API
-```
-
----
-
-## Consideraciones
-
-El entorno está diseñado para evitar instalaciones y configuraciones diferentes entre estudiantes.
-
-La idea principal es:
-
-```text
-Clonar repositorio
-       │
-       ▼
-docker compose up --build
-       │
-       ▼
-Entorno listo
-```
-
-Las versiones y configuraciones del proyecto deben mantenerse de forma uniforme para que el mismo código funcione de la misma manera en todos los equipos.
-
----
+DSC. Jonathan De La Cruz Alvarez.
 
 ## Licencia
 
-Este proyecto está bajo la licencia MIT.
-
-## Autor
-
-**DSC. Jonathan De La Cruz Alvarez**
+El proyecto se distribuye con licencia MIT. La fuente Young Serif conserva su [licencia propia](docs/manuales/recursos/YoungSerif-OFL.txt).

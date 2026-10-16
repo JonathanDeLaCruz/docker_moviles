@@ -1,0 +1,778 @@
+[
+  {
+    "nombre": "01-listado",
+    "titulo": "Consultar y mostrar productos",
+    "pasos": [
+      {
+        "area": "USUARIO",
+        "texto": "Abre Productos"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "ngOnInit() llama a cargarProductos()"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Axios solicita GET /items/productos"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Recibe la petición y consulta la colección"
+      },
+      {
+        "area": "MARIADB",
+        "texto": "Entrega los registros a Directus"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Responde con JSON: { data: [...] }"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Guarda response.data.data en productos"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "*ngFor recorre el arreglo"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Muestra los productos en el listado"
+      }
+    ]
+  },
+  {
+    "nombre": "02-detalle",
+    "titulo": "Consultar el detalle de un producto",
+    "pasos": [
+      {
+        "area": "USUARIO",
+        "texto": "Presiona el icono de ojo"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "routerLink abre /productos-view/1"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "ngOnInit() llama a cargarProducto()"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "ActivatedRoute obtiene el ID y se muestra la carga"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Axios solicita GET /items/productos/1"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Consulta el producto por ID"
+      },
+      {
+        "area": "MARIADB",
+        "texto": "Entrega el registro a Directus"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Devuelve un objeto dentro de data"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Guarda response.data.data en producto"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "ngIf muestra la tarjeta; finally cierra la carga"
+      }
+    ]
+  },
+  {
+    "nombre": "03-crear-modal",
+    "titulo": "Crear un producto mediante un modal",
+    "pasos": [
+      {
+        "area": "USUARIO",
+        "texto": "Presiona + en el listado"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "nuevoProducto() crea y presenta el modal",
+        "nota": "Cancelar: dismiss devuelve guardado: false; no crea ni recarga productos."
+      },
+      {
+        "area": "USUARIO",
+        "texto": "Captura los datos y presiona Guardar"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Valida el formulario",
+        "nota": "Si es inválido, getError() muestra mensajes y el usuario corrige los datos."
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Axios envía POST /items/productos"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Valida y solicita guardar el producto"
+      },
+      {
+        "area": "MARIADB",
+        "texto": "Guarda el registro y genera ID y fecha"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Devuelve la creación exitosa"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Muestra Producto guardado"
+      },
+      {
+        "area": "USUARIO",
+        "texto": "Acepta; dismiss devuelve guardado: true"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "onDidDismiss() recibe el resultado y consulta el listado"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Muestra el producto nuevo"
+      }
+    ]
+  },
+  {
+    "nombre": "03-crear-pagina",
+    "titulo": "Crear un producto mediante una página",
+    "pasos": [
+      {
+        "area": "USUARIO",
+        "texto": "Presiona +"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Router abre /productos-form"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "ngOnInit() crea el formulario reactivo"
+      },
+      {
+        "area": "USUARIO",
+        "texto": "Captura los datos y presiona Guardar"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Valida el formulario",
+        "nota": "Si es inválido, markAllAsTouched() permite mostrar getError(); el usuario corrige los datos."
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Prepara el JSON y envía POST /items/productos"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Valida y solicita guardar el producto"
+      },
+      {
+        "area": "MARIADB",
+        "texto": "Guarda el producto y genera ID y fecha"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Devuelve la creación exitosa"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Muestra Producto guardado"
+      },
+      {
+        "area": "USUARIO",
+        "texto": "Acepta la confirmación"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Router vuelve al listado; ionViewWillEnter() consulta GET /items/productos"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Muestra la colección actualizada"
+      }
+    ]
+  },
+  {
+    "nombre": "04-actualizar-modal",
+    "titulo": "Actualizar un producto mediante un modal",
+    "pasos": [
+      {
+        "area": "USUARIO",
+        "texto": "Presiona el lápiz del producto"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Abre el modal con componentProps.id"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Solicita GET del producto por ID"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Consulta el registro en MariaDB"
+      },
+      {
+        "area": "MARIADB",
+        "texto": "Entrega el registro actual"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Responde con los datos del producto"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "patchValue() llena el formulario"
+      },
+      {
+        "area": "USUARIO",
+        "texto": "Edita los datos y solicita guardar"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Valida y envía PATCH a Directus"
+      },
+      {
+        "area": "MARIADB",
+        "texto": "Directus solicita guardar los cambios"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Recibe la confirmación y dismiss devuelve guardado: true"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "El listado vuelve a consultar Directus"
+      }
+    ]
+  },
+  {
+    "nombre": "04-actualizar-pagina",
+    "titulo": "Actualizar un producto mediante una página",
+    "pasos": [
+      {
+        "area": "USUARIO",
+        "texto": "Presiona el lápiz del producto"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Lee el ID y crea el formulario"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Solicita GET /items/productos/{id}"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Consulta el producto en MariaDB"
+      },
+      {
+        "area": "MARIADB",
+        "texto": "Entrega el registro actual"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Responde con JSON que contiene data"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "patchValue() carga los campos"
+      },
+      {
+        "area": "USUARIO",
+        "texto": "Modifica y presiona Actualizar"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Valida y envía PATCH /items/productos/{id}"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Solicita actualizar el registro en MariaDB"
+      },
+      {
+        "area": "MARIADB",
+        "texto": "Guarda los cambios"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Responde con éxito"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Muestra Producto actualizado"
+      },
+      {
+        "area": "USUARIO",
+        "texto": "Acepta; Router regresa al listado"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "GET /items/productos obtiene la colección actualizada"
+      }
+    ]
+  },
+  {
+    "nombre": "05-eliminar",
+    "titulo": "Eliminar un producto con confirmación",
+    "pasos": [
+      {
+        "area": "USUARIO",
+        "texto": "Presiona la papelera del producto"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Muestra la confirmación con nombre e ID",
+        "nota": "Cancelar: cierra la confirmación sin enviar ninguna petición."
+      },
+      {
+        "area": "USUARIO",
+        "texto": "Confirma Eliminar"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Envía DELETE a Directus"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Solicita eliminar el registro"
+      },
+      {
+        "area": "MARIADB",
+        "texto": "Elimina el producto"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Recibe el éxito y muestra la alerta"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "GET obtiene el listado actualizado"
+      }
+    ]
+  },
+  {
+    "nombre": "06-estilos",
+    "titulo": "Aplicar la fuente y el color",
+    "pasos": [
+      {
+        "area": "APP IONIC",
+        "texto": "Carga el archivo TTF desde assets"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "@font-face registra Young Serif"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "La variable global de Ionic aplica la fuente"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "El texto de las páginas usa la fuente"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Las variables definen el color personalizado",
+        "nota": "Configuración del color, independiente de la carga de la fuente."
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "La clase ion-color-personalizado utiliza esas variables"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "La barra muestra el color personalizado"
+      }
+    ]
+  },
+  {
+    "nombre": "07-componentes",
+    "titulo": "Mostrar una barra reutilizable",
+    "pasos": [
+      {
+        "area": "APP IONIC",
+        "texto": "La página configura el título y el color"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "El selector app-toolbar crea el componente"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "@Input recibe los valores"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "ng-content proyecta los botones de la página"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "La barra muestra título, color y botones"
+      }
+    ]
+  },
+  {
+    "nombre": "08-paginacion",
+    "titulo": "Consultar productos por página",
+    "pasos": [
+      {
+        "area": "USUARIO",
+        "texto": "Abre el listado"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Cuenta los productos"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Ajusta la página actual"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Envía GET con limit, page y sort"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Consulta los registros de esa página en MariaDB"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Muestra la lista y los botones de paginación"
+      },
+      {
+        "area": "USUARIO",
+        "texto": "Selecciona otra página"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "paginaCambio actualiza paginaActual",
+        "nota": "Repite la consulta GET con el nuevo valor de page."
+      }
+    ]
+  },
+  {
+    "nombre": "09-menu",
+    "titulo": "Navegar mediante el menú",
+    "pasos": [
+      {
+        "area": "USUARIO",
+        "texto": "Presiona el botón del menú"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Abre ion-menu principal"
+      },
+      {
+        "area": "USUARIO",
+        "texto": "Elige una opción"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "routerLink cambia la ruta"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "ion-router-outlet muestra la página"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "ion-menu-toggle cierra el menú"
+      }
+    ]
+  },
+  {
+    "nombre": "10-busqueda",
+    "titulo": "Filtrar los productos",
+    "pasos": [
+      {
+        "area": "USUARIO",
+        "texto": "Escribe en el buscador"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "ionInput se ejecuta después de debounce"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Guarda la búsqueda y vuelve a la página 1"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Cuenta los productos usando filter"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Solicita GET paginado con el mismo filter"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Devuelve los registros coincidentes"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Muestra las coincidencias y el total filtrado"
+      }
+    ]
+  },
+  {
+    "nombre": "11-servicios",
+    "titulo": "Consultar datos mediante un servicio",
+    "pasos": [
+      {
+        "area": "APP IONIC",
+        "texto": "La página llama a ProductosService"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "El servicio devuelve un Observable con la llamada Axios"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Recibe la petición y consulta MariaDB"
+      },
+      {
+        "area": "MARIADB",
+        "texto": "Entrega los datos a Directus"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Devuelve la respuesta"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "map extrae el dato del cuerpo"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "firstValueFrom entrega el resultado a la página"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "La página actualiza su vista"
+      }
+    ]
+  },
+  {
+    "nombre": "12-sesion",
+    "titulo": "Registrar una cuenta e iniciar sesión",
+    "pasos": [
+      {
+        "area": "USUARIO",
+        "texto": "Completa el formulario de registro",
+        "nota": "Este recorrido comienza con registro; una cuenta activa puede ir directamente al acceso."
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Envía POST /users/register"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Procesa la solicitud de registro",
+        "nota": "La verificación depende de la configuración de Directus."
+      },
+      {
+        "area": "USUARIO",
+        "texto": "Completa la verificación, si se solicita, y abre el acceso"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Valida correo y contraseña; envía POST /auth/login"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Devuelve una sesión con vigencia"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "El cliente agrega Bearer a las consultas"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Aplica los permisos de la cuenta"
+      }
+    ]
+  },
+  {
+    "nombre": "13-guard",
+    "titulo": "Proteger una ruta con la sesión",
+    "pasos": [
+      {
+        "area": "USUARIO",
+        "texto": "Solicita una ruta protegida"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "authGuard llama a AuthService"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Valida la sesión con Directus",
+        "nota": "Si es válida, abre directamente la página solicitada."
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Si no es válida, abre Login con returnUrl"
+      },
+      {
+        "area": "USUARIO",
+        "texto": "Ingresa sus credenciales"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Autentica la cuenta"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Vuelve a validar y abre la ruta solicitada"
+      }
+    ]
+  },
+  {
+    "nombre": "14-categorias",
+    "titulo": "Guardar un producto con categorías",
+    "pasos": [
+      {
+        "area": "USUARIO",
+        "texto": "Selecciona categorías en el FormArray"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Obtiene los IDs seleccionados sin repetir"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Envía POST del producto con sus enlaces"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Valida los datos y la relación"
+      },
+      {
+        "area": "MARIADB",
+        "texto": "Guarda el producto y las filas de unión"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Confirma la creación"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Muestra la confirmación de guardado"
+      }
+    ]
+  },
+  {
+    "nombre": "15-archivos",
+    "titulo": "Subir y asociar una imagen",
+    "pasos": [
+      {
+        "area": "USUARIO",
+        "texto": "Selecciona un archivo de imagen"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Agrega el File a FormData"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Envía POST /files a Directus"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Guarda el archivo y sus metadatos",
+        "nota": "Requiere los permisos de archivos propios descritos en el manual."
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Recibe el ID y envía PATCH del producto"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Guarda el ID en productos.imagen"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Solicita GET /assets/{id} con autenticación"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Convierte el Blob en URL y muestra la imagen"
+      }
+    ]
+  },
+  {
+    "nombre": "16-despliegue",
+    "titulo": "Servir Ionic y Directus con HTTPS",
+    "pasos": [
+      {
+        "area": "USUARIO",
+        "texto": "Abre el dominio mediante HTTPS"
+      },
+      {
+        "area": "NGINX",
+        "texto": "Recibe la petición",
+        "nota": "Aplicación: sirve los archivos compilados de Ionic."
+      },
+      {
+        "area": "NGINX",
+        "texto": "Las peticiones /api/ se reenvían a Directus"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Consulta los datos en MariaDB",
+        "nota": "Los archivos utilizan el volumen persistente de Directus."
+      },
+      {
+        "area": "MARIADB",
+        "texto": "Entrega los registros consultados"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Devuelve la respuesta a través de Nginx"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Recibe los datos y actualiza la pantalla"
+      }
+    ]
+  },
+  {
+    "nombre": "00-entorno",
+    "titulo": "Comunicación de la aplicación con los servicios",
+    "pasos": [
+      {
+        "area": "APP IONIC",
+        "texto": "Envía peticiones HTTP y recibe JSON"
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Recibe las peticiones y aplica los permisos",
+        "nota": "Swagger UI consulta su especificación OpenAPI."
+      },
+      {
+        "area": "MARIADB",
+        "texto": "Directus consulta y guarda los datos",
+        "nota": "CloudBeaver permite administrar la base."
+      },
+      {
+        "area": "DIRECTUS",
+        "texto": "Devuelve la respuesta a Ionic"
+      },
+      {
+        "area": "APP IONIC",
+        "texto": "Actualiza la pantalla con el resultado"
+      }
+    ]
+  }
+]

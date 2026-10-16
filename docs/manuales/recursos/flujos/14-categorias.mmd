@@ -1,0 +1,14 @@
+flowchart TD
+  N0["USUARIO<br/>Selecciona categorías en el FormArray"] 
+  N1["APP IONIC<br/>Obtiene los IDs seleccionados sin repetir"]
+  N2["APP IONIC<br/>Envía POST del producto con sus enlaces"]
+  N3["DIRECTUS<br/>Valida los datos y la relación"]
+  N4["MARIADB<br/>Guarda el producto y las filas de unión"]
+  N5["DIRECTUS<br/>Confirma la creación"]
+  N6["APP IONIC<br/>Muestra la confirmación de guardado"]
+  N0 --> N1
+  N1 --> N2
+  N2 --> N3
+  N3 --> N4
+  N4 --> N5
+  N5 --> N6

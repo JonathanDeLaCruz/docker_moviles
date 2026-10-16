@@ -1,0 +1,14 @@
+flowchart TD
+  N0["USUARIO<br/>Abre el dominio mediante HTTPS"] 
+  N1["NGINX<br/>Recibe la petición<br/>Aplicación: sirve los archivos compilados de Ionic."]
+  N2["NGINX<br/>Las peticiones /api/ se reenvían a Directus"]
+  N3["DIRECTUS<br/>Consulta los datos en MariaDB<br/>Los archivos utilizan el volumen persistente de Directus."]
+  N4["MARIADB<br/>Entrega los registros consultados"]
+  N5["DIRECTUS<br/>Devuelve la respuesta a través de Nginx"]
+  N6["APP IONIC<br/>Recibe los datos y actualiza la pantalla"]
+  N0 --> N1
+  N1 --> N2
+  N2 --> N3
+  N3 --> N4
+  N4 --> N5
+  N5 --> N6

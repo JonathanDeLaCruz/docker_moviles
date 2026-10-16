@@ -102,6 +102,50 @@ Coloca `.boton-producto` de la sección 4 en `productos-list.page.scss` y agrega
 }
 ```
 
+### `mobile/src/global.scss`
+
+```scss
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ * Put style rules here that you want to apply globally. These styles are for
+ * the entire app and not just one component. Additionally, this file can be
+ * used as an entry point to import other CSS/Sass files to be included in the
+ * output CSS.
+ * For more information on global stylesheets, visit the documentation:
+ * https://ionicframework.com/docs/layout/global-stylesheets
+ */
+
+/* Core CSS required for Ionic components to work properly */
+@import "@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+
+/* Optional CSS utils that can be commented out */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+/**
+ * Ionic Dark Mode
+ * -----------------------------------------------------
+ * For more info, please see:
+ * https://ionicframework.com/docs/theming/dark-mode
+ */
+
+/* @import "@ionic/angular/css/palettes/dark.always.css"; */
+/* @import "@ionic/angular/css/palettes/dark.class.css"; */
+@import "@ionic/angular/css/palettes/dark.system.css";
+
+@import "./app/app.component.scss";
+```
+
 ## 5. Comprobar el resultado
 
 1. Abre el listado: el encabezado debe verse con el color personalizado y los textos con Young Serif, como en la figura 1.
@@ -113,14 +157,12 @@ La figura 1 muestra el resultado obtenido con el código de esta práctica. Las 
 
 ## 6. Explicación detallada del flujo
 
-```mermaid
-flowchart LR
- A["Archivo TTF en assets"] --> B["@font-face registra Young Serif"]
- B --> C["Variable global de Ionic"]
- C --> D["📱 Texto de las páginas"]
- E["Variables del color"] --> F["Clase ion-color-personalizado"]
- F --> G["Toolbar con color personalizado"]
-```
+La figura 2 muestra el recorrido de arriba hacia abajo.
+
+<p align="center">
+  <img src="imagenes/flujo-06-estilos.png" alt="Aplicar la fuente y el color" width="390"><br>
+  <em>Figura 2. Aplicar la fuente y el color.</em>
+</p>
 
 ### Alcance de los estilos
 

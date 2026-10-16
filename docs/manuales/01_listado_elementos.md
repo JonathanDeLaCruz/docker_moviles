@@ -371,18 +371,12 @@ Los valores dependerán de los registros de tu colección. Si la respuesta es `{
 
 El siguiente diagrama muestra la consulta completa, incluida la respuesta y su presentación en pantalla:
 
-```mermaid
-flowchart TD
-    A["📱 El usuario abre Productos"] --> B["La página inicia: ngOnInit()"]
-    B --> C["cargarProductos() solicita los datos con Axios"]
-    C -->|"GET /items/productos"| D["🌐 Directus recibe la petición"]
-    D --> E["🗄️ MariaDB entrega los registros"]
-    E --> D
-    D -->|"Respuesta JSON: { data: [...] }"| F["📱 La app recibe la respuesta"]
-    F --> G["Guarda response.data.data en productos"]
-    G --> H["El HTML recorre productos con *ngFor"]
-    H --> I["📱 Pantalla Productos<br/><br/>Laptop<br/>Precio: $15000.00<br/>Stock: 5"]
-```
+La figura 2 muestra el recorrido de arriba hacia abajo.
+
+<p align="center">
+  <img src="imagenes/flujo-01-listado.png" alt="Consultar y mostrar productos" width="390"><br>
+  <em>Figura 2. Consultar y mostrar productos.</em>
+</p>
 
 Al inicializar el componente, Angular ejecuta `ngOnInit()`. Este llama a `cargarProductos()`, que solicita la colección mediante Axios. Directus consulta MariaDB y responde con un JSON; la página guarda el arreglo recibido y Angular actualiza la vista.
 

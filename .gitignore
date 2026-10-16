@@ -1,0 +1,5 @@
+.env
+**/.env
+**/certs/
+.revision-repo-antiguo/
+docs/manuales/recursos/flujos/generar.ps1

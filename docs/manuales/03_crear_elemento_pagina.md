@@ -713,24 +713,12 @@ Con la opción A, el icono **+** aparece en la barra (figura 4). Con la opción 
 
 La app valida los datos antes de enviarlos. Directus crea el producto y la aplicación regresa al listado; al volver a mostrarse, el listado consulta otra vez la colección.
 
-```mermaid
-flowchart TD
-    A["📱 El usuario presiona +"] --> B["Router abre /productos-form"]
-    B --> C["ngOnInit() crea el formulario reactivo"]
-    C --> D["El usuario captura los datos y presiona Guardar"]
-    D --> E{"¿El formulario es válido?"}
-    E -->|"No"| F["markAllAsTouched() permite mostrar los mensajes de getError()"]
-    F --> D
-    E -->|"Sí"| G["La app prepara el JSON y Axios envía los datos"]
-    G -->|"POST /items/productos"| H["🌐 Directus recibe la petición"]
-    H --> I["🗄️ MariaDB guarda el producto y genera su ID y fecha"]
-    I --> H
-    H -->|"Creación exitosa"| J["📱 La app muestra Producto guardado"]
-    J --> K["El usuario acepta y Router regresa al listado"]
-    K --> L["ionViewWillEnter() llama a cargarProductos()"]
-    L -->|"GET /items/productos"| M["🌐 Directus consulta la colección actualizada"]
-    M --> N["📱 El listado muestra el producto nuevo"]
-```
+La figura 6 muestra el recorrido de arriba hacia abajo.
+
+<p align="center">
+  <img src="imagenes/flujo-03-crear-pagina.png" alt="Crear un producto mediante una página" width="390"><br>
+  <em>Figura 6. Crear un producto mediante una página.</em>
+</p>
 
 ### Cómo se construye el formulario
 

@@ -1,0 +1,24 @@
+flowchart TD
+  N0["USUARIO<br/>Presiona el lápiz del producto"] 
+  N1["APP IONIC<br/>Abre el modal con componentProps.id"]
+  N2["APP IONIC<br/>Solicita GET del producto por ID"]
+  N3["DIRECTUS<br/>Consulta el registro en MariaDB"]
+  N4["MARIADB<br/>Entrega el registro actual"]
+  N5["DIRECTUS<br/>Responde con los datos del producto"]
+  N6["APP IONIC<br/>patchValue() llena el formulario"]
+  N7["USUARIO<br/>Edita los datos y solicita guardar"]
+  N8["APP IONIC<br/>Valida y envía PATCH a Directus"]
+  N9["MARIADB<br/>Directus solicita guardar los cambios"]
+  N10["APP IONIC<br/>Recibe la confirmación y dismiss devuelve guardado: true"]
+  N11["APP IONIC<br/>El listado vuelve a consultar Directus"]
+  N0 --> N1
+  N1 --> N2
+  N2 --> N3
+  N3 --> N4
+  N4 --> N5
+  N5 --> N6
+  N6 --> N7
+  N7 --> N8
+  N8 --> N9
+  N9 --> N10
+  N10 --> N11

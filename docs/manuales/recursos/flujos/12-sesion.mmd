@@ -1,0 +1,16 @@
+flowchart TD
+  N0["USUARIO<br/>Completa el formulario de registro<br/>Este recorrido comienza con registro; una cuenta activa puede ir directamente al acceso."] 
+  N1["APP IONIC<br/>Envía POST /users/register"]
+  N2["DIRECTUS<br/>Procesa la solicitud de registro<br/>La verificación depende de la configuración de Directus."]
+  N3["USUARIO<br/>Completa la verificación, si se solicita, y abre el acceso"]
+  N4["APP IONIC<br/>Valida correo y contraseña; envía POST /auth/login"]
+  N5["DIRECTUS<br/>Devuelve una sesión con vigencia"]
+  N6["APP IONIC<br/>El cliente agrega Bearer a las consultas"]
+  N7["DIRECTUS<br/>Aplica los permisos de la cuenta"]
+  N0 --> N1
+  N1 --> N2
+  N2 --> N3
+  N3 --> N4
+  N4 --> N5
+  N5 --> N6
+  N6 --> N7

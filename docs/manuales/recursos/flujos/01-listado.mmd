@@ -1,0 +1,18 @@
+flowchart TD
+  N0["USUARIO<br/>Abre Productos"] 
+  N1["APP IONIC<br/>ngOnInit() llama a cargarProductos()"]
+  N2["APP IONIC<br/>Axios solicita GET /items/productos"]
+  N3["DIRECTUS<br/>Recibe la petición y consulta la colección"]
+  N4["MARIADB<br/>Entrega los registros a Directus"]
+  N5["DIRECTUS<br/>Responde con JSON: { data: [...] }"]
+  N6["APP IONIC<br/>Guarda response.data.data en productos"]
+  N7["APP IONIC<br/>*ngFor recorre el arreglo"]
+  N8["APP IONIC<br/>Muestra los productos en el listado"]
+  N0 --> N1
+  N1 --> N2
+  N2 --> N3
+  N3 --> N4
+  N4 --> N5
+  N5 --> N6
+  N6 --> N7
+  N7 --> N8

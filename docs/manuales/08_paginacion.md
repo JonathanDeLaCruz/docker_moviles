@@ -461,16 +461,12 @@ La figura 1 muestra el resultado obtenido con el código de esta práctica. Las 
 
 ## 6. Explicación detallada del flujo
 
-```mermaid
-flowchart LR
- A["📱 Abre el listado"] --> B["Directus cuenta productos"]
- B --> C["Ajusta la página actual"]
- C --> D["GET con limit, page y sort"]
- D --> E["🗄️ Registros de esa página"]
- E --> F["📱 Lista y componente de botones"]
- F -->|paginaCambio| G["Listado cambia paginaActual"]
- G --> D
-```
+La figura 2 muestra el recorrido de arriba hacia abajo.
+
+<p align="center">
+  <img src="imagenes/flujo-08-paginacion.png" alt="Consultar productos por página" width="390"><br>
+  <em>Figura 2. Consultar productos por página.</em>
+</p>
 
 ### Reparto de responsabilidades
 

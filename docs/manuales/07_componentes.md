@@ -164,6 +164,104 @@ export class ProductosListPageModule {}
 </ion-content>
 ```
 
+### `mobile/src/app/productos-list/productos-list.page.ts`
+
+```typescript
+import { Component } from '@angular/core';
+import { AlertController } from '@ionic/angular';
+import axios from 'axios';
+import { environment } from '../../environments/environment';
+
+interface Producto {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  precio: string;
+  stock: number;
+  fecha_registro: string;
+}
+
+@Component({
+  selector: 'app-productos-list',
+  templateUrl: './productos-list.page.html',
+  styleUrls: ['./productos-list.page.scss'],
+  standalone: false,
+})
+export class ProductosListPage {
+  titulo: string = 'Productos';
+
+  constructor(private alertController: AlertController) {}
+
+  productos: Producto[] = [];
+
+  ionViewWillEnter(): void {
+    this.cargarProductos();
+  }
+
+  async cargarProductos(): Promise<void> {
+    try {
+      const response = await axios.get<{ data: Producto[] }>(
+        `${environment.apiUrl}/items/productos`
+      );
+
+      this.productos = response.data.data;
+    } catch (error) {
+      console.error('Error al cargar los productos:', error);
+    }
+  }
+
+async confirmarEliminar(id: number, nombre: string): Promise<void> {
+  const alerta = await this.alertController.create({
+    header: 'Eliminar producto',
+    message: `¿Estás seguro de eliminar el producto "${nombre}"?`,
+    buttons: [
+      {
+        text: 'Cancelar',
+        role: 'cancel'
+      },
+      {
+        text: 'Eliminar',
+        role: 'destructive',
+        handler: () => {
+          void this.eliminarProducto(id);
+        }
+      }
+    ]
+  });
+
+  await alerta.present();
+}
+async eliminarProducto(id: number): Promise<void> {
+  try {
+    await axios.delete(
+      `${environment.apiUrl}/items/productos/${id}`
+    );
+
+    const alerta = await this.alertController.create({
+      header: 'Producto eliminado',
+      message: 'El producto fue eliminado correctamente.',
+      buttons: ['Aceptar']
+    });
+
+    await alerta.present();
+    await alerta.onDidDismiss();
+
+    await this.cargarProductos();
+  } catch (error) {
+    console.error('Error al eliminar el producto:', error);
+
+    const alerta = await this.alertController.create({
+      header: 'Error',
+      message: 'No fue posible eliminar el producto. Revisa la conexión, los permisos de eliminación en Directus y las relaciones del registro.',
+      buttons: ['Aceptar']
+    });
+
+    await alerta.present();
+  }
+}
+}
+```
+
 ## 5. Comprobar el resultado
 
 1. Abre el listado: debe mostrar el encabezado de la figura 1 y conservar el icono **+**.
@@ -175,14 +273,12 @@ La figura 1 muestra el resultado obtenido con el código de esta práctica. Las 
 
 ## 6. Explicación detallada del flujo
 
-```mermaid
-flowchart LR
- A["📱 Página con titulo y color"] --> B["Selector app-toolbar"]
- B --> C["@Input recibe los valores"]
- C --> D["Toolbar muestra el título"]
- E["Botones de la página"] --> F["ng-content"]
- F --> D
-```
+La figura 2 muestra el recorrido de arriba hacia abajo.
+
+<p align="center">
+  <img src="imagenes/flujo-07-componentes.png" alt="Mostrar una barra reutilizable" width="390"><br>
+  <em>Figura 2. Mostrar una barra reutilizable.</em>
+</p>
 
 ### Cómo se comparte el componente
 
