@@ -2,11 +2,9 @@
 
 Seleccionarás una imagen, la enviarás a Directus y guardarás su identificador en el producto. La página mostrará la imagen después de completar ambas operaciones.
 
-> **Validación pendiente en el entorno del curso.** Directus 12.3.1 rechazó la configuración de permisos por propietario con `RESOURCE_RESTRICTED` (`custom_permission_rules_enabled`). La selección del archivo y la compilación se comprobaron; la carga, asociación y recuperación autenticada aún no están validadas.
-
 ## 1. Antes de comenzar
 
-Continúa con la sesión del [manual 12](12_login_registro.md) y un producto de prueba existente. La colección `productos` debe tener un campo de archivo llamado `imagen`, relacionado con `directus_files` y permitido como nulo. La cuenta debe poder actualizar ese campo y crear/leer sus archivos en Directus.
+Continúa con la sesión del [manual 12](12_login_registro.md) y un producto de prueba existente. La colección `productos` debe tener un campo de archivo llamado `imagen`, relacionado con `directus_files` y permitido como nulo. La cuenta debe poder actualizar el producto y crear/leer archivos en Directus. Los archivos se comparten entre las cuentas que tengan estos permisos.
 
 Las rutas pertenecen al proyecto Ionic en `mobile/`. Ejecuta los comandos Docker desde la carpeta que contiene `docker-compose.yml`. Al generar páginas o componentes, configura manualmente `standalone: false` en `@Component`; este curso utiliza NgModules.
 
@@ -27,7 +25,18 @@ Las rutas pertenecen al proyecto Ionic en `mobile/`. Ejecuta los comandos Docker
 
 En el modelo de `productos`, crea el campo **imagen** con interfaz **File**, relación hacia `directus_files` y valor nulo permitido. Revisa el permiso de actualización de ese campo.
 
-Para la cuenta de práctica, configura **Create** sobre `directus_files` con preset y validación `uploaded_by = $CURRENT_USER`, y **Read** limitado a `uploaded_by = $CURRENT_USER`. Tu instalación de Directus debe permitir estas reglas personalizadas. Los archivos deben continuar en el volumen `directus_uploads` del servicio.
+En **Settings > Access Policies**, abre la política asignada a la cuenta de práctica. Agrega `directus_files` desde **Add Collection** y configura los permisos de esta tabla. La opción **All Access** se elige dentro de cada acción indicada; no pulses el botón **All** de la colección.
+
+| Colección | Acción | Opción |
+| --- | --- | --- |
+| `directus_files` | **Create** | **All Access** |
+| `directus_files` | **Read** | **All Access** |
+| `productos` | **Read** | **All Access** |
+| `productos` | **Update** | **All Access** |
+
+Deja vacíos los filtros, las validaciones y los presets de estos permisos. Conserva desactivado **Admin Access** y guarda la política. Estos permisos se asignan a la cuenta autenticada que usas en Ionic, no a la política **Public**. Cada cuenta con lectura de archivos podrá consultar los archivos compartidos, independientemente de quién los haya subido.
+
+Los archivos se guardan en el volumen `directus_uploads` del servicio; sus metadatos se registran en `directus_files`.
 
 ### Paso 2. Generar la página
 
@@ -258,11 +267,11 @@ export class AppRoutingModule {}
 
 ## 5. Comprobar el resultado
 
-La figura 1 documenta el intento real con la cuenta de prueba: la falta de permisos impidió guardar el archivo. Esta captura no representa un resultado exitoso. Completa los permisos del paso 1 antes de ejecutar la siguiente comprobación.
+La figura 1 muestra la carga y asociación completadas en Ionic con una cuenta de práctica sin acceso administrativo.
 
 <p align="center">
-  <img src="imagenes/15-carga-permiso-pendiente.jpg" alt="Ionic informa que no fue posible guardar la imagen" width="390"><br>
-  <em>Figura 1. Prueba de carga pendiente de permisos de archivos.</em>
+  <img src="imagenes/15-imagen-guardada.jpg" alt="Ionic confirma el guardado de la imagen y muestra su vista previa" width="390"><br>
+  <em>Figura 1. Imagen enviada a Directus y asociada al producto.</em>
 </p>
 
 1. Inicia sesión y abre el botón de imagen de un producto de prueba.
@@ -271,13 +280,20 @@ La figura 1 documenta el intento real con la cuenta de prueba: la falta de permi
 4. En Directus comprueba que exista el archivo y que `productos.imagen` guarde su ID.
 5. Regresa al listado y vuelve a abrir la página: debe cargar la imagen asociada.
 
+La figura 2 muestra la imagen recuperada al volver a abrir la página. El selector está vacío porque se consulta el archivo guardado, sin seleccionarlo ni subirlo de nuevo.
+
+<p align="center">
+  <img src="imagenes/15-imagen-recuperada.jpg" alt="Imagen recuperada desde Directus al volver a abrir la página" width="390"><br>
+  <em>Figura 2. Recuperación autenticada de la imagen asociada.</em>
+</p>
+
 ## 6. Explicación detallada del flujo
 
-La figura 2 muestra el recorrido de arriba hacia abajo.
+La figura 3 muestra el recorrido de arriba hacia abajo.
 
 <p align="center">
   <img src="imagenes/flujo-15-archivos-ramas.png" alt="Subir y asociar una imagen" width="1000"><br>
-  <em>Figura 2. Flujo previsto de subida y asociación; prueba completa pendiente.</em>
+  <em>Figura 3. Flujo de subida, asociación y recuperación de una imagen.</em>
 </p>
 
 El selector entrega un `File` mediante `event.target.files`. `FormData` conserva su contenido y nombre durante el envío multipart. La respuesta de `/files` incluye el identificador que se guarda en el campo `imagen` del producto.
@@ -285,3 +301,5 @@ El selector entrega un `File` mediante `event.target.files`. `FormData` conserva
 La asociación y la subida son dos peticiones: primero se obtiene el ID del archivo y después se actualiza el producto. La página informa éxito cuando ambas operaciones y la carga de la vista previa terminan correctamente.
 
 El cliente de autenticación agrega el encabezado de acceso al solicitar `/assets/{id}`. `responseType: blob` obtiene el contenido y `URL.createObjectURL()` lo presenta en la imagen de la página. Antes de reemplazar la vista y al destruir el componente se libera la URL creada. Los archivos se almacenan según la configuración de Directus y sus metadatos pertenecen a `directus_files`. Consulta la [API de archivos](https://directus.com/docs/api/files).
+
+Continúa con el [manual 17: imagen en el formulario y el detalle](17_imagen_formulario_detalle.md) para seleccionar la imagen durante la creación y actualización del producto y mostrarla en su detalle.
