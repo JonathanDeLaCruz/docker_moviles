@@ -2,7 +2,7 @@
 
 En esta práctica abrirás un producto desde el listado, consultarás su ID en Directus y mostrarás sus datos en una tarjeta. Mientras se realiza la consulta, la aplicación mostrará un indicador de carga.
 
-**Resultado esperado:** al presionar **Ver detalle** en un producto, navegarás a `productos-view/{id}`. Verás sus datos y podrás regresar al listado, como se muestra en la figura 1.
+**Resultado esperado:** al presionar el icono de **ojo** en un producto, navegarás a `productos-view/{id}`. Verás sus datos y podrás regresar al listado, como se muestra en la figura 1.
 
 <p align="center">
   <img src="imagenes/02-detalle-producto.jpg" alt="Detalle de un producto en tamaño de pantalla móvil" width="390"><br>
@@ -110,10 +110,12 @@ En `mobile/src/app/productos-view/productos-view-routing.module.ts`, conserva la
 Después abre `mobile/src/app/productos-list/productos-list.page.html`. **Dentro del `ion-item` que tiene `*ngFor`, después de `</ion-label>` y antes de `</ion-item>`**, agrega:
 
 ```html
-<ion-button slot="end" [routerLink]="['/productos-view', producto.id]">
-  Ver detalle
+<ion-button fill="solid" slot="end" [routerLink]="['/productos-view', producto.id]" aria-label="Ver detalle">
+  <ion-icon slot="icon-only" name="eye"></ion-icon>
 </ion-button>
 ```
+
+El icono `eye` representa el detalle. `fill="solid"` establece el fondo sólido del botón y `aria-label="Ver detalle"` conserva un nombre accesible sin mostrar palabras dentro del botón.
 
 Si ya existe ese botón, consérvalo sin duplicarlo. Debe permanecer dentro del recorrido para poder acceder al ID de cada `producto`.
 
@@ -284,7 +286,7 @@ En `productos-view.page.html`, **después de `</ion-content>`**, agrega:
 ```html
 <ion-footer *ngIf="producto">
   <ion-toolbar>
-    <ion-button expand="block" (click)="abrirPagina()">
+    <ion-button fill="solid" expand="block" (click)="abrirPagina()">
       Ver respuesta de la API
     </ion-button>
   </ion-toolbar>
@@ -316,8 +318,8 @@ Los siguientes archivos corresponden al resultado de esta práctica, **incluido 
         <p>Stock: {{ producto.stock }}</p>
         <p>Registro: {{ producto.fecha_registro | date:'yyyy-MM-dd' }}</p>
       </ion-label>
-      <ion-button slot="end" [routerLink]="['/productos-view', producto.id]">
-        Ver detalle
+      <ion-button fill="solid" slot="end" [routerLink]="['/productos-view', producto.id]" aria-label="Ver detalle">
+        <ion-icon slot="icon-only" name="eye"></ion-icon>
       </ion-button>
     </ion-item>
   </ion-list>
@@ -466,7 +468,7 @@ export class ProductosViewPage implements OnInit {
 
 <ion-footer *ngIf="producto">
   <ion-toolbar>
-    <ion-button expand="block" (click)="abrirPagina()">
+    <ion-button fill="solid" expand="block" (click)="abrirPagina()">
       Ver respuesta de la API
     </ion-button>
   </ion-toolbar>
@@ -478,7 +480,7 @@ La ruta `productos-view/:id` es un cambio dentro de `app-routing.module.ts`: apl
 ## 5. Comprobar que funciona
 
 1. Guarda los archivos y espera a que Ionic termine de compilar.
-2. Abre `http://localhost:8100/productos-list` y presiona **Ver detalle** en un producto.
+2. Abre `http://localhost:8100/productos-list` y presiona el icono de **ojo** en un producto.
 3. Comprueba que la dirección incluya su ID, por ejemplo, `/productos-view/1`, y que la tarjeta muestre los datos de ese registro.
 4. Presiona el botón de regreso; debe aparecer el listado. Abre otro producto y verifica que se muestren sus datos.
 5. Abre directamente una URL de detalle con un ID existente y comprueba que el botón de regreso también permita llegar al listado.
@@ -504,7 +506,7 @@ La app envía el ID del producto seleccionado a la página de detalle. Esta cons
 
 ```mermaid
 flowchart TD
-    A["📱 El usuario presiona Ver detalle"] --> B["routerLink abre /productos-view/1"]
+    A["📱 El usuario presiona el icono de ojo"] --> B["routerLink abre /productos-view/1"]
     B --> C["ngOnInit() llama a cargarProducto()"]
     C --> D["ActivatedRoute obtiene el ID de la ruta"]
     D --> E["La app muestra Cargando producto..."]
