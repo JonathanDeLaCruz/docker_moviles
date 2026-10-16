@@ -86,21 +86,31 @@ import { ProductosFormPageModule } from '../productos-form/productos-form.module
 
 Conserva `CommonModule`, `FormsModule`, `IonicModule`, `ProductosListPageRoutingModule` y la declaración de `ProductosListPage`. No agregues `ProductosFormPage` a las declaraciones del listado: ya pertenece a su propio módulo. Ambos módulos completos están en la sección 4.
 
-### Paso 3. Agregar el botón flotante al listado
+### Paso 3. Elegir la ubicación del botón de creación
 
-Abre `mobile/src/app/productos-list/productos-list.page.html`. **Después de `</ion-content>`**, agrega:
+Abre `mobile/src/app/productos-list/productos-list.page.html`. **Opción A: botón flotante.** Dentro de `ion-content`, después de `</ion-list>` y **antes de `</ion-content>`**, agrega:
 
 ```html
 <ion-fab slot="fixed" vertical="bottom" horizontal="center">
-    <ion-fab-button (click)="nuevoProducto()">
+    <ion-fab-button (click)="nuevoProducto()" aria-label="Nuevo producto">
         <ion-icon name="add"></ion-icon>
     </ion-fab-button>
 </ion-fab>
 ```
 
-Este es el botón **+** para crear un producto. Al presionarlo se ejecutará `nuevoProducto()`. Conserva las filas y los botones **Ver detalle** del manual 02.
+Este es el botón **+** para crear un producto. Al presionarlo se ejecutará `nuevoProducto()`. Conserva las filas y los botones con icono de **ojo** del manual 02.
 
-Si vienes de la variante mediante página, retira de la cabecera el bloque `ion-buttons` que contiene **Nuevo** y su `[routerLink]="['/productos-form']"`. El acceso al formulario en esta variante será el botón flotante que acabas de agregar.
+**Opción B: botón en la barra.** Retira el bloque `ion-fab` anterior y agrega este bloque **dentro de `ion-toolbar`, después de `ion-title`**:
+
+```html
+<ion-buttons slot="end">
+  <ion-button fill="solid" (click)="nuevoProducto()" aria-label="Nuevo producto">
+    <ion-icon slot="icon-only" name="add"></ion-icon>
+  </ion-button>
+</ion-buttons>
+```
+
+La figura 4 muestra el acceso flotante y la figura 5 el acceso en la barra. **Elige una sola opción**. Ambas llaman a `nuevoProducto()` y abren el mismo modal; aquí no utilices `routerLink` para crear productos. Si vienes de la variante mediante página, reemplaza su acceso de creación por la opción elegida. El código completo de la sección 4 utiliza la opción A. Los botones `ion-button` llevan `fill="solid"`; `ion-fab-button` ya es sólido.
 
 ### Paso 4. Abrir el modal y recibir el resultado
 
@@ -326,7 +336,7 @@ Abre `mobile/src/app/productos-form/productos-form.page.html` y **reemplaza su c
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button (click)="cerrarModal()">
+      <ion-button fill="solid" (click)="cerrarModal()">
         Cancelar
       </ion-button>
     </ion-buttons>
@@ -363,7 +373,7 @@ Abre `mobile/src/app/productos-form/productos-form.page.html` y **reemplaza su c
       </ion-note>
     </ion-list>
 
-    <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="guardando">
+    <ion-button fill="solid" expand="block" type="submit" class="ion-margin-top" [disabled]="guardando">
       {{ guardando ? 'Guardando...' : 'Guardar' }}
     </ion-button>
   </form>
@@ -491,18 +501,17 @@ export class ProductosListPage implements OnInit {
         <p>Stock: {{ producto.stock }}</p>
         <p>Registro: {{ producto.fecha_registro | date:'yyyy-MM-dd' }}</p>
       </ion-label>
-      <ion-button slot="end" [routerLink]="['/productos-view', producto.id]">
-        Ver detalle
+      <ion-button fill="solid" slot="end" [routerLink]="['/productos-view', producto.id]" aria-label="Ver detalle">
+        <ion-icon slot="icon-only" name="eye"></ion-icon>
       </ion-button>
     </ion-item>
   </ion-list>
+  <ion-fab slot="fixed" vertical="bottom" horizontal="center">
+      <ion-fab-button (click)="nuevoProducto()" aria-label="Nuevo producto">
+          <ion-icon name="add"></ion-icon>
+      </ion-fab-button>
+  </ion-fab>
 </ion-content>
-
-<ion-fab slot="fixed" vertical="bottom" horizontal="center">
-    <ion-fab-button (click)="nuevoProducto()">
-        <ion-icon name="add"></ion-icon>
-    </ion-fab-button>
-</ion-fab>
 ```
 
 ### `mobile/src/app/productos-form/productos-form.module.ts`
@@ -689,7 +698,7 @@ export class ProductosFormPage implements OnInit {
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button (click)="cerrarModal()">
+      <ion-button fill="solid" (click)="cerrarModal()">
         Cancelar
       </ion-button>
     </ion-buttons>
@@ -726,7 +735,7 @@ export class ProductosFormPage implements OnInit {
       </ion-note>
     </ion-list>
 
-    <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="guardando">
+    <ion-button fill="solid" expand="block" type="submit" class="ion-margin-top" [disabled]="guardando">
       {{ guardando ? 'Guardando...' : 'Guardar' }}
     </ion-button>
   </form>
@@ -765,6 +774,20 @@ Presiona **Guardar** y luego **Aceptar** en la confirmación. El modal debe cerr
 </p>
 
 Las pruebas de guardado crean un registro real en la colección `productos`. Los demás productos y las fechas de las capturas dependen de la base de datos del entorno.
+
+### Dos ubicaciones para abrir el mismo modal
+
+Prueba el icono **+** en la ubicación elegida. Debe abrir el formulario sin cambiar la URL de `/productos-list`. Presiona **Cancelar** para cerrarlo sin guardar.
+
+<p align="center">
+  <img src="imagenes/03-modal-boton-flotante.jpg" alt="Botón flotante más para abrir el formulario modal" width="390"><br>
+  <em>Figura 4. Opción A: acceso flotante al formulario modal.</em>
+</p>
+
+<p align="center">
+  <img src="imagenes/03-modal-boton-barra.jpg" alt="Botón sólido más en la barra para abrir el formulario modal" width="390"><br>
+  <em>Figura 5. Opción B: acceso al mismo modal desde la barra.</em>
+</p>
 
 ## 6. Explicación detallada del flujo
 
