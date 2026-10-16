@@ -2384,156 +2384,6 @@
     "imagen": "flujo-15-archivos-ramas.png"
   },
   {
-    "nombre": "16-despliegue",
-    "titulo": "La APK consulta Directus en Azure",
-    "nodos": [
-      {
-        "id": "BUILD",
-        "texto": "En la computadora: ng build genera www",
-        "tipo": "proceso"
-      },
-      {
-        "id": "SYNC",
-        "texto": "cap sync android copia archivos y plugins",
-        "tipo": "proceso"
-      },
-      {
-        "id": "APK",
-        "texto": "Gradle crea la APK",
-        "tipo": "proceso"
-      },
-      {
-        "id": "INSTALL",
-        "texto": "El usuario instala la APK en Android",
-        "tipo": "proceso"
-      },
-      {
-        "id": "APP",
-        "texto": "La app utiliza la URL HTTPS pública de Directus",
-        "tipo": "proceso"
-      },
-      {
-        "id": "HTTPS",
-        "texto": "Nginx de la VM recibe la petición HTTPS",
-        "tipo": "proceso"
-      },
-      {
-        "id": "API",
-        "texto": "Directus aplica los permisos y procesa la operación",
-        "tipo": "proceso"
-      },
-      {
-        "id": "DB",
-        "texto": "MariaDB consulta o guarda los datos",
-        "tipo": "proceso"
-      },
-      {
-        "id": "FILES",
-        "texto": "Volumen persistente de archivos",
-        "tipo": "proceso"
-      },
-      {
-        "id": "RESPONSE",
-        "texto": "Directus devuelve JSON a través de Nginx",
-        "tipo": "proceso"
-      },
-      {
-        "id": "SCREEN",
-        "texto": "La app recibe los datos y actualiza la pantalla",
-        "tipo": "pantalla"
-      }
-    ],
-    "aristas": [
-      {
-        "de": "BUILD",
-        "a": "SYNC"
-      },
-      {
-        "de": "SYNC",
-        "a": "APK"
-      },
-      {
-        "de": "APK",
-        "a": "INSTALL"
-      },
-      {
-        "de": "INSTALL",
-        "a": "APP"
-      },
-      {
-        "de": "APP",
-        "a": "HTTPS",
-        "texto": "Petición desde el celular"
-      },
-      {
-        "de": "HTTPS",
-        "a": "API"
-      },
-      {
-        "de": "API",
-        "a": "DB",
-        "influye": false,
-        "salida": "e",
-        "entrada": "w",
-        "descripcion": "Consulta"
-      },
-      {
-        "de": "DB",
-        "a": "API",
-        "influye": false,
-        "tipo": "retorno",
-        "salida": "s",
-        "entrada": "e",
-        "descripcion": "Datos"
-      },
-      {
-        "de": "API",
-        "a": "FILES",
-        "influye": false,
-        "descripcion": "Solo operaciones de archivos"
-      },
-      {
-        "de": "FILES",
-        "a": "API",
-        "influye": false,
-        "tipo": "retorno",
-        "descripcion": "Contenido del archivo"
-      },
-      {
-        "de": "API",
-        "a": "RESPONSE",
-        "texto": "Respuesta de la API"
-      },
-      {
-        "de": "RESPONSE",
-        "a": "SCREEN",
-        "texto": "HTTPS"
-      }
-    ],
-    "filas": [
-      [
-        "API",
-        "DB"
-      ],
-      [
-        "RESPONSE",
-        "FILES"
-      ]
-    ],
-    "principal": [
-      "BUILD",
-      "SYNC",
-      "APK",
-      "INSTALL",
-      "APP",
-      "HTTPS",
-      "API",
-      "RESPONSE",
-      "SCREEN"
-    ],
-    "imagen": "flujo-16-despliegue-ramas.png"
-  },
-  {
     "nombre": "00-entorno",
     "titulo": "Comunicación de la aplicación con los servicios",
     "nodos": [
@@ -2620,9 +2470,9 @@
     "imagen": "flujo-00-entorno-ramas.png"
   },
   {
-    "nombre": "17-imagen-formulario",
+    "nombre": "16-imagen-formulario",
     "titulo": "Imagen en formulario y detalle",
-    "imagen": "flujo-17-imagen-formulario-ramas.png",
+    "imagen": "flujo-16-imagen-formulario-ramas.png",
     "nodos": [
       {
         "id": "A",

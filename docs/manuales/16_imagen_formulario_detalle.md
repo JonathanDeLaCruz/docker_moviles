@@ -652,10 +652,10 @@ export class ProductosViewPage implements OnDestroy {
 
 ## 5. Comprobar el resultado
 
-1. En el formulario de creación captura Mouse con imagen manual 17, precio 450 y stock 10. Selecciona [producto-ejemplo.svg](recursos/producto-ejemplo.svg). La figura 1 muestra la vista previa antes de guardar.
+1. En el formulario de creación captura un nombre para el producto, precio 450 y stock 10. Selecciona [producto-ejemplo.svg](recursos/producto-ejemplo.svg). La figura 1 muestra la vista previa antes de guardar.
 
 <p align="center">
-  <img src="imagenes/17-crear-con-imagen.jpg" alt="Formulario de creación con archivo seleccionado" width="390"><br>
+  <img src="imagenes/16-crear-con-imagen.jpg" alt="Formulario de creación con archivo seleccionado" width="390"><br>
   <em>Figura 1. Datos e imagen preparados en el mismo formulario.</em>
 </p>
 
@@ -664,14 +664,14 @@ export class ProductosViewPage implements OnDestroy {
 4. Vuelve a editar y selecciona [producto-ejemplo-azul.svg](recursos/producto-ejemplo-azul.svg). La figura 2 muestra la nueva vista previa. Actualiza y vuelve al detalle.
 
 <p align="center">
-  <img src="imagenes/17-editar-con-imagen.jpg" alt="Formulario de edición con una nueva imagen seleccionada" width="390"><br>
+  <img src="imagenes/16-editar-con-imagen.jpg" alt="Formulario de edición con una nueva imagen seleccionada" width="390"><br>
   <em>Figura 2. Reemplazo de imagen desde el formulario de actualización.</em>
 </p>
 
 5. El detalle debe mostrar la imagen azul como en la figura 3. Sal y vuelve a entrar: debe recuperarse la misma imagen. Revisa también que las categorías permanezcan correctas.
 
 <p align="center">
-  <img src="imagenes/17-detalle-imagen.jpg" alt="Detalle con imagen y categorías del producto" width="390"><br>
+  <img src="imagenes/16-detalle-imagen.jpg" alt="Detalle con imagen y categorías del producto" width="390"><br>
   <em>Figura 3. Imagen guardada y categorías en la vista de detalle.</em>
 </p>
 
@@ -682,7 +682,7 @@ export class ProductosViewPage implements OnDestroy {
 La figura 4 muestra cómo el formulario decide entre conservar la imagen existente o subir una nueva, y entre crear o actualizar el producto.
 
 <p align="center">
-  <img src="imagenes/flujo-17-imagen-formulario-ramas.png" alt="Flujo de imagen en creación actualización y detalle" width="1000"><br>
+  <img src="imagenes/flujo-16-imagen-formulario-ramas.png" alt="Flujo de imagen en creación actualización y detalle" width="1000"><br>
   <em>Figura 4. Selección, guardado y recuperación de la imagen del producto.</em>
 </p>
 

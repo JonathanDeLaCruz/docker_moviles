@@ -24,8 +24,7 @@ Ionic 8.8.17, Angular 20.3.30, Node.js 22 en el contenedor móvil, Directus 12.3
 | 13 | Redirección de ruta protegida, retorno tras acceso y cierre de sesión. | Comprobado en Ionic. Se corrigió la navegación con replaceUrl. |
 | 14 | Creación, edición y detalle con categorías; altas y bajas de enlaces. | Comprobado en Ionic con el producto 13. Guardado sin cambios y retirada de todas las categorías comprobados además mediante la API con la cuenta de prueba. |
 | 15 | Selección real, carga, asociación y recuperación de imagen. | Comprobado en Ionic con una cuenta sin acceso administrativo y permisos compartidos de Create/Read sobre directus_files y Read/Update sobre productos. |
-| 17 | Imagen en formulario de creación/edición y detalle con categorías. | Comprobado en Ionic; compilación final de desarrollo correcta y capturas reales del producto 14. |
-| 16 | Compose con db y api, sintaxis de Nginx y compilación para Android. | Compose y Nginx comprobados localmente. APK debug creada y firma verificada; servidor público, instalación y solicitudes desde el celular pendientes. |
+| 16 | Imagen en formulario de creación/edición y detalle con categorías. | Comprobado en Ionic; compilación final de desarrollo correcta y capturas reales del producto 14. |
 
 ## Compilación
 
@@ -37,7 +36,7 @@ Cada captura pertenece a la etapa indicada por su manual; los productos, fechas 
 
 Se verificó en la vista Markdown de GitHub la figura del manual 08: archivo cargado, ancho 390 y alineación centrada. Las figuras 09–15 acompañan los manuales publicados para revisión; su comprobación en GitHub se registra por separado. La comprobación completa del manual 15 se registra en la sección de carga de archivos compartidos.
 
-El propietario autorizó publicar el conjunto para revisarlo en GitHub. Los resultados parciales de los manuales 12 y 16 conservan sus limitaciones explícitas.
+El propietario autorizó publicar el conjunto para revisarlo en GitHub. El resultado parcial del manual 12 conserva sus limitaciones explícitas.
 
 ## Corrección de flujos para visores móviles
 
@@ -47,19 +46,11 @@ La comprobación de referencias abarcó 20 documentos y 49 figuras, sin recursos
 
 Después de publicar, se comprobó el README en la vista Markdown de GitHub: sus dos imágenes cargaron y quedaron centradas. En el manual 14 se comprobó la captura y el flujo PNG con ancho de navegador de 390 px: ambas imágenes cargaron, se ajustaron a 309 px dentro del contenido y quedaron centradas. Esto verifica el navegador con tamaño móvil; no constituye una prueba en la aplicación nativa de GitHub.
 
-## Compilación Android del manual 16
-
-Se generó app-debug.apk con la aplicación de prácticas: 5 392 871 bytes, paquete mx.edu.moviles, mínimo SDK 24 y destino SDK 36. Gradle terminó con BUILD SUCCESSFUL in 2m 33s y 213 tareas ejecutadas. apksigner verificó la firma v2; se comprobó la presencia de AndroidManifest.xml, classes.dex y la URL https://api.example.com en los archivos empaquetados. El [registro de la APK](manuales/recursos/android/validacion-apk.json) incluye la huella SHA-256.
-
-La compilación se ejecutó con JDK 21 y el wrapper de Linux en un contenedor temporal de herramientas; el proyecto Android se generó con cap add android y se actualizó con cap sync android. No se instalaron herramientas de compilación en el servidor de Azure.
-
-El Compose corregido validó únicamente los servicios db y api. nginx -t comprobó la sintaxis de su proxy usando un certificado temporal de prueba, sin iniciar un servidor. El dominio real y su certificado todavía no están disponibles. La APK utiliza una URL de ejemplo, por lo que no se presenta como una aplicación conectada a Azure ni como instalada y probada en un celular.
-
 ## Diseño de los diagramas con ramificaciones
 
 Se revisaron visualmente los 19 diagramas: los 18 de los manuales y el del README. Se contrastaron sus pasos con los ejemplos de código y las explicaciones de cada práctica. El recorrido principal se orienta hacia abajo; las decisiones, cancelaciones, intercambios con MariaDB y ciclos de retorno mantienen conexiones propias. Las figuras siguen centradas y con pie de figura.
 
-Las imágenes PNG conservan la visualización independiente de Mermaid. Las fuentes JSON, DOT y Mermaid reflejan los nodos y las aristas del flujo. Las herramientas locales de generación permanecen fuera del repositorio. Esta revisión de diagramas no constituye una nueva ejecución de las pruebas de Ionic, Android o Azure registradas en las secciones anteriores.
+Las imágenes PNG conservan la visualización independiente de Mermaid. Las fuentes JSON, DOT y Mermaid reflejan los nodos y las aristas del flujo. Las herramientas locales de generación permanecen fuera del repositorio. Esta revisión de diagramas no constituye una nueva ejecución de las pruebas de Ionic registradas en las secciones anteriores.
 
 ## Carga de archivos compartidos del manual 15
 
@@ -69,6 +60,6 @@ Se sustituyeron las reglas por propietario por permisos normales, autorizados po
 
 La etapa del manual 14 se compiló y ejecutó antes de incorporar imágenes: creación del producto 13 con dos categorías, consulta de sus nombres en el detalle, carga de las selecciones al editar, eliminación de Accesorios y alta posterior desde Ionic. Se corrigió la relación productos_categorias.productos_id para que one_deselect_action sea delete; después de recargar Directus, la eliminación de enlaces funcionó con permisos normales. La API autenticada verificó que create/delete vacíos conservan los mismos IDs de enlace y que retirar todos deja cero asociaciones; se restituyeron las dos selecciones del ejemplo. El catálogo no se eliminó.
 
-La etapa final del manual 17 se compiló en desarrollo y se probó en Ionic: creación del producto 14 con archivo y categoría Periféricos, recuperación del archivo existente en edición, reemplazo por producto-ejemplo-azul.svg y visualización de la nueva imagen junto a la categoría en el detalle. Las capturas de creación, edición y detalle pertenecen a ese mismo producto. En la prueba inicial del producto 12 se actualizó stock sin seleccionar otro archivo y se comprobó que conservaba su ID de imagen sin crear otro archivo. El producto 13 también mostró imagen y ambas categorías juntas. No se instaló una licencia ni otro almacenamiento; se utilizaron las políticas básicas de la cuenta autenticada.
+La etapa final del manual 16 se compiló en desarrollo y se probó en Ionic: creación del producto 14 con archivo y categoría Periféricos, recuperación del archivo existente en edición, reemplazo por producto-ejemplo-azul.svg y visualización de la nueva imagen junto a la categoría en el detalle. Las capturas de creación, edición y detalle pertenecen a ese mismo producto. En la prueba inicial del producto 12 se actualizó stock sin seleccionar otro archivo y se comprobó que conservaba su ID de imagen sin crear otro archivo. El producto 13 también mostró imagen y ambas categorías juntas. No se instaló una licencia ni otro almacenamiento; se utilizaron las políticas básicas de la cuenta autenticada.
 
-El manual 16 se retiró temporalmente del índice por solicitud del propietario hasta contar con servidor para validar el despliegue remoto. Su documento y registro de compilación de APK se conservan.
+El manual de Rocky Linux y sus recursos se retiraron de docs y se conservaron localmente hasta comprobar el despliegue con un servidor. El manual de imagen en formulario y detalle pasó del número 17 al 16; se actualizaron el índice, los enlaces y los nombres de sus recursos. Las capturas y el código probado se conservan.

@@ -84,7 +84,7 @@ Cada manual conserva la implementación en el **punto 3**. El punto 2 presenta l
 | 13 | [Guardia de autenticación](docs/manuales/13_guard.md) |
 | 14 | [Categorías en creación, actualización y detalle](docs/manuales/14_muchos_muchos.md) |
 | 15 | [Subida de imágenes](docs/manuales/15_subir_archivos.md) |
-| 17 | [Imagen en el formulario y el detalle](docs/manuales/17_imagen_formulario_detalle.md) |
+| 16 | [Imagen en el formulario y el detalle](docs/manuales/16_imagen_formulario_detalle.md) |
 
 Al generar una página o componente, agrega manualmente `standalone: false` en `@Component` para declararlo en su NgModule. Cada práctica especifica los módulos que utiliza.
 
@@ -95,7 +95,6 @@ Las capturas y los diagramas se incluyen como imágenes centradas con pie de fig
 - **09–11, 13 y 14:** pruebas realizadas con la aplicación y la API del entorno del curso.
 - **12:** acceso y validaciones comprobados; registro completo pendiente de habilitar el registro y configurar el correo de verificación.
 - **15:** subida, asociación y recuperación de imágenes comprobadas con una cuenta de práctica y archivos compartidos.
-- El manual 16 se retiró temporalmente del índice hasta disponer de un servidor y comprobar el despliegue remoto y las solicitudes desde el teléfono.
 
 Consulta el [registro de validación](docs/VALIDACION.md) para conocer el alcance de cada comprobación.
 

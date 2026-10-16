@@ -302,4 +302,4 @@ La asociación y la subida son dos peticiones: primero se obtiene el ID del arch
 
 El cliente de autenticación agrega el encabezado de acceso al solicitar `/assets/{id}`. `responseType: blob` obtiene el contenido y `URL.createObjectURL()` lo presenta en la imagen de la página. Antes de reemplazar la vista y al destruir el componente se libera la URL creada. Los archivos se almacenan según la configuración de Directus y sus metadatos pertenecen a `directus_files`. Consulta la [API de archivos](https://directus.com/docs/api/files).
 
-Continúa con el [manual 17: imagen en el formulario y el detalle](17_imagen_formulario_detalle.md) para seleccionar la imagen durante la creación y actualización del producto y mostrarla en su detalle.
+Continúa con el [manual 16: imagen en el formulario y el detalle](16_imagen_formulario_detalle.md) para seleccionar la imagen durante la creación y actualización del producto y mostrarla en su detalle.
