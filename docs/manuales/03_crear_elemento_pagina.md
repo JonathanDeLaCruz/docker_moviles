@@ -4,9 +4,10 @@ En esta práctica abrirás un formulario desde el listado, validarás sus campos
 
 **Resultado esperado:** el botón **Nuevo** abrirá la página `productos-form`. La figura 1 muestra el formulario con los datos del ejemplo, antes de guardarlo.
 
-| ![Formulario de creación con los datos del producto Mouse](imagenes/03-pagina-formulario.jpg) |
-| :---: |
-| *Figura 1. Formulario de creación mediante una página, listo para enviar el producto.* |
+<p align="center">
+  <img src="imagenes/03-pagina-formulario.jpg" alt="Formulario de creación con los datos del producto Mouse" width="390"><br>
+  <em>Figura 1. Formulario de creación mediante una página, listo para enviar el producto.</em>
+</p>
 
 Las capturas se tomaron ejecutando el código de esta práctica en el navegador con tamaño de pantalla móvil. El tema oscuro y los registros del listado corresponden al entorno de prueba.
 
@@ -657,9 +658,10 @@ En `app-routing.module.ts`, aplica únicamente la entrada del paso 2 y conserva 
 3. Presiona **Guardar** sin capturar datos. Deben aparecer los mensajes de nombre, precio y stock obligatorios, como en la figura 2.
 4. Comprueba que un precio negativo y un stock decimal muestren los mensajes correspondientes. Corrige esos valores antes de guardar.
 
-| ![Mensajes de los campos obligatorios al intentar guardar el formulario vacío](imagenes/03-pagina-validaciones.jpg) |
-| :---: |
-| *Figura 2. Validación del formulario vacío antes de enviar información a Directus.* |
+<p align="center">
+  <img src="imagenes/03-pagina-validaciones.jpg" alt="Mensajes de los campos obligatorios al intentar guardar el formulario vacío" width="390"><br>
+  <em>Figura 2. Validación del formulario vacío antes de enviar información a Directus.</em>
+</p>
 
 Captura los mismos datos del ejemplo de la figura 1:
 
@@ -672,9 +674,10 @@ Captura los mismos datos del ejemplo de la figura 1:
 
 Presiona **Guardar**. Debe aparecer **Producto guardado**. Al presionar **Aceptar**, la aplicación debe regresar al listado y mostrar el nuevo producto sin recargar manualmente el navegador, como en la figura 3.
 
-| ![Listado actualizado con el producto Mouse recién creado](imagenes/03-pagina-producto-creado.jpg) |
-| :---: |
-| *Figura 3. Producto recién creado visible en el listado después de aceptar la confirmación.* |
+<p align="center">
+  <img src="imagenes/03-pagina-producto-creado.jpg" alt="Listado actualizado con el producto Mouse recién creado" width="390"><br>
+  <em>Figura 3. Producto recién creado visible en el listado después de aceptar la confirmación.</em>
+</p>
 
 Los demás productos y las fechas dependen de tu base de datos. Esta prueba crea un registro real en la colección `productos` del entorno de prácticas.
 
