@@ -1,374 +1,66 @@
-# Paginación de elementos con Ionic, Angular y Directus
+# Paginar productos con Ionic y Directus
 
-En esta práctica se agregará paginación al listado de productos creado en las prácticas anteriores.
+Crearás un componente con los botones de página y pedirás a Directus únicamente los productos de la página elegida. El listado contará los registros para calcular cuántas páginas necesita.
 
-Hasta este momento, una consulta como:
+<p align="center">
+  <img src="imagenes/08-paginacion.jpg" alt="Resultado de la práctica ejecutado en Ionic." width="390"><br>
+  <em>Figura 1. Resultado de la práctica ejecutado en Ionic.</em>
+</p>
 
-```text
-GET /items/productos
-```
+## 1. Antes de comenzar
 
-puede devolver varios registros en una sola petición. Cuando una colección comienza a crecer, no conviene solicitar todos los elementos al mismo tiempo. En su lugar podemos pedir únicamente una parte de los registros.
+Continúa con los manuales [05](05_eliminar_elemento.md) y [07](07_componentes.md). Necesitas más productos que el tamaño de página. El ejemplo usa **3 por página** para poder probar la navegación con pocos registros; puedes cambiar ese valor a 10.
 
-Directus permite realizar paginación mediante los parámetros:
+Las rutas pertenecen al proyecto Ionic en `mobile/`. Ejecuta los comandos Docker desde la carpeta que contiene `docker-compose.yml`. Al generar páginas o componentes, configura manualmente `standalone: false` en `@Component`; este curso utiliza NgModules.
 
-```text
-limit
-page
-```
+## 2. Conceptos y métodos que utilizarás
 
-Por ejemplo:
+| Elemento | Cómo se utiliza | Para qué sirve |
+| --- | --- | --- |
+| `limit` y `page` | Parámetros del GET. | Indican tamaño y número de página; `page` empieza en 1. |
+| `sort: id` | Orden ascendente estable. | Mantiene el orden entre consultas. |
+| `aggregate[count]` | Conteo de la colección. | Obtiene el total. |
+| `Math.ceil()` | `Math.ceil(total / porPagina)` | Calcula el total de páginas. |
+| `@Input()` y `OnChanges` | Reciben y recalculan el estado. | Actualizan los botones del componente. |
+| `@Output()` y `EventEmitter` | Emiten `paginaCambio`. | Comunican la página elegida al listado. |
 
-```text
-GET /items/productos?limit=10&page=1
-```
+## 3. Implementación paso a paso
 
-solicita los primeros 10 productos.
-
-Después:
-
-```text
-GET /items/productos?limit=10&page=2
-```
-
-solicita la segunda página.
-
-En esta práctica también crearemos un componente reutilizable:
-
-```text
-PaginacionComponent
-```
-
-que podrá utilizarse posteriormente en otros listados.
-
-Se continuará trabajando con:
-
-```text
-Ionic
-Angular
-TypeScript
-Axios
-Directus
-MariaDB
-NgModule
-```
-
-y con:
-
-```typescript
-standalone: false
-```
-
-como en las prácticas anteriores.
-
----
-
-## Objetivo
-
-Al finalizar la práctica, la aplicación deberá:
-
-1. Solicitar una cantidad limitada de productos a Directus.
-2. Utilizar el parámetro `page` para cambiar de página.
-3. Obtener la cantidad total de registros.
-4. Calcular el número total de páginas.
-5. Crear un componente reutilizable de paginación.
-6. Mostrar botones para navegar entre páginas.
-7. Mostrar únicamente una cantidad limitada de números de página.
-8. Permitir navegar con `Anterior` y `Siguiente`.
-9. Informar al componente padre cuando cambie la página mediante `@Output()`.
-10. Recargar únicamente los datos necesarios sin recargar el navegador.
-11. Mantener actualizada la paginación después de crear o eliminar registros.
-
-El flujo será:
-
-```text
-productos-list
-      |
-      | GET
-      v
-Directus
-      |
-      | limit = 10
-      | page = 1
-      v
-10 productos
-      |
-      v
-Listado
-      |
-      v
-PaginacionComponent
-      |
-      | paginaCambio
-      v
-productos-list
-      |
-      | GET
-      | page = 2
-      v
-Directus
-```
-
----
-
-## 1. ¿Qué es la paginación?
-
-Supongamos que existen:
-
-```text
-47 productos
-```
-
-y queremos mostrar:
-
-```text
-10 productos por página
-```
-
-La distribución sería:
-
-| Página | Registros |
-| ---: | ---: |
-| 1 | 1 al 10 |
-| 2 | 11 al 20 |
-| 3 | 21 al 30 |
-| 4 | 31 al 40 |
-| 5 | 41 al 47 |
-
-El número de páginas se obtiene mediante:
-
-```typescript
-Math.ceil(total / porPagina)
-```
-
-En este ejemplo:
-
-```typescript
-Math.ceil(47 / 10)
-```
-
-produce:
-
-```text
-5
-```
-
----
-
-## 2. Paginación en Directus
-
-Directus permite utilizar:
-
-```text
-limit
-```
-
-para indicar cuántos registros queremos recibir y:
-
-```text
-page
-```
-
-para indicar qué página queremos consultar.
-
-Por ejemplo:
-
-```text
-GET /items/productos?limit=10&page=3
-```
-
-La numeración de `page` comienza en:
-
-```text
-1
-```
-
-Por lo tanto:
-
-```text
-page=1
-```
-
-representa la primera página.
-
----
-
-## 3. ¿Por qué no traer todos los registros?
-
-Podríamos solicitar todos los productos y dividirlos solamente desde Angular. Sin embargo, eso obligaría a transferir todos los registros aunque sólo se mostrara una parte.
-
-```text
-Base de datos
-10,000 productos
-      |
-      v
-API
-10,000 productos
-      |
-      v
-Aplicación
-muestra solamente 10
-```
-
-Con paginación:
-
-```text
-Base de datos
-10,000 productos
-      |
-      | limit=10&page=1
-      v
-API
-10 productos
-      |
-      v
-Aplicación
-muestra 10
-```
-
----
-
-## 4. Crear el componente de paginación
-
-Desde la raíz del proyecto ejecuta:
+### Paso 1. Generar el componente
 
 ```powershell
 docker compose exec mobile ionic g component components/paginacion
 ```
 
-Si estás ejecutando Ionic directamente:
+Agrega manualmente `standalone: false`. Crea `paginacion.module.ts` y completa los cuatro archivos del componente con el código de la sección 4. El módulo declara y exporta `PaginacionComponent`.
 
-```powershell
-ionic g component components/paginacion
+### Paso 2. Preparar el listado
+
+En `productos-list.page.ts`, agrega `total = 0`, `paginaActual = 1` y `porPagina = 3`. Cambia la carga de `ionViewWillEnter()` para llamar a `cargarDatos()`.
+
+`cargarTotal()` solicita el conteo; `ajustarPaginaActual()` verifica que la página exista y `cargarProductos()` solicita sus registros con `limit`, `page` y `sort`. Agrega los métodos de la referencia completa.
+
+### Paso 3. Importar el módulo y mostrar los botones
+
+Importa `PaginacionModule` en el módulo del listado y agrégalo a `imports`. Dentro de `ion-content`, después de la lista, coloca:
+
+```html
+<app-paginacion
+  [total]="total"
+  [porPagina]="porPagina"
+  [paginaActual]="paginaActual"
+  [maxPaginasVisibles]="5"
+  (paginaCambio)="cambiarPagina($event)">
+</app-paginacion>
 ```
 
-Se generará una estructura similar a:
+### Paso 4. Actualizar el estado después de cambios
 
-```text
-src/app/components/paginacion/
-├── paginacion.component.html
-├── paginacion.component.scss
-├── paginacion.component.spec.ts
-└── paginacion.component.ts
-```
+En `eliminarProducto()`, después de aceptar el éxito, llama a `cargarDatos()`. Al regresar del formulario mediante página, `ionViewWillEnter()` ejecutará la misma carga. Si utilizas formularios mediante modal, llama a `cargarDatos()` cuando `data?.guardado` sea verdadero.
 
----
+## 4. Código completo de referencia
 
-## 5. Configurar `standalone: false`
-
-Abre:
-
-```text
-src/app/components/paginacion/paginacion.component.ts
-```
-
-Verifica que el decorador contenga:
-
-```typescript
-standalone: false
-```
-
-Por ejemplo:
-
-```typescript
-@Component({
-  selector: 'app-paginacion',
-  templateUrl: './paginacion.component.html',
-  styleUrls: ['./paginacion.component.scss'],
-  standalone: false
-})
-```
-
----
-
-## 6. Crear `paginacion.module.ts`
-
-Dentro de:
-
-```text
-src/app/components/paginacion/
-```
-
-crea:
-
-```text
-paginacion.module.ts
-```
-
-Agrega:
-
-```typescript
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
-
-import { PaginacionComponent } from './paginacion.component';
-
-@NgModule({
-  declarations: [
-    PaginacionComponent
-  ],
-  imports: [
-    CommonModule,
-    IonicModule
-  ],
-  exports: [
-    PaginacionComponent
-  ]
-})
-export class PaginacionModule {}
-```
-
----
-
-## 7. Entradas y salida del componente
-
-El componente recibirá información con `@Input()`:
-
-```typescript
-@Input() total: number = 0;
-@Input() porPagina: number = 10;
-@Input() paginaActual: number = 1;
-@Input() maxPaginasVisibles: number = 5;
-```
-
-También utilizará `@Output()` para informar al padre cuando el usuario cambie de página:
-
-```typescript
-@Output() paginaCambio = new EventEmitter<number>();
-```
-
-El flujo será:
-
-```text
-productos-list
-      |
-      | @Input()
-      v
-PaginacionComponent
-      |
-      | @Output()
-      v
-productos-list
-```
-
-`@Input()` comunica:
-
-```text
-Padre -> Hijo
-```
-
-`@Output()` comunica:
-
-```text
-Hijo -> Padre
-```
-
----
-
-## 8. Código de `paginacion.component.ts`
-
-Utiliza:
+### `mobile/src/app/components/paginacion/paginacion.component.ts`
 
 ```typescript
 import {
@@ -463,114 +155,20 @@ export class PaginacionComponent implements OnChanges {
 }
 ```
 
----
-
-## 9. ¿Por qué utilizamos `OnChanges`?
-
-El componente recibe valores desde la página padre.
-
-Cuando cambian:
-
-```text
-total
-paginaActual
-porPagina
-```
-
-Angular ejecuta:
-
-```typescript
-ngOnChanges()
-```
-
-y recalculamos:
-
-```text
-totalPaginas
-paginasVisibles
-```
-
-Por ejemplo:
-
-```text
-total = 47
-porPagina = 10
-```
-
-produce:
-
-```text
-5 páginas
-```
-
-Si después se elimina un registro y el total cambia, el componente recalcula sus botones automáticamente.
-
----
-
-## 10. ¿Por qué limitar los números visibles?
-
-Supongamos que existen:
-
-```text
-10,000 productos
-```
-
-con:
-
-```text
-10 por página
-```
-
-Tendríamos:
-
-```text
-1,000 páginas
-```
-
-No sería conveniente generar mil botones.
-
-Por eso utilizamos:
-
-```typescript
-maxPaginasVisibles: number = 5;
-```
-
-Por ejemplo, al inicio podemos mostrar:
-
-```text
-1 2 3 4 5
-```
-
-y cuando el usuario se encuentra cerca de la página 20:
-
-```text
-18 19 20 21 22
-```
-
----
-
-## 11. Configurar el HTML del componente
-
-Abre:
-
-```text
-src/app/components/paginacion/paginacion.component.html
-```
-
-Agrega:
+### `mobile/src/app/components/paginacion/paginacion.component.html`
 
 ```html
 <div class="paginacion" *ngIf="totalPaginas > 1">
 
-  <ion-button fill="clear" size="small" [disabled]="paginaActual === 1" (click)="anterior()">
+  <ion-button fill="solid" size="small" [disabled]="paginaActual === 1" (click)="anterior()">
     Anterior
   </ion-button>
 
-  <ion-button *ngFor="let pagina of paginasVisibles" size="small" [fill]="pagina === paginaActual ? 'solid' : 'outline'" (click)="cambiarPagina(pagina)">
+  <ion-button *ngFor="let pagina of paginasVisibles" size="small" fill="solid" [color]="pagina === paginaActual ? 'primary' : 'medium'" (click)="cambiarPagina(pagina)">
     {{ pagina }}
   </ion-button>
 
-  <ion-button fill="clear" size="small" [disabled]="paginaActual === totalPaginas" (click)="siguiente()">
+  <ion-button fill="solid" size="small" [disabled]="paginaActual === totalPaginas" (click)="siguiente()">
     Siguiente
   </ion-button>
 
@@ -581,17 +179,7 @@ Agrega:
 </p>
 ```
 
----
-
-## 12. Configurar el SCSS
-
-Abre:
-
-```text
-src/app/components/paginacion/paginacion.component.scss
-```
-
-Agrega:
+### `mobile/src/app/components/paginacion/paginacion.component.scss`
 
 ```scss
 .paginacion {
@@ -616,40 +204,97 @@ Agrega:
 }
 ```
 
-
----
-
-## 13. Variables necesarias en `productos-list`
-
-Abre:
-
-```text
-src/app/productos-list/productos-list.page.ts
-```
-
-Dentro de la clase agrega:
+### `mobile/src/app/components/paginacion/paginacion.module.ts`
 
 ```typescript
-total: number = 0;
-paginaActual: number = 1;
-porPagina: number = 10;
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { IonicModule } from '@ionic/angular';
+
+import { PaginacionComponent } from './paginacion.component';
+
+@NgModule({
+  declarations: [
+    PaginacionComponent
+  ],
+  imports: [
+    CommonModule,
+    IonicModule
+  ],
+  exports: [
+    PaginacionComponent
+  ]
+})
+export class PaginacionModule {}
 ```
 
-Estas variables representan:
-
-```text
-total         -> cantidad total de productos
-paginaActual  -> página que se está mostrando
-porPagina     -> productos solicitados por página
-```
-
----
-
-## 14. Modificar `cargarProductos()`
-
-Modifica el método de la siguiente manera:
+### `mobile/src/app/productos-list/productos-list.module.ts`
 
 ```typescript
+import { PaginacionModule } from '../components/paginacion/paginacion.module';
+import { ToolbarModule } from '../components/toolbar/toolbar.module';
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+
+import { IonicModule } from '@ionic/angular';
+
+import { ProductosListPageRoutingModule } from './productos-list-routing.module';
+
+import { ProductosListPage } from './productos-list.page';
+
+@NgModule({
+  imports: [
+    PaginacionModule,
+    ToolbarModule,
+    CommonModule,
+    FormsModule,
+    IonicModule,
+    ProductosListPageRoutingModule
+  ],
+  declarations: [ProductosListPage]
+})
+export class ProductosListPageModule {}
+```
+
+### `mobile/src/app/productos-list/productos-list.page.ts`
+
+```typescript
+import { Component } from '@angular/core';
+import { AlertController } from '@ionic/angular';
+import axios from 'axios';
+import { environment } from '../../environments/environment';
+
+interface Producto {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  precio: string;
+  stock: number;
+  fecha_registro: string;
+}
+
+@Component({
+  selector: 'app-productos-list',
+  templateUrl: './productos-list.page.html',
+  styleUrls: ['./productos-list.page.scss'],
+  standalone: false,
+})
+export class ProductosListPage {
+  total: number = 0;
+  paginaActual: number = 1;
+  porPagina: number = 3;
+
+  titulo: string = 'Productos';
+
+  constructor(private alertController: AlertController) {}
+
+  productos: Producto[] = [];
+
+  ionViewWillEnter(): void {
+    void this.cargarDatos();
+  }
+
 async cargarProductos(): Promise<void> {
   try {
     const response = await axios.get<{ data: Producto[] }>(
@@ -669,80 +314,60 @@ async cargarProductos(): Promise<void> {
     console.error('Error al cargar los productos:', error);
   }
 }
-```
 
-Axios generará una petición equivalente a:
 
-```text
-GET /items/productos?limit=10&page=1&sort=id
-```
+async confirmarEliminar(id: number, nombre: string): Promise<void> {
+  const alerta = await this.alertController.create({
+    header: 'Eliminar producto',
+    message: `¿Estás seguro de eliminar el producto "${nombre}"?`,
+    buttons: [
+      {
+        text: 'Cancelar',
+        role: 'cancel'
+      },
+      {
+        text: 'Eliminar',
+        role: 'destructive',
+        handler: () => {
+          void this.eliminarProducto(id);
+        }
+      }
+    ]
+  });
 
-### ¿Para qué sirve `sort`?
-
-Utilizamos:
-
-```typescript
-sort: 'id'
-```
-
-para mantener un orden estable entre páginas.
-
-También podríamos utilizar:
-
-```typescript
-sort: '-id'
-```
-
-para ordenar de forma descendente.
-
----
-
-## 15. Obtener el total de productos
-
-Para calcular el número de páginas necesitamos conocer el total de registros.
-
-Directus permite obtener conteos mediante agregaciones.
-
-La petición será:
-
-```text
-GET /items/productos?aggregate[count]=*
-```
-
----
-
-## 16. Crear la interfaz para el conteo
-
-Antes de la clase agrega:
-
-```typescript
-interface ConteoDirectus {
-  count: number | string;
+  await alerta.present();
 }
+async eliminarProducto(id: number): Promise<void> {
+  try {
+    await axios.delete(
+      `${environment.apiUrl}/items/productos/${id}`
+    );
 
-interface ConteoDirectusResponse {
-  data: ConteoDirectus[];
+    const alerta = await this.alertController.create({
+      header: 'Producto eliminado',
+      message: 'El producto fue eliminado correctamente.',
+      buttons: ['Aceptar']
+    });
+
+    await alerta.present();
+    await alerta.onDidDismiss();
+
+    await this.cargarDatos();
+  } catch (error) {
+    console.error('Error al eliminar el producto:', error);
+
+    const alerta = await this.alertController.create({
+      header: 'Error',
+      message: 'No fue posible eliminar el producto. Revisa la conexión, los permisos de eliminación en Directus y las relaciones del registro.',
+      buttons: ['Aceptar']
+    });
+
+    await alerta.present();
+  }
 }
-```
-
-Se acepta:
-
-```typescript
-number | string
-```
-
-porque el conteo puede recibirse como número o como texto dependiendo de la respuesta.
-
----
-
-## 17. Crear `cargarTotal()`
-
-Dentro de `ProductosListPage` agrega:
-
-```typescript
 async cargarTotal(): Promise<void> {
   try {
-    const response = await axios.get<ConteoDirectusResponse>(
+    const response = await axios.get<{ data: { count: number | string }[] }>(
       `${environment.apiUrl}/items/productos?aggregate[count]=*`
     );
 
@@ -759,71 +384,6 @@ async cargarTotal(): Promise<void> {
     this.total = 0;
   }
 }
-```
-
-Si la API devuelve:
-
-```json
-{
-  "data": [
-    {
-      "count": "47"
-    }
-  ]
-}
-```
-
-la expresión:
-
-```typescript
-Number(response.data.data[0]?.count ?? 0)
-```
-
-convierte el resultado a número.
-
----
-
-## 18. Crear `cargarDatos()`
-
-Cuando se abra el listado necesitamos:
-
-1. obtener el total;
-2. verificar que la página actual siga siendo válida;
-3. cargar los productos correspondientes.
-
-Agrega:
-
-```typescript
-async cargarDatos(): Promise<void> {
-  await this.cargarTotal();
-  this.ajustarPaginaActual();
-  await this.cargarProductos();
-}
-```
-
----
-
-## 19. Ajustar la página después de eliminar registros
-
-Supongamos que tenemos:
-
-```text
-21 productos
-```
-
-con:
-
-```text
-10 por página
-```
-
-Existen tres páginas. La última contiene un solo producto.
-
-Si eliminamos ese producto, ahora solamente existirán dos páginas. La aplicación no debe permanecer intentando mostrar la página 3.
-
-Agrega:
-
-```typescript
 private ajustarPaginaActual(): void {
   const totalPaginas = Math.ceil(
     this.total / this.porPagina
@@ -838,660 +398,92 @@ private ajustarPaginaActual(): void {
     this.paginaActual = totalPaginas;
   }
 }
-```
-
----
-
-## 20. Cargar los datos al iniciar
-
-En:
-
-```typescript
-ngOnInit()
-```
-
-utiliza:
-
-```typescript
-ngOnInit(): void {
-  this.cargarDatos();
+async cargarDatos(): Promise<void> {
+  await this.cargarTotal();
+  this.ajustarPaginaActual();
+  await this.cargarProductos();
 }
-```
-
-Si la rama de navegación mediante páginas utiliza:
-
-```typescript
-ionViewWillEnter()
-```
-
-para actualizar el listado al regresar desde el formulario, utiliza:
-
-```typescript
-ionViewWillEnter(): void {
-  this.cargarDatos();
-}
-```
-
-En ese caso no es suficiente llamar solamente a `cargarProductos()`, porque también debemos actualizar el total.
-
----
-
-## 21. Importar `PaginacionModule`
-
-Abre:
-
-```text
-src/app/productos-list/productos-list.module.ts
-```
-
-Importa:
-
-```typescript
-import { PaginacionModule } from '../components/paginacion/paginacion.module';
-```
-
-Después agrega `PaginacionModule` dentro de `imports`:
-
-```typescript
-@NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    ProductosListPageRoutingModule,
-    PaginacionModule
-  ],
-  declarations: [
-    ProductosListPage
-  ]
-})
-export class ProductosListPageModule {}
-```
-
----
-
-## 22. Utilizar el componente en `productos-list`
-
-Abre:
-
-```text
-src/app/productos-list/productos-list.page.html
-```
-
-Después del listado agrega:
-
-```html
-<app-paginacion [total]="total" [porPagina]="porPagina" [paginaActual]="paginaActual" [maxPaginasVisibles]="5" (paginaCambio)="cambiarPagina($event)"></app-paginacion>
-```
-
-Cuando el usuario selecciona una página, el componente ejecuta:
-
-```typescript
-paginaCambio.emit(pagina)
-```
-
-y la página padre recibe directamente un número.
-
----
-
-## 23. Crear `cambiarPagina()`
-
-En:
-
-```text
-productos-list.page.ts
-```
-
-agrega:
-
-```typescript
 async cambiarPagina(
   pagina: number
 ): Promise<void> {
   this.paginaActual = pagina;
   await this.cargarProductos();
 }
-```
-
-Al cambiar de página, se consulta el conjunto de productos correspondiente.
-
-El flujo será:
-
-```text
-Usuario presiona página 3
-        |
-        v
-PaginacionComponent
-        |
-        | emit(3)
-        v
-cambiarPagina(3)
-        |
-        v
-paginaActual = 3
-        |
-        v
-cargarProductos()
-        |
-        v
-GET ?limit=10&page=3
-```
-
----
-
-## 24. Fragmento principal de `productos-list.page.ts`
-
-La parte relacionada con la paginación puede quedar así:
-
-```typescript
-import { Component, OnInit } from '@angular/core';
-import axios from 'axios';
-
-import { environment } from '../../environments/environment';
-
-interface Producto {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  precio: string;
-  stock: number;
-  fecha_registro: string;
-}
-
-interface ConteoDirectus {
-  count: number | string;
-}
-
-interface ConteoDirectusResponse {
-  data: ConteoDirectus[];
-}
-
-@Component({
-  selector: 'app-productos-list',
-  templateUrl: './productos-list.page.html',
-  styleUrls: ['./productos-list.page.scss'],
-  standalone: false
-})
-export class ProductosListPage implements OnInit {
-
-  productos: Producto[] = [];
-
-  total: number = 0;
-  paginaActual: number = 1;
-  porPagina: number = 10;
-
-  ngOnInit(): void {
-    this.cargarDatos();
-  }
-
-  async cargarDatos(): Promise<void> {
-    await this.cargarTotal();
-    this.ajustarPaginaActual();
-    await this.cargarProductos();
-  }
-
-  async cargarProductos(): Promise<void> {
-    try {
-      const response = await axios.get<{ data: Producto[] }>(
-        `${environment.apiUrl}/items/productos`,
-        {
-          params: {
-            limit: this.porPagina,
-            page: this.paginaActual,
-            sort: 'id'
-          }
-        }
-      );
-
-      this.productos = response.data.data;
-
-    } catch (error) {
-      console.error(
-        'Error al cargar los productos:',
-        error
-      );
-    }
-  }
-
-  async cargarTotal(): Promise<void> {
-    try {
-      const response = await axios.get<ConteoDirectusResponse>(
-        `${environment.apiUrl}/items/productos?aggregate[count]=*`
-      );
-
-      this.total = Number(
-        response.data.data[0]?.count ?? 0
-      );
-
-    } catch (error) {
-      console.error(
-        'Error al obtener el total de productos:',
-        error
-      );
-
-      this.total = 0;
-    }
-  }
-
-  private ajustarPaginaActual(): void {
-    const totalPaginas = Math.ceil(
-      this.total / this.porPagina
-    );
-
-    if (totalPaginas === 0) {
-      this.paginaActual = 1;
-      return;
-    }
-
-    if (this.paginaActual > totalPaginas) {
-      this.paginaActual = totalPaginas;
-    }
-  }
-
-  async cambiarPagina(
-    pagina: number
-  ): Promise<void> {
-    this.paginaActual = pagina;
-    await this.cargarProductos();
-  }
 }
 ```
 
----
-
-## 25. Integración con la creación mediante modal
-
-En la variante mediante modal, después de crear un producto teníamos una lógica similar a:
-
-```typescript
-const { data } = await modal.onDidDismiss();
-
-if (data?.guardado) {
-  await this.cargarProductos();
-}
-```
-
-Ahora debemos actualizar también el total.
-
-Cámbialo por:
-
-```typescript
-const { data } = await modal.onDidDismiss();
-
-if (data?.guardado) {
-  await this.cargarDatos();
-}
-```
-
----
-
-## 26. Integración con la creación mediante página
-
-En la variante que navega hacia `productos-form`, el listado puede utilizar:
-
-```typescript
-ionViewWillEnter(): void {
-  this.cargarDatos();
-}
-```
-
-Así, cuando el usuario regrese del formulario se actualizarán tanto los productos como el total.
-
----
-
-## 27. Integración con eliminar
-
-Después de eliminar un producto conviene utilizar:
-
-```typescript
-await this.cargarDatos();
-```
-
-en lugar de solamente:
-
-```typescript
-await this.cargarProductos();
-```
-
-Una eliminación puede modificar:
-
-```text
-total de registros
-total de páginas
-página actual válida
-```
-
-El método `ajustarPaginaActual()` evita que permanezcamos en una página que ya no existe.
-
----
-
-## 28. Probar la paginación
-
-Asegúrate de tener suficientes productos en Directus.
-
-Por ejemplo, con:
-
-```text
-25 productos
-```
-
-y:
-
-```typescript
-porPagina = 10;
-```
-
-se deberán obtener:
-
-```text
-Página 1 -> 10 productos
-Página 2 -> 10 productos
-Página 3 -> 5 productos
-```
-
-Abre:
-
-```text
-http://localhost:8100/productos-list
-```
-
-Comprueba que:
-
-1. inicialmente se muestre la página 1;
-2. aparezcan solamente 10 productos;
-3. existan tres páginas;
-4. `Anterior` esté deshabilitado en la primera página;
-5. al presionar `2` se solicite la segunda página;
-6. `Siguiente` avance correctamente;
-7. `Siguiente` esté deshabilitado en la última página;
-8. no se recargue el navegador completo.
-
----
-
-## 29. Revisar las peticiones desde el navegador
-
-En las herramientas de desarrollo abre:
-
-```text
-Network
-```
-
-Debes observar peticiones similares a:
-
-```text
-/items/productos?limit=10&page=1&sort=id
-```
-
-y después:
-
-```text
-/items/productos?limit=10&page=2&sort=id
-```
-
-Además, al cargar o actualizar completamente el listado se ejecutará:
-
-```text
-/items/productos?aggregate[count]=*
-```
-
-Esto permite verificar que la paginación está ocurriendo desde la API y no únicamente ocultando elementos en Angular.
-
----
-
-## 30. Cambiar la cantidad de registros por página
-
-Actualmente tenemos:
-
-```typescript
-porPagina: number = 10;
-```
-
-Puedes cambiarlo por:
-
-```typescript
-porPagina: number = 5;
-```
-
-o:
-
-```typescript
-porPagina: number = 20;
-```
-
-El componente recalculará automáticamente el número total de páginas.
-
----
-
-## 31. ¿Por qué no utilizamos `(click)` sobre todo el componente?
-
-No debemos utilizar:
+### `mobile/src/app/productos-list/productos-list.page.html`
 
 ```html
-<app-paginacion (click)="pagina($event)" ></app-paginacion>
+<app-toolbar [nombre]="titulo" color="personalizado">
+  <ion-buttons slot="end">
+    <ion-button fill="solid" [routerLink]="['/productos-form']" aria-label="Nuevo producto">
+      <ion-icon slot="icon-only" name="add"></ion-icon>
+    </ion-button>
+  </ion-buttons>
+</app-toolbar>
+
+<ion-content>
+  <ion-list>
+    <ion-item *ngFor="let producto of productos">
+      <ion-label class="ion-text-wrap">
+        <h2>{{ producto.nombre }}</h2>
+        <p>{{ producto.descripcion }}</p>
+        <p>Precio: ${{ producto.precio }}</p>
+        <p>Stock: {{ producto.stock }}</p>
+        <p>Registro: {{ producto.fecha_registro | date:'yyyy-MM-dd' }}</p>
+      </ion-label>
+      <ion-button fill="solid" slot="end" [routerLink]="['/productos-view', producto.id]" aria-label="Ver detalle">
+        <ion-icon slot="icon-only" name="eye"></ion-icon>
+      </ion-button>
+      <ion-button fill="solid" color="warning" [routerLink]="['/productos-form', producto.id]">
+        <ion-icon slot="icon-only" name="pencil"></ion-icon>
+      </ion-button>
+      <ion-button fill="solid" color="danger" (click)="confirmarEliminar(producto.id, producto.nombre)" aria-label="Eliminar producto">
+        <ion-icon slot="icon-only" name="trash"></ion-icon>
+      </ion-button>
+    </ion-item>
+  </ion-list>
+  <app-paginacion [total]="total" [porPagina]="porPagina" [paginaActual]="paginaActual" [maxPaginasVisibles]="5" (paginaCambio)="cambiarPagina($event)"></app-paginacion>
+</ion-content>
 ```
 
-para después obtener:
+## 5. Comprobar el resultado
 
-```typescript
-event.target.innerText
+1. Abre el listado: debe mostrar hasta tres productos y los controles de la figura 1. **Anterior** estará deshabilitado en la primera página.
+2. Presiona **Siguiente**: deben cambiar los registros y el color del botón de la página activa.
+3. Presiona la última página: puede contener menos productos; **Siguiente** estará deshabilitado.
+4. Regresa con **Anterior** o con un número de página.
+5. Crea un producto desde **+**, acepta y comprueba que se actualice el total al regresar.
+6. Si eliminas el último producto de la última página, el listado debe ajustarse a una página existente.
+
+La figura 1 muestra el resultado obtenido con el código de esta práctica. Las fechas, los productos y el tema visual dependen de tu entorno.
+
+## 6. Explicación detallada del flujo
+
+```mermaid
+flowchart LR
+ A["📱 Abre el listado"] --> B["Directus cuenta productos"]
+ B --> C["Ajusta la página actual"]
+ C --> D["GET con limit, page y sort"]
+ D --> E["🗄️ Registros de esa página"]
+ E --> F["📱 Lista y componente de botones"]
+ F -->|paginaCambio| G["Listado cambia paginaActual"]
+ G --> D
 ```
 
-Ese código depende del elemento exacto que recibió el clic.
+### Reparto de responsabilidades
 
-En su lugar utilizamos:
+La página realiza las consultas, almacena `total`, `porPagina` y `paginaActual`, y muestra los productos. El componente recibe esos valores mediante `@Input()`, calcula sus botones y emite la selección mediante `paginaCambio`.
 
-```typescript
-@Output() paginaCambio
-```
+### Conteo y límites
 
-El componente emite directamente el número de página seleccionado.
+El GET `?aggregate[count]=*` devuelve el total dentro de `data[0].count`. `Number()` permite aceptar un conteo numérico o expresado como cadena. Por ejemplo, 47 registros con 10 por página producen `Math.ceil(47 / 10)`, es decir, 5 páginas.
 
----
+`ajustarPaginaActual()` se ejecuta después del conteo. Si el total queda en cero, conserva la página 1; si la página actual supera la última disponible, la reduce. De esta manera una eliminación no deja el listado apuntando a una página que ya no existe.
 
-## 32. Responsabilidad del componente de paginación
+### Botones visibles
 
-`PaginacionComponent` no debe conocer:
+`ngOnChanges()` recalcula el total de páginas y una ventana de hasta `maxPaginasVisibles` números. El cálculo centra esa ventana alrededor de la página actual y la ajusta al inicio o al final. La página activa usa `primary` y las demás `medium`; todos los botones tienen relleno sólido. `cambiarPagina()` evita valores fuera del rango y selecciones repetidas.
 
-```text
-Axios
-Directus
-productos
-usuarios
-categorías
-```
-
-Únicamente debe conocer:
-
-```text
-total
-porPagina
-paginaActual
-```
-
-y emitir:
-
-```text
-paginaCambio
-```
-
-Por eso puede reutilizarse en otros listados.
-
----
-
-## 33. Responsabilidad de `productos-list`
-
-`ProductosListPage` sí es responsable de:
-
-```text
-consultar Directus
-guardar paginaActual
-guardar porPagina
-guardar total
-cargar productos
-```
-
-La separación será:
-
-```text
-ProductosListPage
-      |
-      | Datos
-      v
-PaginacionComponent
-      |
-      | Evento
-      v
-ProductosListPage
-      |
-      | HTTP
-      v
-Directus
-```
-
----
-
-## 34. Preparación para búsquedas y filtros
-
-Posteriormente podemos combinar esta paginación con:
-
-```text
-búsqueda
-filtros
-ordenamiento
-```
-
-Existe una regla importante:
-
-> El total debe calcularse utilizando los mismos filtros que se aplican al listado.
-
-Por ejemplo, si existen 100 productos pero una búsqueda encuentra solamente 17, el paginador debe calcularse utilizando 17.
-
----
-
-## 35. Organización final
-
-La estructura relacionada con esta práctica será:
-
-```text
-src/app/
-├── components/
-│   ├── toolbar/
-│   │   └── ...
-│   │
-│   └── paginacion/
-│       ├── paginacion.component.html
-│       ├── paginacion.component.scss
-│       ├── paginacion.component.spec.ts
-│       ├── paginacion.component.ts
-│       └── paginacion.module.ts
-│
-└── productos-list/
-    ├── productos-list-routing.module.ts
-    ├── productos-list.module.ts
-    ├── productos-list.page.html
-    ├── productos-list.page.scss
-    ├── productos-list.page.spec.ts
-    └── productos-list.page.ts
-```
-
-Los componentes reutilizables permanecen dentro de:
-
-```text
-src/app/components/
-```
-
----
-
-## 36. Resumen
-
-La paginación se divide en dos responsabilidades.
-
-### Directus
-
-Recibe:
-
-```text
-limit
-page
-```
-
-Por ejemplo:
-
-```text
-/items/productos?limit=10&page=2
-```
-
-También permite obtener el conteo mediante:
-
-```text
-/items/productos?aggregate[count]=*
-```
-
-### `ProductosListPage`
-
-Mantiene:
-
-```typescript
-total
-paginaActual
-porPagina
-```
-
-y realiza las consultas HTTP.
-
-### `PaginacionComponent`
-
-Recibe:
-
-```typescript
-@Input() total
-@Input() porPagina
-@Input() paginaActual
-```
-
-y devuelve:
-
-```typescript
-@Output() paginaCambio
-```
-
-El flujo completo será:
-
-```text
-Directus
-   |
-   | total
-   | productos paginados
-   v
-ProductosListPage
-   |
-   | @Input()
-   v
-PaginacionComponent
-   |
-   | usuario selecciona página
-   |
-   | @Output()
-   v
-ProductosListPage
-   |
-   | limit + page
-   v
-Directus
-```
-
-Los elementos utilizados en esta práctica son:
-
-```text
-Directus
-limit
-page
-Aggregation
-@Input()
-@Output()
-EventEmitter
-Axios
-environment.apiUrl
-```
-
-Esto deja un componente de paginación más pequeño, reutilizable y coherente con la arquitectura utilizada en las prácticas actuales.
+Después de una creación, edición o eliminación se recalculan el total y la página antes de consultar sus productos. La configuración de `limit` evita transferir la colección completa para mostrar solo una parte.
