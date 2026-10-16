@@ -1,420 +1,86 @@
 # Actualizar un elemento con Ionic mediante una página
 
-En esta práctica se actualizará un producto existente utilizando el mismo formulario creado para registrar productos, pero navegando hacia `productos-form` como una **página independiente**.
+En esta práctica reutilizarás el formulario de creación para editar un producto. Al presionar el icono de lápiz, la app consultará ese registro, mostrará sus datos y enviará los cambios a Directus mediante `PATCH`. Después de aceptar la confirmación, el listado volverá a consultar la colección.
 
-Se utilizarán las mismas tecnologías y la misma colección de las prácticas anteriores:
+**Resultado esperado:** abrir `/productos-form/5` muestra los datos del producto seleccionado, como en la figura 1. Utiliza el ID que exista en tu colección.
 
-```text
-Ionic
-Angular
-TypeScript
-Axios
-Directus
-MariaDB
-```
+<p align="center">
+  <img src="imagenes/04-pagina-datos-cargados.jpg" alt="Página de edición con los datos actuales del producto Mouse" width="390"><br>
+  <em>Figura 1. Formulario de edición cargado con los datos existentes del producto.</em>
+</p>
 
-Las peticiones principales serán:
+Las capturas se tomaron con el código de esta práctica en la aplicación Ionic, con tamaño de pantalla móvil. El tema oscuro, los identificadores, las fechas y los demás registros corresponden al entorno de prueba.
 
-```text
-GET   http://localhost:8000/items/productos/{id}
-PATCH http://localhost:8000/items/productos/{id}
-```
+## 1. Antes de comenzar
 
-La primera petición permitirá obtener los datos actuales del producto y la segunda actualizar únicamente el registro seleccionado.
+Continúa con el [manual 03: creación mediante página](03_crear_elemento_pagina.md) funcionando y con al menos un producto registrado. Conserva Axios, `environment.apiUrl`, los permisos de lectura y creación y la configuración de CORS.
 
-En esta variante se navegará desde `productos-list` hacia `productos-form/{id}`.
+- Ejecuta los comandos desde la carpeta que contiene `docker-compose.yml`.
+- Las rutas del proyecto Ionic comienzan en `mobile/src/` en este repositorio.
+- Conserva `standalone: false` en las páginas. Si generas una página o componente, configura ese valor manualmente en `@Component`.
+- Esta variante utiliza `Router` y una página independiente. La [actualización mediante modal](04_actualizar_elemento_modal.md) es otra alternativa.
 
-Cuando termine la actualización, la aplicación regresará a `productos-list`. El listado utilizará `ionViewWillEnter()` para volver a consultar los productos y mostrar los cambios.
+Los archivos finales de esta práctica están reunidos en la sección 4.
 
-## Objetivo
+## 2. Conceptos y métodos que utilizarás
 
-Al finalizar la práctica, la aplicación deberá:
+| Elemento | Cómo se utiliza | Para qué sirve |
+| --- | --- | --- |
+| `[routerLink]` | `['/productos-form', producto.id]` | Abre la página con el ID del producto elegido. |
+| `ActivatedRoute` | `snapshot.paramMap.get('id')` | Obtiene el parámetro de la ruta. |
+| `Number()` y `Number.isNaN()` | Convertir el parámetro y comprobar si es numérico. | Permiten guardar el ID recibido como número. |
+| `esEdicion` | `this.idProducto !== undefined` | Distingue entre editar un registro y crear uno. |
+| `axios.get()` | `GET /items/productos/{id}` | Consulta los datos de un producto. |
+| `patchValue()` | `this.productoForm.patchValue({...})` | Carga los campos recibidos en el formulario existente. |
+| `axios.patch()` | `await axios.patch(url, producto, opciones)` | Envía los campos que se actualizarán en el registro seleccionado. |
+| `axios.post()` | `POST /items/productos` | Conserva la creación cuando no se recibe un ID. |
+| `onDidDismiss()` | `await alerta.onDidDismiss()` | Espera a que se cierre la confirmación antes de regresar. |
+| `ionViewWillEnter()` | `this.cargarProductos()` | Vuelve a consultar la colección al regresar al listado. |
 
-1. Agregar un botón para editar cada producto.
-2. Navegar desde `productos-list` hacia `productos-form/{id}`.
-3. Obtener el `id` mediante `ActivatedRoute`.
-4. Reutilizar el formulario existente para crear y actualizar.
-5. Consultar el producto mediante `GET` por `id`.
-6. Cargar los datos existentes con `patchValue()`.
-7. Mantener los mensajes de validación en `page.ts`.
-8. Utilizar el método `getError()`.
-9. Actualizar el producto mediante `PATCH`.
-10. Regresar al listado después de guardar.
-11. Volver a ejecutar `cargarProductos()` mediante `ionViewWillEnter()`.
+Se conservan el formulario reactivo, `Validators`, `getError()` y `markAllAsTouched()` del manual 03. `cargando` controla la espera de la consulta inicial y `guardando` el envío del formulario.
 
-El flujo será:
+## 3. Implementación paso a paso
 
-```text
-productos-list
-      |
-      | Editar
-      v
-/productos-form/{id}
-      |
-      v
-ActivatedRoute
-      |
-      | id
-      v
-productos-form
-      |
-      | GET /items/productos/{id}
-      v
-Directus
-      |
-      v
-Formulario con datos
-      |
-      | PATCH /items/productos/{id}
-      v
-Directus
-      |
-      v
-MariaDB
-      |
-      v
-Router
-      |
-      v
-/productos-list
-      |
-      v
-ionViewWillEnter()
-      |
-      v
-cargarProductos()
-```
+### Paso 1. Permitir actualizar en Directus
 
----
+Abre `http://localhost:8000`. En **Access Policies**, habilita **Update** sobre `productos` en la política utilizada en las prácticas. Conserva **Read** y **Create**. El formulario enviará únicamente `nombre`, `descripcion`, `precio` y `stock`; no agregues `id` ni `fecha_registro` a los controles o al cuerpo de la petición.
 
-## 1. Permitir la lectura y actualización en Directus
+### Paso 2. Agregar la ruta de edición
 
-La política utilizada durante las prácticas debe tener los permisos:
-
-```text
-Read
-Update
-```
-
-sobre:
-
-```text
-productos
-```
-
-`Read` es necesario porque primero se consultará el producto que se desea modificar.
-
-`Update` es necesario para ejecutar la petición:
-
-```text
-PATCH /items/productos/{id}
-```
-
-Los campos que se actualizarán serán:
-
-```text
-nombre
-descripcion
-precio
-stock
-```
-
-No se enviarán:
-
-```text
-id
-fecha_registro
-```
-
-porque no forman parte de los datos editables del formulario.
-
----
-
-## 2. Reutilizar `productos-form`
-
-Esta práctica continúa a partir del formulario utilizado para crear productos.
-
-El archivo principal será:
-
-```text
-src/app/productos-form/productos-form.page.ts
-```
-
-El mismo formulario tendrá dos comportamientos:
-
-```text
-/productos-form
-      |
-      v
-Crear producto
-      |
-      v
-POST
-```
-
-```text
-/productos-form/5
-      |
-      v
-Editar producto 5
-      |
-      v
-GET por id
-      |
-      v
-PATCH
-```
-
-De esta manera no será necesario crear otra página llamada, por ejemplo:
-
-```text
-productos-editar
-```
-
-El mismo `productos-form` servirá para ambos procesos.
-
----
-
-## 3. Agregar una ruta con `id`
-
-Abre:
-
-```text
-src/app/productos-form/productos-form-routing.module.ts
-```
-
-El arreglo de rutas puede quedar de la siguiente manera:
+En `mobile/src/app/productos-form/productos-form-routing.module.ts`, reemplaza el arreglo `routes` por:
 
 ```typescript
 const routes: Routes = [
-  {
-    path: ':id',
-    component: ProductosFormPage
-  },
-  {
-    path: '',
-    component: ProductosFormPage
-  }
+  { path: ':id', component: ProductosFormPage },
+  { path: '', component: ProductosFormPage }
 ];
 ```
 
-La primera ruta permitirá crear:
+La ruta **`:id` es para editar**: `/productos-form/5`. La ruta **vacía es para crear**: `/productos-form`. Conserva en `app-routing.module.ts` la carga del módulo para `path: 'productos-form'` del manual anterior; no agregues allí otra entrada con `:id`.
 
-```text
-/productos-form
-```
+### Paso 3. Abrir el producto desde el listado
 
-La segunda permitirá editar:
-
-```text
-/productos-form/5
-```
-
-El valor que aparece después de `productos-form/` será recibido con el nombre:
-
-```text
-id
-```
-
-porque la ruta utiliza:
-
-```typescript
-path: ':id'
-```
-
----
-
-## 4. Agregar el botón `Editar`
-
-Abre:
-
-```text
-src/app/productos-list/productos-list.page.html
-```
-
-Dentro del elemento donde se muestra cada producto agrega:
+En `mobile/src/app/productos-list/productos-list.page.html`, dentro de cada `ion-item`, después del botón con icono de ojo, agrega:
 
 ```html
-<ion-button fill="clear" color="warning" [routerLink]="['/productos-form', producto.id]">
+<ion-button fill="solid" color="warning" [routerLink]="['/productos-form', producto.id]">
   <ion-icon slot="icon-only" name="pencil"></ion-icon>
 </ion-button>
 ```
 
-La parte importante es:
+Conserva el botón de detalle con icono de ojo y el de creación con icono **+**. Aquí se muestra el acceso de creación en la barra; si elegiste el botón flotante del manual 03, conserva ese acceso y agrega únicamente el de edición a cada fila.
 
-```html
-[routerLink]="['/productos-form', producto.id]"
-```
+En el TypeScript del listado conserva `ionViewWillEnter()` llamando a `cargarProductos()`, como en el manual 03 mediante página. Así los cambios aparecerán al regresar sin recargar el navegador.
 
-Si el producto tiene:
+### Paso 4. Detectar el ID e inicializar el formulario
 
-```text
-id = 5
-```
-
-Angular construirá la ruta:
-
-```text
-/productos-form/5
-```
-
-En esta variante no se utilizará:
-
-```typescript
-ModalController
-```
-
-para abrir el formulario.
-
----
-
-## 5. Actualizar el listado al regresar
-
-Cuando se utiliza navegación entre páginas, `productos-list` puede permanecer almacenado en la pila de navegación de Ionic.
-
-Por esta razón, `ngOnInit()` no es el mejor lugar para depender de una recarga cada vez que se regresa al listado.
-
-Abre:
-
-```text
-src/app/productos-list/productos-list.page.ts
-```
-
-Utiliza:
-
-```typescript
-ionViewWillEnter(): void {
-  this.cargarProductos();
-}
-```
-
-Si actualmente tienes:
-
-```typescript
-ngOnInit(): void {
-  this.cargarProductos();
-}
-```
-
-puedes sustituir esa carga por `ionViewWillEnter()`.
-
-La diferencia principal es:
-
-```text
-ngOnInit()
-```
-
-se ejecuta cuando Angular inicializa el componente.
-
-Mientras que:
-
-```text
-ionViewWillEnter()
-```
-
-se ejecuta cada vez que la página está a punto de mostrarse.
-
-Por eso es apropiado para volver a consultar el listado después de crear o actualizar un producto.
-
----
-
-## 6. Fragmento principal de `productos-list.page.ts`
-
-El listado puede quedar de forma similar a:
-
-```typescript
-import { Component } from '@angular/core';
-import axios from 'axios';
-import { environment } from '../../environments/environment';
-
-interface Producto {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  precio: string;
-  stock: number;
-  fecha_registro: string;
-}
-
-@Component({
-  selector: 'app-productos-list',
-  templateUrl: './productos-list.page.html',
-  styleUrls: ['./productos-list.page.scss'],
-  standalone: false,
-})
-export class ProductosListPage {
-
-  productos: Producto[] = [];
-
-  ionViewWillEnter(): void {
-    this.cargarProductos();
-  }
-
-  async cargarProductos(): Promise<void> {
-    try {
-      const response = await axios.get<{ data: Producto[] }>(
-        `${environment.apiUrl}/items/productos`
-      );
-
-      this.productos = response.data.data;
-    } catch (error) {
-      console.error('Error al cargar los productos:', error);
-    }
-  }
-}
-```
-
-No es necesario crear un método `editarProducto()` si el botón utiliza directamente:
-
-```html
-[routerLink]="['/productos-form', producto.id]"
-```
-
----
-
-## 7. Importar `ActivatedRoute`
-
-Abre:
-
-```text
-src/app/productos-form/productos-form.page.ts
-```
-
-Agrega:
+En `mobile/src/app/productos-form/productos-form.page.ts`, reemplaza la importación de `Router` por:
 
 ```typescript
 import { ActivatedRoute, Router } from '@angular/router';
 ```
 
-En esta variante se utiliza:
-
-```text
-ActivatedRoute
-```
-
-para leer el `id` incluido en la URL.
-
-También se utiliza:
-
-```text
-Router
-```
-
-para regresar al listado después de guardar.
-
-No se necesita:
-
-```typescript
-ModalController
-```
-
-porque el formulario es una página normal.
-
----
-
-## 8. Crear las interfaces
-
-Antes de la clase utiliza:
+Reemplaza `ProductoCrear` por `ProductoGuardar` y agrega `ProductoDetalle` antes de `@Component`:
 
 ```typescript
 interface ProductoGuardar {
@@ -434,115 +100,7 @@ interface ProductoDetalle {
 }
 ```
 
-`ProductoGuardar` contiene solamente los campos que se enviarán a Directus.
-
-`ProductoDetalle` representa la estructura de un producto recuperado mediante `GET` por `id`.
-
----
-
-## 9. Crear las variables
-
-Dentro de la clase conserva:
-
-```typescript
-productoForm!: FormGroup;
-guardando: boolean = false;
-```
-
-y agrega:
-
-```typescript
-idProducto?: number;
-cargando: boolean = false;
-```
-
-`idProducto` almacenará el identificador obtenido de la URL.
-
-Cuando la página se abra en:
-
-```text
-/productos-form
-```
-
-`idProducto` permanecerá vacío.
-
-Cuando se abra en:
-
-```text
-/productos-form/5
-```
-
-se almacenará:
-
-```typescript
-idProducto = 5;
-```
-
----
-
-## 10. Crear `esEdicion`
-
-Dentro de la clase agrega:
-
-```typescript
-get esEdicion(): boolean {
-  return this.idProducto !== undefined;
-}
-```
-
-Este getter permitirá distinguir entre creación y actualización.
-
-```text
-idProducto vacío
-      |
-      v
-esEdicion = false
-      |
-      v
-Crear
-```
-
-```text
-idProducto con valor
-      |
-      v
-esEdicion = true
-      |
-      v
-Actualizar
-```
-
----
-
-## 11. Mantener los mensajes de validación en `page.ts`
-
-Conserva:
-
-```typescript
-mensajesValidacion: Record<string, Record<string, string>> = {
-  nombre: {
-    required: 'El nombre es obligatorio.',
-    maxlength: 'El nombre no debe superar 150 caracteres.'
-  },
-  precio: {
-    required: 'El precio es obligatorio.',
-    min: 'El precio debe ser igual o mayor que cero.'
-  },
-  stock: {
-    required: 'El stock es obligatorio.',
-    min: 'El stock debe ser igual o mayor que cero.',
-    pattern: 'El stock debe contener únicamente números enteros.'
-  }
-};
-```
-
-Las reglas son las mismas tanto para crear como para actualizar.
-
----
-
-## 12. Configurar el constructor
-
-Utiliza:
+Dentro de la clase, junto a `productoForm` y `guardando`, agrega `idProducto?: number;` y `cargando: boolean = false;`. Reemplaza el constructor y `ngOnInit()`, y agrega el getter `esEdicion`:
 
 ```typescript
 constructor(
@@ -551,41 +109,11 @@ constructor(
   private activatedRoute: ActivatedRoute,
   private router: Router
 ) {}
-```
 
-Cada dependencia tendrá la siguiente función:
+get esEdicion(): boolean {
+  return this.idProducto !== undefined;
+}
 
-```text
-FormBuilder
-```
-
-crea el formulario reactivo.
-
-```text
-AlertController
-```
-
-muestra los mensajes después de guardar o cuando ocurre un error.
-
-```text
-ActivatedRoute
-```
-
-obtiene el `id` desde la URL.
-
-```text
-Router
-```
-
-permite regresar a `productos-list` después del guardado.
-
----
-
-## 13. Crear primero el formulario y obtener después el `id`
-
-Modifica `ngOnInit()`:
-
-```typescript
 async ngOnInit(): Promise<void> {
   this.crearFormulario();
 
@@ -602,99 +130,11 @@ async ngOnInit(): Promise<void> {
 }
 ```
 
-Primero se ejecuta:
+Conserva `crearFormulario()`, `mensajesValidacion` y `getError()` del manual 03. El formulario se construye **antes** de consultar sus datos. Si la ruta no trae ID, queda vacío para crear; si trae un valor numérico, se carga el registro.
 
-```typescript
-this.crearFormulario();
-```
+### Paso 5. Consultar y cargar los valores actuales
 
-porque después `cargarProducto()` utilizará:
-
-```typescript
-this.productoForm.patchValue(...)
-```
-
-La instrucción:
-
-```typescript
-this.activatedRoute.snapshot.paramMap.get('id')
-```
-
-obtiene el parámetro definido en:
-
-```typescript
-path: ':id'
-```
-
-Los parámetros de una URL llegan como texto, por eso se convierte mediante:
-
-```typescript
-Number(id)
-```
-
----
-
-## 14. Mantener `crearFormulario()`
-
-El formulario puede conservarse igual que en la práctica de creación:
-
-```typescript
-private crearFormulario(): void {
-  this.productoForm = this.formBuilder.group({
-    nombre: ['', [
-      Validators.required,
-      Validators.maxLength(150)
-    ]],
-    descripcion: [''],
-    precio: ['', [
-      Validators.required,
-      Validators.min(0)
-    ]],
-    stock: ['', [
-      Validators.required,
-      Validators.min(0),
-      Validators.pattern('^[0-9]+$')
-    ]]
-  });
-}
-```
-
-No se agrega:
-
-```text
-id
-```
-
-al formulario porque se utilizará únicamente para identificar el producto en la URL.
-
----
-
-## 15. Mantener `getError()`
-
-Conserva:
-
-```typescript
-getError(controlName: string): string {
-  const control = this.productoForm.get(controlName);
-
-  if (!control || !control.errors || !(control.touched || control.dirty)) {
-    return '';
-  }
-
-  const tipoError = Object.keys(control.errors)[0];
-
-  return this.mensajesValidacion[controlName]?.[tipoError]
-    ?? 'El valor ingresado no es válido.';
-}
-```
-
-No es necesario duplicar los mensajes de validación en el HTML.
-
----
-
-## 16. Crear `cargarProducto()`
-
-Agrega:
+Dentro de la misma clase, agrega:
 
 ```typescript
 private async cargarProducto(): Promise<void> {
@@ -733,81 +173,11 @@ private async cargarProducto(): Promise<void> {
 }
 ```
 
-Si la URL actual es:
+`response.data.data` contiene el producto entregado por Directus. `patchValue()` llena los cuatro campos editables; el ID se conserva por separado para construir la URL del `PATCH`.
 
-```text
-http://localhost:8100/productos-form/5
-```
+### Paso 6. Elegir entre actualizar y crear al guardar
 
-la petición será:
-
-```text
-GET http://localhost:8000/items/productos/5
-```
-
-Directus responderá con una estructura similar a:
-
-```json
-{
-  "data": {
-    "id": 5,
-    "nombre": "Mouse",
-    "descripcion": "Mouse inalámbrico",
-    "precio": "450.00",
-    "stock": 10,
-    "fecha_registro": "2026-09-21T12:00:00"
-  }
-}
-```
-
-Después se utilizará:
-
-```typescript
-this.productoForm.patchValue(...)
-```
-
-para llenar los controles del formulario.
-
----
-
-## 17. ¿Por qué utilizar `patchValue()`?
-
-El producto recuperado contiene campos que no forman parte del formulario, por ejemplo:
-
-```text
-id
-fecha_registro
-```
-
-El formulario únicamente necesita:
-
-```text
-nombre
-descripcion
-precio
-stock
-```
-
-Por eso se utiliza:
-
-```typescript
-this.productoForm.patchValue({
-  nombre: producto.nombre,
-  descripcion: producto.descripcion,
-  precio: producto.precio,
-  stock: producto.stock
-});
-```
-
-`patchValue()` permite asignar solamente los controles indicados.
-
----
-
-## 18. Modificar `guardarProducto()`
-
-Ahora el método deberá decidir si se está creando o actualizando.
-
-Utiliza:
+Reemplaza el método `guardarProducto()` por:
 
 ```typescript
 async guardarProducto(): Promise<void> {
@@ -885,108 +255,200 @@ async guardarProducto(): Promise<void> {
 }
 ```
 
-La condición principal es:
+El formulario inválido se detiene antes de enviar datos. Si `esEdicion` es verdadero, se ejecuta `PATCH` con el ID; en caso contrario se conserva el `POST` de creación. La navegación ocurre después de aceptar la confirmación.
+
+### Paso 7. Adaptar el HTML al modo de edición
+
+En `productos-form.page.html`, cambia el título por:
+
+```html
+<ion-title>{{ esEdicion ? 'Editar producto' : 'Nuevo producto' }}</ion-title>
+```
+
+Antes del formulario agrega el indicador de carga y ajusta la condición del `form`:
+
+```html
+<div *ngIf="cargando" class="ion-text-center ion-padding">
+  <ion-spinner name="crescent"></ion-spinner>
+  <p>Cargando producto...</p>
+</div>
+
+<form *ngIf="productoForm && !cargando" [formGroup]="productoForm" (ngSubmit)="guardarProducto()">
+  <!-- Conserva aquí los cuatro campos y sus mensajes del manual 03. -->
+</form>
+```
+
+Dentro del formulario, el botón de envío queda así:
+
+```html
+<ion-button fill="solid" expand="block" type="submit" [disabled]="guardando">
+  {{ guardando ? 'Guardando...' : (esEdicion ? 'Actualizar' : 'Guardar') }}
+</ion-button>
+```
+
+Conserva `ReactiveFormsModule` y la flecha de regreso con `defaultHref="/productos-list"`. Compara el archivo final con la sección siguiente.
+
+## 4. Código completo de referencia
+
+Estos archivos corresponden a la variante mediante página con el botón **+** en la barra. Conserva las demás páginas, las rutas principales y `environment` de los manuales anteriores. No necesitas agregar estilos para esta práctica.
+
+### `mobile/src/app/productos-form/productos-form-routing.module.ts`
 
 ```typescript
-if (this.esEdicion && this.idProducto !== undefined)
+import { NgModule } from '@angular/core';
+import { Routes, RouterModule } from '@angular/router';
+
+import { ProductosFormPage } from './productos-form.page';
+
+const routes: Routes = [
+  {
+    path: ':id',
+    component: ProductosFormPage
+  },
+  {
+    path: '',
+    component: ProductosFormPage
+  }
+];
+
+@NgModule({
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule],
+})
+export class ProductosFormPageRoutingModule {}
 ```
 
-Cuando existe un identificador se utiliza:
+### `mobile/src/app/productos-list/productos-list.module.ts`
 
 ```typescript
-axios.patch(...)
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+
+import { IonicModule } from '@ionic/angular';
+
+import { ProductosListPageRoutingModule } from './productos-list-routing.module';
+
+import { ProductosListPage } from './productos-list.page';
+
+@NgModule({
+  imports: [
+    CommonModule,
+    FormsModule,
+    IonicModule,
+    ProductosListPageRoutingModule
+  ],
+  declarations: [ProductosListPage]
+})
+export class ProductosListPageModule {}
 ```
 
-Cuando no existe se mantiene:
+### `mobile/src/app/productos-list/productos-list.page.ts`
 
 ```typescript
-axios.post(...)
-```
+import { Component } from '@angular/core';
+import axios from 'axios';
+import { environment } from '../../environments/environment';
 
----
+interface Producto {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  precio: string;
+  stock: number;
+  fecha_registro: string;
+}
 
-## 19. Petición `PATCH`
+@Component({
+  selector: 'app-productos-list',
+  templateUrl: './productos-list.page.html',
+  styleUrls: ['./productos-list.page.scss'],
+  standalone: false,
+})
+export class ProductosListPage {
 
-Si se está editando el producto con:
+  productos: Producto[] = [];
 
-```text
-id = 5
-```
+  ionViewWillEnter(): void {
+    this.cargarProductos();
+  }
 
-se ejecutará:
+  async cargarProductos(): Promise<void> {
+    try {
+      const response = await axios.get<{ data: Producto[] }>(
+        `${environment.apiUrl}/items/productos`
+      );
 
-```text
-PATCH http://localhost:8000/items/productos/5
-```
-
-El cuerpo enviado será similar a:
-
-```json
-{
-  "nombre": "Mouse inalámbrico",
-  "descripcion": "Mouse inalámbrico recargable",
-  "precio": 500,
-  "stock": 15
+      this.productos = response.data.data;
+    } catch (error) {
+      console.error('Error al cargar los productos:', error);
+    }
+  }
 }
 ```
 
-El `id` no se envía dentro del cuerpo porque ya forma parte de la URL.
+### `mobile/src/app/productos-list/productos-list.page.html`
 
----
+```html
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Productos</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="solid" [routerLink]="['/productos-form']" aria-label="Nuevo producto">
+        <ion-icon slot="icon-only" name="add"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
 
-## 20. Regresar al listado
+<ion-content>
+  <ion-list>
+    <ion-item *ngFor="let producto of productos">
+      <ion-label class="ion-text-wrap">
+        <h2>{{ producto.nombre }}</h2>
+        <p>{{ producto.descripcion }}</p>
+        <p>Precio: ${{ producto.precio }}</p>
+        <p>Stock: {{ producto.stock }}</p>
+        <p>Registro: {{ producto.fecha_registro | date:'yyyy-MM-dd' }}</p>
+      </ion-label>
+      <ion-button fill="solid" slot="end" [routerLink]="['/productos-view', producto.id]" aria-label="Ver detalle">
+        <ion-icon slot="icon-only" name="eye"></ion-icon>
+      </ion-button>
+      <ion-button fill="solid" color="warning" [routerLink]="['/productos-form', producto.id]">
+        <ion-icon slot="icon-only" name="pencil"></ion-icon>
+      </ion-button>
+    </ion-item>
+  </ion-list>
+</ion-content>
+```
 
-Después de guardar correctamente se ejecutará:
+### `mobile/src/app/productos-form/productos-form.module.ts`
 
 ```typescript
-await this.router.navigate(['/productos-list']);
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
+import { IonicModule } from '@ionic/angular';
+
+import { ProductosFormPageRoutingModule } from './productos-form-routing.module';
+
+import { ProductosFormPage } from './productos-form.page';
+
+@NgModule({
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    IonicModule,
+    ProductosFormPageRoutingModule
+  ],
+  declarations: [ProductosFormPage]
+})
+export class ProductosFormPageModule {}
 ```
 
-Al regresar, Ionic ejecutará:
-
-```typescript
-ionViewWillEnter(): void {
-  this.cargarProductos();
-}
-```
-
-por lo tanto se realizará nuevamente:
-
-```text
-GET /items/productos
-```
-
-y se mostrará la información actualizada.
-
-El flujo será:
-
-```text
-PATCH exitoso
-      |
-      v
-router.navigate(['/productos-list'])
-      |
-      v
-productos-list
-      |
-      v
-ionViewWillEnter()
-      |
-      v
-cargarProductos()
-      |
-      v
-GET /items/productos
-      |
-      v
-Listado actualizado
-```
-
----
-
-## 21. Código completo de `productos-form.page.ts`
-
-El archivo puede quedar de forma similar a:
+### `mobile/src/app/productos-form/productos-form.page.ts`
 
 ```typescript
 import { Component, OnInit } from '@angular/core';
@@ -1214,47 +676,7 @@ export class ProductosFormPage implements OnInit {
 }
 ```
 
----
-
-## 22. Configurar el HTML del formulario
-
-Abre:
-
-```text
-src/app/productos-form/productos-form.page.html
-```
-
-En una página normal se puede utilizar un botón de regreso:
-
-```html
-<ion-buttons slot="start">
-  <ion-back-button defaultHref="/productos-list"></ion-back-button>
-</ion-buttons>
-```
-
-El título puede cambiar según el modo:
-
-```html
-<ion-title>
-  {{ esEdicion ? 'Editar producto' : 'Nuevo producto' }}
-</ion-title>
-```
-
-El botón puede mostrar:
-
-```text
-Guardar
-```
-
-o:
-
-```text
-Actualizar
-```
-
-según exista un `id`.
-
-El HTML completo puede quedar de forma similar a:
+### `mobile/src/app/productos-form/productos-form.page.html`
 
 ```html
 <ion-header>
@@ -1303,218 +725,93 @@ El HTML completo puede quedar de forma similar a:
       </ion-note>
     </ion-list>
 
-    <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="guardando || cargando">
+    <ion-button fill="solid" expand="block" type="submit" class="ion-margin-top" [disabled]="guardando || cargando">
       {{ guardando ? 'Guardando...' : (esEdicion ? 'Actualizar' : 'Guardar') }}
     </ion-button>
   </form>
 </ion-content>
 ```
 
----
+## 5. Comprobar el resultado
 
-## 23. Cómo se diferencia crear de actualizar
+Con la aplicación Ionic abierta, sigue esta secuencia:
 
-El mismo formulario ahora funcionará de dos maneras.
+1. En el listado, presiona el **lápiz** del producto que deseas modificar. La URL debe incluir su ID y el formulario debe mostrar los valores existentes (figura 1).
+2. Vacía el nombre o escribe un precio negativo y trata de actualizar. Deben aparecer los mensajes de validación; corrige los campos antes de continuar.
+3. Para reproducir el ejemplo, parte del producto **Mouse**, con precio **450** y stock **10**, y cambia sus datos por los de esta tabla. La figura 2 muestra el formulario antes del envío.
 
-### Crear
-
-Se abre:
-
-```text
-/productos-form
-```
-
-No existe un parámetro `id`.
-
-Por lo tanto:
-
-```typescript
-this.idProducto === undefined
-```
-
-y:
-
-```typescript
-this.esEdicion === false
-```
-
-Al guardar se ejecutará:
-
-```text
-POST /items/productos
-```
-
-### Actualizar
-
-Se abre, por ejemplo:
-
-```text
-/productos-form/5
-```
-
-El parámetro será:
-
-```text
-id = 5
-```
-
-Entonces se ejecutará primero:
-
-```text
-GET /items/productos/5
-```
-
-para llenar el formulario.
-
-Al guardar se ejecutará:
-
-```text
-PATCH /items/productos/5
-```
-
----
-
-## 24. Probar la actualización
-
-Abre:
-
-```text
-http://localhost:8100/productos-list
-```
-
-Selecciona el botón de edición de un producto.
-
-Si el producto tiene:
-
-```text
-id = 5
-```
-
-la aplicación deberá navegar a:
-
-```text
-http://localhost:8100/productos-form/5
-```
-
-Después deberá ejecutar:
-
-```text
-GET http://localhost:8000/items/productos/5
-```
-
-El formulario deberá mostrar los valores actuales.
-
-Por ejemplo:
-
-```text
-Nombre: Mouse
-Descripción: Mouse inalámbrico
-Precio: 450
-Stock: 10
-```
-
-Modifica los datos:
-
-```text
-Nombre: Mouse inalámbrico
-Descripción: Mouse inalámbrico recargable
-Precio: 500
-Stock: 15
-```
-
-Presiona:
-
-```text
-Actualizar
-```
-
-La aplicación deberá ejecutar:
-
-```text
-PATCH http://localhost:8000/items/productos/5
-```
-
-Después de aceptar el mensaje:
-
-1. la aplicación debe regresar a `/productos-list`;
-2. debe ejecutarse `ionViewWillEnter()`;
-3. debe ejecutarse `cargarProductos()`;
-4. el producto debe mostrar los datos modificados;
-5. no debe ser necesario recargar manualmente el navegador.
-
----
-
-## 25. Probar que el formulario todavía puede crear
-
-Después de realizar las modificaciones anteriores, abre:
-
-```text
-http://localhost:8100/productos-form
-```
-
-Como la URL no contiene un `id`, el formulario deberá mantenerse vacío.
-
-Captura, por ejemplo:
-
-```text
-Nombre: Teclado
-Descripción: Teclado mecánico
-Precio: 800
-Stock: 20
-```
-
-Al presionar:
-
-```text
-Guardar
-```
-
-se deberá ejecutar:
-
-```text
-POST http://localhost:8000/items/productos
-```
-
-Esto comprueba que `productos-form` continúa siendo reutilizable.
-
----
-
-## 26. Resumen
-
-Esta variante utiliza navegación mediante rutas en lugar de abrir un modal.
-
-Los elementos principales son:
-
-1. Permisos `Read` y `Update` en Directus.
-2. Ruta `:id` en `productos-form-routing.module.ts`.
-3. Botón `Editar` con `[routerLink]`.
-4. `ActivatedRoute` para obtener el `id`.
-5. Formulario reactivo reutilizable.
-6. Mensajes de validación almacenados en `page.ts`.
-7. Método `getError()`.
-8. Petición `GET` por `id` para obtener los datos existentes.
-9. `patchValue()` para llenar el formulario.
-10. Petición `PATCH` para actualizar el producto.
-11. `Router` para regresar al listado después del guardado.
-12. `ionViewWillEnter()` para volver a consultar los productos.
-
-La lógica principal será:
-
-| Ruta | Acción |
+| Campo | Valor nuevo |
 | --- | --- |
-| `/productos-form` | Crear producto |
-| `/productos-form/{id}` | Editar producto |
-| Sin `id` al guardar | `POST /items/productos` |
-| Con `id` al guardar | `PATCH /items/productos/{id}` |
-| Guardado exitoso | Navegar a `/productos-list` |
-| Regreso al listado | `ionViewWillEnter()` → `cargarProductos()` |
+| Nombre | Mouse inalámbrico |
+| Descripción | Mouse inalámbrico recargable |
+| Precio | 500 |
+| Stock | 15 |
 
-La diferencia principal entre ambas variantes de actualización es:
+<p align="center">
+  <img src="imagenes/04-pagina-datos-modificados.jpg" alt="Formulario con los nuevos datos del producto antes de actualizar" width="390"><br>
+  <em>Figura 2. Valores modificados, preparados para enviarse mediante PATCH.</em>
+</p>
 
-| Página normal | Modal |
-| --- | --- |
-| Navega a `/productos-form/{id}` | Permanece en `productos-list` |
-| Recibe el `id` con `ActivatedRoute` | Recibe el `id` con `@Input()` |
-| Utiliza `Router` al terminar | Utiliza `ModalController.dismiss()` |
-| El listado se actualiza con `ionViewWillEnter()` | El listado se actualiza después de `onDidDismiss()` |
-| Cambia la ruta visible | No cambia la ruta del listado |
+4. Presiona **Actualizar**. Debe aparecer **Producto actualizado**. Acepta y comprueba que el listado muestre los cambios sin recargar el navegador (figura 3).
+5. Abre el icono de **ojo** del mismo producto para comprobar que el detalle también muestra sus datos actualizados.
+6. Regresa y presiona **+**. Debe abrirse el formulario vacío con el título **Nuevo producto** y el botón **Guardar**. Prueba la creación para confirmar que se conserva el `POST`; en la prueba se registró **Teclado**, descripción **Teclado mecánico**, precio **800** y stock **20**.
+
+<p align="center">
+  <img src="imagenes/04-pagina-listado-actualizado.jpg" alt="Listado con Mouse inalámbrico actualizado a precio 500 y stock 15" width="390"><br>
+  <em>Figura 3. Listado consultado de nuevo al regresar después de la actualización.</em>
+</p>
+
+Estas pruebas modifican un registro existente y crean otro en la colección `productos` del entorno de prácticas. Utiliza el ID real de tu producto; el ejemplo se probó editando el ID 5.
+
+## 6. Explicación detallada del flujo
+
+### De la fila seleccionada al formulario
+
+`[routerLink]="['/productos-form', producto.id]"` construye la ruta del registro elegido. El módulo del formulario reconoce el segmento `:id`; `ActivatedRoute.snapshot.paramMap.get('id')` lo entrega como cadena o devuelve `null` si no existe.
+
+`Number()` convierte el parámetro y `Number.isNaN()` evita tratar una conversión no numérica como un ID. El getter `esEdicion` depende de si se asignó `idProducto`; con él se eligen el título, el texto del botón y el tipo de petición. La consulta inicial ocurre en `ngOnInit()`, después de construir el formulario.
+
+`axios.get()` pide un solo registro a Directus. Axios guarda el cuerpo HTTP en `response.data` y Directus coloca el producto en la propiedad `data` de ese cuerpo; por eso se utiliza `response.data.data`. El precio recibido admite cadena o número, mientras que al guardar se convierte a número.
+
+`patchValue()` asigna los valores a los controles existentes. No recrea el formulario ni elimina sus validaciones. `cargando` muestra el indicador y oculta el formulario mientras se espera la respuesta; `finally` restablece ese estado incluso si falla la consulta.
+
+### Del formulario a Directus y de regreso
+
+`guardarProducto()` primero comprueba la validez. `markAllAsTouched()` permite mostrar los mensajes de `getError()`; el `return` impide continuar con un formulario inválido.
+
+Después prepara un objeto con los cuatro campos editables. `trim()` quita espacios del nombre y la descripción; `?.trim() ?? ''` permite una descripción vacía. `Number()` convierte precio y stock. No se envían el ID ni la fecha generada por la base de datos.
+
+En edición, `PATCH /items/productos/{id}` actualiza el registro señalado por la URL. Sin ID, `POST /items/productos` crea otro. El mismo formulario conserva ambos usos sin duplicar los controles.
+
+`guardando` deshabilita el botón durante el envío. Si la petición tiene éxito, la app presenta la confirmación, espera su cierre con `onDidDismiss()` y regresa mediante `Router`. Si falla, `catch` registra el error y muestra la alerta correspondiente; `finally` libera el estado de guardado.
+
+Al volver al listado, `ionViewWillEnter()` ejecuta `cargarProductos()`. Esta nueva consulta actualiza el arreglo de `*ngFor` y muestra los valores guardados sin recargar todo el navegador.
+
+```mermaid
+sequenceDiagram
+    actor Alumno
+    participant App as 📱 App Ionic
+    participant API as 🌐 Directus
+    participant DB as 🗄️ MariaDB
+    Alumno->>App: Pulsa el lápiz del producto
+    App->>App: Lee el ID y crea el formulario
+    App->>API: GET /items/productos/{id}
+    API->>DB: Consulta el producto
+    DB-->>API: Registro actual
+    API-->>App: JSON con data
+    App->>App: patchValue() carga los campos
+    Alumno->>App: Modifica y pulsa Actualizar
+    App->>App: Valida y prepara los cuatro campos
+    App->>API: PATCH /items/productos/{id}
+    API->>DB: Actualiza el registro
+    DB-->>API: Cambio guardado
+    API-->>App: Respuesta exitosa
+    App-->>Alumno: Producto actualizado
+    Alumno->>App: Acepta la confirmación
+    App->>App: Router regresa al listado
+    App->>API: GET /items/productos
+    API->>DB: Consulta la colección
+    DB-->>API: Productos actuales
+    API-->>App: JSON con data
+    App-->>Alumno: Listado actualizado
+```
