@@ -1,60 +1,62 @@
-# Crear productos con varias categorías
+# Crear, actualizar y consultar productos con categorías
 
-Utilizarás un `FormArray` para seleccionar varias categorías al crear un producto. Directus guardará el producto y sus enlaces en la colección de unión de la relación.
+Utilizarás un FormArray para seleccionar categorías al crear y editar productos. El detalle mostrará sus nombres y Directus conservará los enlaces en productos_categorias.
 
 ## 1. Antes de comenzar
 
-Continúa con los servicios y formularios de los manuales 11–13. Necesitas las colecciones y permisos descritos en el primer paso. Esta práctica agrega categorías durante la creación del producto.
-
-Las rutas pertenecen al proyecto Ionic en `mobile/`. Ejecuta los comandos Docker desde la carpeta que contiene `docker-compose.yml`. Al generar páginas o componentes, configura manualmente `standalone: false` en `@Component`; este curso utiliza NgModules.
+Continúa con los servicios, la sesión y los formularios mediante página de los manuales 11–13. Conserva el listado y sus accesos de creación, edición y detalle. Las rutas src/... corresponden a mobile/src/... en este repositorio. Al generar páginas o componentes, agrega manualmente `standalone: false` en @Component.
 
 ## 2. Conceptos y métodos que utilizarás
 
-| Elemento | Uso | Resultado |
+| Elemento | Uso | Para qué sirve |
 | --- | --- | --- |
-| Muchos a muchos | Productos y categorías unidos por una colección. | Un producto puede tener varias categorías y una categoría varios productos. |
-| `FormArray` | Agrupa controles de selección. | Permite agregar o quitar filas. |
-| `FormControl` | Guarda el ID elegido. | Representa una selección. |
-| `formArrayName` | Conecta el arreglo en la plantilla. | Vincula sus filas con Angular. |
-| `Set` | Reúne los IDs sin repetir. | Evita duplicar enlaces en el envío. |
+| FormArray y FormControl | Una selección requerida por fila. | Agregar y quitar categorías en ambos modos. |
+| patchValue() y clear() | Cargar datos y reconstruir las filas. | Mostrar las selecciones existentes al editar. |
+| fields | Solicitar categorias.id y categorias.categorias_id con sus datos. | Obtener el ID del enlace y el nombre de la categoría. |
+| Set | Comparar IDs únicos. | Evitar enlaces repetidos. |
+| create y delete | Enviar los cambios de la relación en PATCH. | Agregar enlaces nuevos y quitar solo los retirados. |
 
 ## 3. Implementación paso a paso
 
-### Paso 1. Configurar la relación en Directus
+### Paso 1. Configurar la relación y los permisos
 
-Crea `categorias` con `id` entero autoincremental y `nombre` de texto. Registra **Periféricos** y **Accesorios**. En el modelo de datos de `productos`, crea el campo **categorias** como relación **Many to Many** hacia `categorias`, con colección de unión `productos_categorias`. Comprueba que sus campos de relación sean `productos_id` y `categorias_id`.
+Crea categorias con id entero autoincremental y nombre de texto. Registra Periféricos y Accesorios. En productos crea categorias como relación Many to Many hacia categorias, con colección de unión productos_categorias. La unión debe tener id propio, productos_id y categorias_id. En la configuración de la relación productos.categorias, establece la acción al deseleccionar (Deselect Action) en Delete: al quitar una selección se elimina su fila de unión. Conserva los registros del catálogo categorias.
 
-La colección de unión debe tener su propio ID y las dos relaciones. En la política utilizada por la cuenta de la práctica configura lectura de `categorias` y lectura/creación de `productos_categorias`; conserva los permisos de productos.
+En la política de la cuenta autenticada, configura estas acciones con All Access dentro de cada acción, sin filtros, validaciones ni presets:
 
-### Paso 2. Crear el servicio de categorías
+| Colección | Acciones |
+| --- | --- |
+| productos | Create, Read y Update |
+| categorias | Read |
+| productos_categorias | Create, Read y Delete |
 
-Crea `services/categorias.ts` con el contenido de la sección 4. Inyecta `CategoriasService` en el formulario y carga sus opciones al inicializarlo.
+Delete elimina el enlace del producto con una categoría; no elimina la categoría del catálogo. Conserva Admin Access desactivado.
 
-### Paso 3. Agregar el arreglo de controles
+### Paso 2. Consultar opciones y relaciones
 
-Importa `FormArray` y `FormControl`. Después de construir el formulario, agrega el control `categorias` con `this.formBuilder.array([])`. El getter y los métodos de la sección 4 permiten consultar, agregar y quitar sus controles. Cada selección utiliza `Validators.required`.
+Crea services/categorias.ts con el código del punto 4. En ProductosService.detalle() agrega fields para consultar el producto, el ID de cada enlace y el ID y nombre de cada categoría. Actualiza las interfaces del servicio con la estructura de respuesta y las dos formas de envío de categorias.
 
-### Paso 4. Preparar el envío
+### Paso 3. Mostrar categorías en creación y edición
 
-Agrega `categorias?: { categorias_id: number }[]` a `ProductoGuardar` en el formulario y en el servicio de productos. Antes del envío de creación, convierte las selecciones en IDs y forma los enlaces. Por ejemplo:
+El bloque de categorías del formulario debe estar visible en ambos modos. Al cargar el producto para editar, guarda sus enlaces en enlacesCategorias, vacía categoriasFA con clear() y agrega un FormControl por cada categoría existente. Los botones + y papelera modifican las filas; cada fila agregada debe tener una selección para poder guardar.
+
+### Paso 4. Guardar altas y cambios
+
+Al crear, envía categorias como un arreglo de objetos categorias_id. Al actualizar, compara los IDs seleccionados con los enlaces originales y envía un objeto con create y delete. Por ejemplo, si conservas la categoría 1, agregas la 3 y retiras el enlace 9:
 
 ```json
-{
-  "nombre": "Mouse con categorías",
-  "descripcion": "Producto de práctica",
-  "precio": 450,
-  "stock": 10,
-  "categorias": [{ "categorias_id": 1 }, { "categorias_id": 2 }]
-}
+{ "categorias": { "create": [{ "categorias_id": 3 }], "delete": [9] } }
 ```
 
-Utiliza los IDs reales de tus categorías. El `POST` de `ProductosService.crear()` envía ese objeto.
+9 es el ID del enlace en productos_categorias, no el ID de una categoría. El código completo calcula estos valores: utiliza los IDs reales de tu base. Guardar sin cambios envía ambos arreglos vacíos y conserva los enlaces existentes. Quitar todas las filas elimina los enlaces del producto.
 
-### Paso 5. Mostrar las selecciones
+### Paso 5. Mostrar las categorías en el detalle
 
-Agrega el bloque `formArrayName="categorias"` del HTML completo dentro del formulario. Los botones **+** y papelera agregan o quitan controles. La sección de categorías se muestra durante la creación.
+Usa la misma respuesta expandida del servicio. Recorre detalle.categorias y muestra enlace.categorias_id.nombre. Si el arreglo está vacío, muestra Sin categorías asignadas. ionViewWillEnter() vuelve a consultar cada vez que entras al detalle para mostrar los cambios guardados.
 
 ## 4. Código completo de referencia
+
+Conserva los NgModules, las rutas y AuthService de las prácticas anteriores. Sustituye estos seis archivos por su contenido completo:
 
 ### `mobile/src/app/services/categorias.ts`
 
@@ -83,6 +85,7 @@ import { AuthService } from './auth';
 import { environment } from '../../environments/environment';
 
 export interface Producto {
+  categorias?: { id: number; categorias_id: { id: number; nombre: string } }[];
   id: number;
   nombre: string;
   descripcion: string;
@@ -91,7 +94,7 @@ export interface Producto {
   fecha_registro: string;
 }
 export interface ProductoGuardar {
-  categorias?: { categorias_id: number }[];
+  categorias?: { categorias_id: number }[] | { create: { categorias_id: number }[]; delete: number[] };
   nombre: string;
   descripcion: string;
   precio: number;
@@ -118,7 +121,7 @@ export class ProductosService {
   }
 
   detalle(id: number): Observable<Producto> {
-    return defer(() => this.auth.cliente.get<{ data: Producto }>(this.url + '/' + id))
+    return defer(() => this.auth.cliente.get<{ data: Producto }>(this.url + '/' + id, { params: { fields: '*,categorias.id,categorias.categorias_id.id,categorias.categorias_id.nombre' } }))
       .pipe(map(response => response.data.data));
   }
 
@@ -153,24 +156,8 @@ import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@ang
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { firstValueFrom } from 'rxjs';
-import { ProductosService } from '../services/productos';
+import { ProductoGuardar, ProductosService } from '../services/productos';
 
-interface ProductoGuardar {
-  categorias?: { categorias_id: number }[];
-  nombre: string;
-  descripcion: string;
-  precio: number;
-  stock: number;
-}
-
-interface ProductoDetalle {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  precio: string | number;
-  stock: number;
-  fecha_registro: string;
-}
 
 @Component({
   selector: 'app-productos-form',
@@ -179,8 +166,8 @@ interface ProductoDetalle {
   standalone: false,
 })
 export class ProductosFormPage implements OnInit {
-
   categorias: Categoria[] = [];
+  enlacesCategorias: { id: number; categoriaId: number }[] = [];
   mensajeCategorias = '';
   productoForm!: FormGroup;
   idProducto?: number;
@@ -279,6 +266,11 @@ export class ProductosFormPage implements OnInit {
     try {
       const producto = await firstValueFrom(this.productosService.detalle(this.idProducto));
 
+      this.enlacesCategorias = (producto.categorias ?? []).map(enlace => ({ id: enlace.id, categoriaId: enlace.categorias_id.id }));
+      this.categoriasFA.clear();
+      for (const enlace of this.enlacesCategorias) {
+        this.categoriasFA.push(new FormControl(enlace.categoriaId, Validators.required));
+      }
       this.productoForm.patchValue({
         nombre: producto.nombre,
         descripcion: producto.descripcion,
@@ -301,6 +293,7 @@ export class ProductosFormPage implements OnInit {
   }
 
   async guardarProducto(): Promise<void> {
+    if (this.guardando) return;
     if (this.productoForm.invalid) {
       this.productoForm.markAllAsTouched();
       return;
@@ -317,8 +310,14 @@ export class ProductosFormPage implements OnInit {
       stock: Number(valores.stock)
     };
 
-    if (!this.esEdicion) {
-      const ids = [...new Set(this.categoriasFA.value.map(Number))] as number[];
+    const ids = [...new Set(this.categoriasFA.value.map(Number))] as number[];
+    if (this.esEdicion) {
+      const anteriores = new Set(this.enlacesCategorias.map(enlace => enlace.categoriaId));
+      producto.categorias = {
+        create: ids.filter(id => !anteriores.has(id)).map(id => ({ categorias_id: id })),
+        delete: this.enlacesCategorias.filter(enlace => !ids.includes(enlace.categoriaId)).map(enlace => enlace.id)
+      };
+    } else {
       producto.categorias = ids.map(id => ({ categorias_id: id }));
     }
 
@@ -421,7 +420,7 @@ export class ProductosFormPage implements OnInit {
       </ion-note>
     </ion-list>
 
-    <section *ngIf="!esEdicion">
+    <section>
       <h2>Categorías</h2>
       <p *ngIf="mensajeCategorias" role="status">{{ mensajeCategorias }}</p>
       <ion-button fill="solid" type="button" (click)="agregarCategoria()" aria-label="Agregar categoría"><ion-icon slot="icon-only" name="add"></ion-icon></ion-button>
@@ -442,32 +441,183 @@ export class ProductosFormPage implements OnInit {
 </ion-content>
 ```
 
+### `mobile/src/app/productos-view/productos-view.page.ts`
+
+```typescript
+import { Component } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { LoadingController } from '@ionic/angular';
+import { firstValueFrom } from 'rxjs';
+import { Producto, ProductosService } from '../services/productos';
+import { environment } from '../../environments/environment';
+
+@Component({
+  selector: 'app-productos-view',
+  templateUrl: './productos-view.page.html',
+  styleUrls: ['./productos-view.page.scss'],
+  standalone: false
+})
+export class ProductosViewPage {
+
+  producto: Producto | null = null;
+  mensajeError: string = '';
+
+  constructor(
+    private route: ActivatedRoute,
+    private productosService: ProductosService,
+    private loading: LoadingController
+  ) { }
+
+  ionViewWillEnter() {
+    this.cargarProducto();
+  }
+
+  async cargarProducto(): Promise<void> {
+    const id = this.route.snapshot.paramMap.get('id');
+
+    this.producto = null;
+    this.mensajeError = '';
+
+    if (!id) {
+      this.mensajeError = 'No se recibió el ID del producto.';
+      return;
+    }
+
+    const loading = await this.loading.create({
+      message: 'Cargando producto...',
+      spinner: 'bubbles',
+    });
+
+    await loading.present();
+
+    try {
+      this.producto = await firstValueFrom(this.productosService.detalle(Number(id)));
+
+    } catch (error) {
+      console.error('Error al cargar el producto:', error);
+      this.mensajeError = 'No se pudo cargar el producto. Revisa el ID, la conexión y los permisos de lectura.';
+    } finally {
+      await loading.dismiss();
+    }
+  }
+
+  abrirPagina(): void {
+    if (!this.producto) {
+      return;
+    }
+
+    const url = `${environment.apiUrl}/items/productos/${this.producto.id}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+
+}
+```
+
+### `mobile/src/app/productos-view/productos-view.page.html`
+
+```html
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/productos-list"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Detalle del producto</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-text color="danger" *ngIf="mensajeError">
+    <p class="ion-padding">{{ mensajeError }}</p>
+  </ion-text>
+
+  <ion-card *ngIf="producto as detalle">
+    <ion-card-header>
+      <ion-card-title>{{ detalle.nombre }}</ion-card-title>
+      <ion-card-subtitle>Producto #{{ detalle.id }}</ion-card-subtitle>
+    </ion-card-header>
+
+    <ion-card-content>
+      <h2>Categorías</h2>
+      <ul *ngIf="detalle.categorias?.length; else sinCategorias">
+        <li *ngFor="let enlace of detalle.categorias">{{ enlace.categorias_id.nombre }}</li>
+      </ul>
+      <ng-template #sinCategorias><p>Sin categorías asignadas.</p></ng-template>
+      <ion-list>
+        <ion-item>
+          <ion-label class="ion-text-wrap">
+            <p>Descripción</p>
+            <h2>{{ detalle.descripcion }}</h2>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-label>
+            <p>Precio</p>
+            <h2>${{ detalle.precio }}</h2>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-label>
+            <p>Stock</p>
+            <h2>{{ detalle.stock }}</h2>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-label>
+            <p>Fecha de registro</p>
+            <h2 *ngIf="detalle.fecha_registro; else sinFecha">
+              {{ detalle.fecha_registro | date:'yyyy-MM-dd' }}
+            </h2>
+            <ng-template #sinFecha>
+              <h2>Sin fecha de registro</h2>
+            </ng-template>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
+
+<ion-footer *ngIf="producto">
+  <ion-toolbar>
+    <ion-button fill="solid" expand="block" (click)="abrirPagina()">
+      Ver respuesta de la API
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>
+```
+
 ## 5. Comprobar el resultado
 
-La figura 1 muestra el formulario real de Ionic con dos categorías seleccionadas. En la prueba se guardó el producto y se verificaron ambos enlaces en Directus.
+1. Entra a Ionic con la cuenta de práctica. Crea un producto, agrega dos filas y elige Periféricos y Accesorios. Guarda y acepta la confirmación.
+2. Abre el detalle: debe mostrar ambos nombres, como en la figura 1.
 
 <p align="center">
-  <img src="imagenes/14-categorias.jpg" alt="Formulario Ionic con Periféricos y Accesorios seleccionados" width="390"><br>
-  <em>Figura 1. Producto de prueba con dos categorías antes de guardarlo.</em>
+  <img src="imagenes/14-detalle-categorias.jpg" alt="Detalle de un producto con sus categorías" width="390"><br>
+  <em>Figura 1. Categorías del producto mostradas en el detalle.</em>
 </p>
 
-1. Abre **+** para crear un producto. Agrega dos filas de categorías.
-2. Elige **Periféricos** y **Accesorios**, y completa los cuatro campos del producto.
-3. Guarda y acepta la confirmación.
-4. En Directus, abre el producto y comprueba sus dos categorías y los enlaces de `productos_categorias`.
-5. Repite con una fila vacía para comprobar la validación; quítala con la papelera si no la necesitas.
+3. Abre la edición del mismo producto. Las categorías guardadas deben aparecer seleccionadas, como en la figura 2.
+
+<p align="center">
+  <img src="imagenes/14-editar-categorias.jpg" alt="Formulario de edición con categorías existentes" width="390"><br>
+  <em>Figura 2. Selecciones recuperadas en el formulario de actualización.</em>
+</p>
+
+4. Quita Accesorios y actualiza. Comprueba en el detalle que solo quede Periféricos. Agrega Accesorios de nuevo desde la edición y verifica ambos nombres.
+5. Guarda otra vez sin cambiar las filas: no deben aparecer enlaces duplicados. Finalmente, quita todas las filas, actualiza y verifica Sin categorías asignadas. Reasigna las categorías si deseas conservar el ejemplo.
+6. Prueba una fila vacía: el formulario debe impedir el envío hasta seleccionar una categoría o quitar esa fila.
 
 ## 6. Explicación detallada del flujo
 
-La figura 2 muestra el recorrido de arriba hacia abajo.
+La figura 3 muestra los caminos de creación, edición y consulta de categorías.
 
 <p align="center">
-  <img src="imagenes/flujo-14-categorias-ramas.png" alt="Guardar un producto con categorías" width="1000"><br>
-  <em>Figura 2. Guardar un producto con categorías.</em>
+  <img src="imagenes/flujo-14-categorias-integradas.png" alt="Flujo de categorías en creación edición y detalle" width="1000"><br>
+  <em>Figura 3. Categorías en creación, actualización y detalle.</em>
 </p>
 
-El `FormArray` conserva un control por selección. `agregarCategoria()` crea otro control requerido y `eliminarCategoria()` quita la fila de captura. Las opciones provienen de la colección `categorias`.
+El catálogo categorias contiene las opciones. productos_categorias guarda cada asociación: su id identifica el enlace, productos_id identifica el producto y categorias_id identifica la categoría. El FormArray contiene los IDs de las categorías seleccionadas; enlacesCategorias conserva además los IDs de unión recibidos al cargar la edición.
 
-Antes de guardar un producto nuevo, la aplicación transforma las selecciones en números, elimina repeticiones mediante `Set` y construye los objetos de la relación. `categorias_id` referencia un registro existente de categorías; el campo `categorias` del producto identifica la relación configurada en Directus.
+Al crear, los objetos categorias_id producen los enlaces. Al editar, Set reúne selecciones únicas: create contiene categorías que aún no estaban y delete contiene los IDs de los enlaces retirados. Los enlaces conservados no se recrean. Las operaciones se envían dentro del guardado del producto; quitar una fila de la pantalla no cambia la base hasta presionar Actualizar.
 
-Directus procesa la creación anidada y genera las filas de la colección de unión con el nuevo producto. Los nombres del modelo y de los campos deben coincidir con el JSON. En edición se conservan los campos del producto que ya utilizaba el formulario. Consulta las [relaciones de Directus](https://directus.com/docs/guides/connect/relations).
+La consulta expandida permite reconstruir las filas de edición y mostrar los nombres en el detalle. El catálogo permanece intacto al quitar asociaciones.

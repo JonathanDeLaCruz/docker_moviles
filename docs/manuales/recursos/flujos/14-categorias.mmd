@@ -1,30 +1,35 @@
 flowchart TD
-  A["Se abre el formulario de creación"]
-  LOAD["CategoriasService consulta Directus"]
-  OPTIONS["La app recibe las categorías disponibles"]
-  FORM["El usuario completa los datos del producto"]
-  PLUS["+ agrega una fila al FormArray"]
-  SELECT["El usuario elige la categoría de cada fila"]
-  TRASH["La papelera quita una fila"]
-  VALID{"¿Formulario y selecciones válidos?"}
-  INVALID["Muestra validaciones y permite corregir"]
-  JSON["Convierte IDs, elimina repetidos con Set y prepara enlaces"]
-  POST["Directus recibe POST del producto con categorias"]
-  DB["MariaDB guarda producto y filas de productos_categorias"]
-  DONE["La app muestra la confirmación"]
-  A --> LOAD
-  LOAD --> OPTIONS
-  OPTIONS --> FORM
-  FORM --> PLUS
-  PLUS --> SELECT
-  SELECT -->|"Quitar fila"| TRASH
-  TRASH -.->|"Selecciones restantes"| SELECT
-  SELECT -->|"Guardar"| VALID
-  VALID -->|"No"| INVALID
-  INVALID -.->|"Corregir"| SELECT
-  VALID -->|"Sí"| JSON
-  JSON --> POST
+  A["La app abre el formulario"]
+  CAT["Consulta el catálogo de categorías"]
+  MODE{"¿Está editando?"}
+  LOAD["Consulta el producto y sus enlaces"]
+  FILL["patchValue y FormArray cargan selecciones"]
+  NEW["Formulario nuevo con categorías opcionales"]
+  EDIT["El usuario agrega, cambia o quita filas"]
+  VALID{"¿Formulario válido?"}
+  ERR["Muestra validaciones"]
+  IDS["Set reúne IDs únicos"]
+  SAVE{"¿Crear o actualizar?"}
+  POST["POST envía categorias_id de cada selección"]
+  PATCH["PATCH envía create y delete de enlaces"]
+  DB["Directus guarda producto y asociaciones"]
+  DETAIL["El detalle consulta categorías expandidas"]
+  VIEW["Muestra los nombres o Sin categorías asignadas"]
+  A --> CAT
+  CAT --> MODE
+  MODE -->|"Sí"| LOAD
+  LOAD --> FILL
+  FILL --> EDIT
+  MODE -->|"No"| NEW
+  NEW --> EDIT
+  EDIT -->|"Guardar"| VALID
+  VALID -->|"No"| ERR
+  ERR -.->|"Corregir"| EDIT
+  VALID -->|"Sí"| IDS
+  IDS --> SAVE
+  SAVE -->|"Crear"| POST
+  SAVE -->|"Actualizar"| PATCH
   POST --> DB
-  DB -.-> POST
-  POST -->|"Creación exitosa"| DONE
-  SELECT -.->|"Agregar otra"| PLUS
+  PATCH --> DB
+  DB --> DETAIL
+  DETAIL --> VIEW
