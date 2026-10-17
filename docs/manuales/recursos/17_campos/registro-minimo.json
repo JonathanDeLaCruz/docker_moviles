@@ -1,0 +1,23 @@
+{
+  "id": 4,
+  "nombre": "Prueba mínima desde Ionic",
+  "correo": "alumno@example.com",
+  "telefono": null,
+  "sitio_web": null,
+  "descripcion": null,
+  "edad": null,
+  "monto": "0.00",
+  "tipo": "curso",
+  "modalidad": "presencial",
+  "tecnologias": [],
+  "canales": [],
+  "acepta_terminos": true,
+  "recibir_avisos": false,
+  "prioridad": 4,
+  "fecha_evento": null,
+  "hora_evento": null,
+  "estado": "pendiente",
+  "origen": "app_ionic",
+  "fecha_envio": "2026-10-17T06:15:46.000Z",
+  "fecha_creacion": "2026-10-17T06:15:46.000Z"
+}

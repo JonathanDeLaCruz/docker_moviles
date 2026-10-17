@@ -1,0 +1,27 @@
+{
+  "nombre": "Práctica de campos Ionic",
+  "correo": "alumno@example.com",
+  "telefono": "+52 5551234567",
+  "sitio_web": "https://ionicframework.com",
+  "descripcion": "Ejemplo con controles y valores automáticos.",
+  "edad": 21,
+  "monto": 450.5,
+  "tipo": "taller",
+  "modalidad": "en_linea",
+  "tecnologias": [
+    "ionic",
+    "directus"
+  ],
+  "canales": [
+    "correo",
+    "whatsapp"
+  ],
+  "acepta_terminos": true,
+  "recibir_avisos": true,
+  "prioridad": 3,
+  "fecha_evento": "2026-11-20",
+  "hora_evento": "10:30:00",
+  "estado": "pendiente",
+  "origen": "app_ionic",
+  "fecha_envio": "2026-10-17T06:11:06.239Z"
+}

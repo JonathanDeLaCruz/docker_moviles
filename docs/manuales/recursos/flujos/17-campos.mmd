@@ -1,0 +1,31 @@
+flowchart TD
+  abrir["El alumno abre Ejemplos de campos"]
+  capturar["Captura datos y selecciona opciones"]
+  validar{"¿El formulario es válido?"}
+  corregir["Mostrar mensajes y corregir campos"]
+  mapear["Convertir números, booleanos y arreglos"]
+  agregar["Agregar estado, origen y fecha de envío"]
+  solicitar["Ionic envía POST a Directus"]
+  fechar["Directus asigna la fecha de creación"]
+  base["MariaDB guarda el registro y genera su ID"]
+  respuesta["Directus devuelve el registro completo"]
+  mostrar["Ionic muestra los datos guardados"]
+  consultar["Consultar registro guardado: GET por ID"]
+  leer["Directus lee el registro en MariaDB"]
+  nuevo["El icono + reinicia el formulario"]
+  abrir --> capturar
+  capturar --> validar
+  validar -->|"Sí"| mapear
+  validar -->|"No"| corregir
+  corregir -.-> capturar
+  mapear --> agregar
+  agregar --> solicitar
+  solicitar -->|"/items/ejemplos_campos"| fechar
+  fechar --> base
+  base --> respuesta
+  respuesta -->|"JSON: { data: registro }"| mostrar
+  mostrar --> consultar
+  consultar --> leer
+  leer -.->|"Datos persistidos"| mostrar
+  mostrar -->|"Otro ejemplo"| nuevo
+  nuevo -.-> capturar

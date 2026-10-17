@@ -1,0 +1,320 @@
+{
+  "collection": "ejemplos_campos",
+  "schema": {},
+  "meta": {
+    "icon": "dynamic_form",
+    "note": "Ejemplos del manual 17: controles de Ionic y valores agregados al guardar."
+  },
+  "fields": [
+    {
+      "field": "id",
+      "type": "integer",
+      "schema": {
+        "is_primary_key": true,
+        "has_auto_increment": true,
+        "is_nullable": false
+      },
+      "meta": {
+        "hidden": true,
+        "readonly": true
+      }
+    },
+    {
+      "field": "nombre",
+      "type": "string",
+      "schema": {
+        "is_nullable": false,
+        "max_length": 100
+      },
+      "meta": {
+        "interface": "input"
+      }
+    },
+    {
+      "field": "correo",
+      "type": "string",
+      "schema": {
+        "is_nullable": false,
+        "max_length": 254
+      },
+      "meta": {
+        "interface": "input",
+        "options": {
+          "type": "email"
+        }
+      }
+    },
+    {
+      "field": "telefono",
+      "type": "string",
+      "schema": {
+        "is_nullable": true,
+        "max_length": 20
+      },
+      "meta": {
+        "interface": "input"
+      }
+    },
+    {
+      "field": "sitio_web",
+      "type": "string",
+      "schema": {
+        "is_nullable": true,
+        "max_length": 255
+      },
+      "meta": {
+        "interface": "input"
+      }
+    },
+    {
+      "field": "descripcion",
+      "type": "text",
+      "schema": {
+        "is_nullable": true
+      },
+      "meta": {
+        "interface": "input-multiline"
+      }
+    },
+    {
+      "field": "edad",
+      "type": "integer",
+      "schema": {
+        "is_nullable": true
+      },
+      "meta": {
+        "interface": "input",
+        "options": {
+          "min": 18,
+          "max": 100
+        }
+      }
+    },
+    {
+      "field": "monto",
+      "type": "decimal",
+      "schema": {
+        "is_nullable": false,
+        "numeric_precision": 10,
+        "numeric_scale": 2
+      },
+      "meta": {
+        "interface": "input"
+      }
+    },
+    {
+      "field": "tipo",
+      "type": "string",
+      "schema": {
+        "is_nullable": false,
+        "max_length": 30
+      },
+      "meta": {
+        "interface": "select-dropdown",
+        "options": {
+          "choices": [
+            {
+              "text": "Curso",
+              "value": "curso"
+            },
+            {
+              "text": "Taller",
+              "value": "taller"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "field": "modalidad",
+      "type": "string",
+      "schema": {
+        "is_nullable": false,
+        "max_length": 30
+      },
+      "meta": {
+        "interface": "select-radio",
+        "options": {
+          "choices": [
+            {
+              "text": "Presencial",
+              "value": "presencial"
+            },
+            {
+              "text": "En línea",
+              "value": "en_linea"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "field": "tecnologias",
+      "type": "json",
+      "schema": {
+        "is_nullable": false
+      },
+      "meta": {
+        "interface": "select-multiple-dropdown",
+        "special": [
+          "cast-json"
+        ],
+        "options": {
+          "choices": [
+            {
+              "text": "Ionic",
+              "value": "ionic"
+            },
+            {
+              "text": "Angular",
+              "value": "angular"
+            },
+            {
+              "text": "Directus",
+              "value": "directus"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "field": "canales",
+      "type": "json",
+      "schema": {
+        "is_nullable": false
+      },
+      "meta": {
+        "interface": "select-multiple-checkbox",
+        "special": [
+          "cast-json"
+        ],
+        "options": {
+          "choices": [
+            {
+              "text": "Correo",
+              "value": "correo"
+            },
+            {
+              "text": "WhatsApp",
+              "value": "whatsapp"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "field": "acepta_terminos",
+      "type": "boolean",
+      "schema": {
+        "is_nullable": false,
+        "default_value": false
+      },
+      "meta": {
+        "interface": "boolean",
+        "special": [
+          "cast-boolean"
+        ]
+      }
+    },
+    {
+      "field": "recibir_avisos",
+      "type": "boolean",
+      "schema": {
+        "is_nullable": false,
+        "default_value": false
+      },
+      "meta": {
+        "interface": "boolean",
+        "special": [
+          "cast-boolean"
+        ]
+      }
+    },
+    {
+      "field": "prioridad",
+      "type": "integer",
+      "schema": {
+        "is_nullable": false,
+        "default_value": 3
+      },
+      "meta": {
+        "interface": "slider",
+        "options": {
+          "min": 0,
+          "max": 10,
+          "step": 1
+        }
+      }
+    },
+    {
+      "field": "fecha_evento",
+      "type": "date",
+      "schema": {
+        "is_nullable": true
+      },
+      "meta": {
+        "interface": "input"
+      }
+    },
+    {
+      "field": "hora_evento",
+      "type": "time",
+      "schema": {
+        "is_nullable": true
+      },
+      "meta": {
+        "interface": "input"
+      }
+    },
+    {
+      "field": "estado",
+      "type": "string",
+      "schema": {
+        "is_nullable": false,
+        "max_length": 30,
+        "default_value": "pendiente"
+      },
+      "meta": {
+        "interface": "input",
+        "readonly": true
+      }
+    },
+    {
+      "field": "origen",
+      "type": "string",
+      "schema": {
+        "is_nullable": false,
+        "max_length": 30,
+        "default_value": "app_ionic"
+      },
+      "meta": {
+        "interface": "input",
+        "readonly": true
+      }
+    },
+    {
+      "field": "fecha_envio",
+      "type": "timestamp",
+      "schema": {
+        "is_nullable": false
+      },
+      "meta": {
+        "interface": "datetime"
+      }
+    },
+    {
+      "field": "fecha_creacion",
+      "type": "timestamp",
+      "schema": {
+        "is_nullable": true
+      },
+      "meta": {
+        "interface": "datetime",
+        "special": [
+          "date-created"
+        ],
+        "readonly": true
+      }
+    }
+  ]
+}

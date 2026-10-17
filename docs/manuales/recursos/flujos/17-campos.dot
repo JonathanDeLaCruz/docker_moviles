@@ -1,0 +1,37 @@
+digraph Flujo {
+  graph [rankdir=TB, bgcolor="#181818", pad="0.24", nodesep="0.42", ranksep="0.55", splines=spline, outputorder=edgesfirst];
+  node [shape=box, style="rounded,filled", fillcolor="#0e2a4d", color="#304b67", fontcolor="#b5d3f6", fontname="Arial", fontsize=17, penwidth=1.15, margin="0.22,0.20"];
+  edge [color="#89929c", fontcolor="#b5d3f6", fontname="Arial", fontsize=13, arrowsize=0.65, penwidth=1.15];
+  abrir [label="El alumno abre Ejemplos de\ncampos", group=main, penwidth=1.7];
+  capturar [label="Captura datos y selecciona\nopciones", group=main];
+  validar [label="¿El formulario es\nválido?", group=main, shape=diamond, style=filled, margin="0.12,0.08"];
+  corregir [label="Mostrar mensajes y corregir\ncampos"];
+  mapear [label="Convertir números,\nbooleanos y arreglos", group=main];
+  agregar [label="Agregar estado, origen y\nfecha de envío", group=main];
+  solicitar [label="Ionic envía POST a Directus", group=main];
+  fechar [label="Directus asigna la fecha de\ncreación", group=main];
+  base [label="MariaDB guarda el registro\ny genera su ID", group=main];
+  respuesta [label="Directus devuelve el\nregistro completo", group=main];
+  mostrar [label="Ionic muestra los datos\nguardados", group=main, penwidth=1.7];
+  consultar [label="Consultar registro\nguardado: GET por ID", group=main];
+  leer [label="Directus lee el registro en\nMariaDB", group=main];
+  nuevo [label="El icono + reinicia el\nformulario"];
+  subgraph cluster_row0 { style=invis; margin=8; {rank=same; validar; corregir;} }
+  subgraph cluster_row1 { style=invis; margin=8; {rank=same; consultar; nuevo;} }
+  abrir -> capturar [weight=12];
+  capturar -> validar [weight=12];
+  validar -> mapear [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Sí</TD></TR></TABLE>>];
+  validar -> corregir [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>No</TD></TR></TABLE>>, style=dashed];
+  corregir -> capturar [constraint=false, style=dashed, color="#80a6c9"];
+  mapear -> agregar [weight=12];
+  agregar -> solicitar [weight=12];
+  solicitar -> fechar [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>/items/ejemplos_campos</TD></TR></TABLE>>];
+  fechar -> base [weight=12];
+  base -> respuesta [weight=12];
+  respuesta -> mostrar [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>JSON: { data:<BR/>registro }</TD></TR></TABLE>>];
+  mostrar -> consultar [weight=12];
+  consultar -> leer [weight=12];
+  leer -> mostrar [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Datos persistidos</TD></TR></TABLE>>, constraint=false, style=dashed, color="#80a6c9"];
+  mostrar -> nuevo [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Otro ejemplo</TD></TR></TABLE>>, style=dashed];
+  nuevo -> capturar [constraint=false, style=dashed, color="#80a6c9"];
+}

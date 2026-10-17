@@ -2664,5 +2664,175 @@
       "GET",
       "VIEW"
     ]
+  },
+  {
+    "nombre": "17-campos",
+    "titulo": "Campos del formulario y valores automáticos",
+    "imagen": "flujo-17-campos-ramas.png",
+    "nodos": [
+      {
+        "id": "abrir",
+        "texto": "El alumno abre Ejemplos de campos",
+        "tipo": "pantalla"
+      },
+      {
+        "id": "capturar",
+        "texto": "Captura datos y selecciona opciones"
+      },
+      {
+        "id": "validar",
+        "texto": "¿El formulario es válido?",
+        "tipo": "decision"
+      },
+      {
+        "id": "corregir",
+        "texto": "Mostrar mensajes y corregir campos"
+      },
+      {
+        "id": "mapear",
+        "texto": "Convertir números, booleanos y arreglos"
+      },
+      {
+        "id": "agregar",
+        "texto": "Agregar estado, origen y fecha de envío"
+      },
+      {
+        "id": "solicitar",
+        "texto": "Ionic envía POST a Directus"
+      },
+      {
+        "id": "fechar",
+        "texto": "Directus asigna la fecha de creación"
+      },
+      {
+        "id": "base",
+        "texto": "MariaDB guarda el registro y genera su ID"
+      },
+      {
+        "id": "respuesta",
+        "texto": "Directus devuelve el registro completo"
+      },
+      {
+        "id": "mostrar",
+        "texto": "Ionic muestra los datos guardados",
+        "tipo": "pantalla"
+      },
+      {
+        "id": "consultar",
+        "texto": "Consultar registro guardado: GET por ID"
+      },
+      {
+        "id": "leer",
+        "texto": "Directus lee el registro en MariaDB"
+      },
+      {
+        "id": "nuevo",
+        "texto": "El icono + reinicia el formulario"
+      }
+    ],
+    "aristas": [
+      {
+        "de": "abrir",
+        "a": "capturar"
+      },
+      {
+        "de": "capturar",
+        "a": "validar"
+      },
+      {
+        "de": "validar",
+        "a": "mapear",
+        "texto": "Sí"
+      },
+      {
+        "de": "validar",
+        "a": "corregir",
+        "texto": "No",
+        "tipo": "alternativa"
+      },
+      {
+        "de": "corregir",
+        "a": "capturar",
+        "tipo": "retorno",
+        "influye": false
+      },
+      {
+        "de": "mapear",
+        "a": "agregar"
+      },
+      {
+        "de": "agregar",
+        "a": "solicitar"
+      },
+      {
+        "de": "solicitar",
+        "a": "fechar",
+        "texto": "/items/ejemplos_campos"
+      },
+      {
+        "de": "fechar",
+        "a": "base"
+      },
+      {
+        "de": "base",
+        "a": "respuesta"
+      },
+      {
+        "de": "respuesta",
+        "a": "mostrar",
+        "texto": "JSON: { data: registro }"
+      },
+      {
+        "de": "mostrar",
+        "a": "consultar"
+      },
+      {
+        "de": "consultar",
+        "a": "leer"
+      },
+      {
+        "de": "leer",
+        "a": "mostrar",
+        "tipo": "retorno",
+        "texto": "Datos persistidos",
+        "influye": false
+      },
+      {
+        "de": "mostrar",
+        "a": "nuevo",
+        "texto": "Otro ejemplo",
+        "tipo": "alternativa"
+      },
+      {
+        "de": "nuevo",
+        "a": "capturar",
+        "tipo": "retorno",
+        "influye": false
+      }
+    ],
+    "filas": [
+      [
+        "validar",
+        "corregir"
+      ],
+      [
+        "consultar",
+        "nuevo"
+      ]
+    ],
+    "principal": [
+      "abrir",
+      "capturar",
+      "validar",
+      "mapear",
+      "agregar",
+      "solicitar",
+      "fechar",
+      "base",
+      "respuesta",
+      "mostrar",
+      "consultar",
+      "leer"
+    ]
   }
 ]
