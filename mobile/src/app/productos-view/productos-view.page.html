@@ -1,7 +1,7 @@
 <ion-header>
-  <ion-toolbar>
+  <ion-toolbar color="personalizado">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/productos-list"></ion-back-button>
+      <ion-back-button defaultHref="/tabs/productos"></ion-back-button>
     </ion-buttons>
     <ion-title>Detalle del producto</ion-title>
   </ion-toolbar>
@@ -19,6 +19,15 @@
     </ion-card-header>
 
     <ion-card-content>
+      <img *ngIf="imagenUrl" [src]="imagenUrl" [alt]="'Imagen de ' + detalle.nombre" class="imagen-producto">
+      <p *ngIf="mensajeImagen" role="status">{{ mensajeImagen }}</p>
+      <p>Marca: {{ detalle.marca?.nombre || 'Sin marca' }}</p>
+      <p>Proveedor: {{ detalle.proveedor?.nombre || 'Sin proveedor' }}</p>
+      <h2>Categorías</h2>
+      <ul *ngIf="detalle.categorias?.length; else sinCategorias">
+        <li *ngFor="let enlace of detalle.categorias">{{ enlace.categorias_id.nombre }}</li>
+      </ul>
+      <ng-template #sinCategorias><p>Sin categorías asignadas.</p></ng-template>
       <ion-list>
         <ion-item>
           <ion-label class="ion-text-wrap">
@@ -56,7 +65,7 @@
 
 <ion-footer *ngIf="producto">
   <ion-toolbar>
-    <ion-button expand="block" (click)="abrirPagina()">
+    <ion-button fill="solid" expand="block" (click)="abrirPagina()">
       Ver respuesta de la API
     </ion-button>
   </ion-toolbar>

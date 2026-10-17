@@ -1,0 +1,17 @@
+flowchart TD
+  marcas["marcas<br/>id, nombre, descripción"]
+  proveedores["proveedores<br/>id, nombre, correo, teléfono, activo"]
+  productos["productos<br/>id, datos, imagen, marca y proveedor"]
+  categorias["categorias<br/>id, nombre"]
+  union["productos_categorias<br/>producto y categoría"]
+  clientes["clientes<br/>id, nombre, correo y teléfono"]
+  pedidos["pedidos<br/>cliente, producto, cantidad, estado y fecha"]
+  origenes["origenes_ejemplo<br/>id, código y nombre"]
+  ejemplos["ejemplos_campos<br/>controles y origen relacionado"]
+  marcas -->|"1 a muchos: marca"| productos
+  proveedores -->|"1 a muchos: proveedor"| productos
+  productos -->|"1 a muchos"| union
+  categorias -->|"1 a muchos"| union
+  productos -->|"1 a muchos: producto"| pedidos
+  clientes -->|"1 a muchos: cliente"| pedidos
+  origenes -->|"1 a muchos: origen"| ejemplos

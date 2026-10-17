@@ -1,15 +1,22 @@
 <ion-header>
-  <ion-toolbar>
+  <ion-toolbar color="personalizado">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/productos-list"></ion-back-button>
+      <ion-back-button defaultHref="/tabs/productos"></ion-back-button>
     </ion-buttons>
 
-    <ion-title>Nuevo producto</ion-title>
+    <ion-title>
+      {{ esEdicion ? 'Editar producto' : 'Nuevo producto' }}
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <form *ngIf="productoForm" [formGroup]="productoForm" (ngSubmit)="guardarProducto()">
+  <div *ngIf="cargando" class="ion-text-center ion-padding">
+    <ion-spinner></ion-spinner>
+    <p>Cargando producto...</p>
+  </div>
+
+  <form *ngIf="productoForm && !cargando" [formGroup]="productoForm" (ngSubmit)="guardarProducto()">
     <ion-list>
       <ion-item>
         <ion-input label="Nombre" labelPlacement="stacked" type="text" formControlName="nombre" maxlength="150"></ion-input>
@@ -37,8 +44,34 @@
       </ion-note>
     </ion-list>
 
-    <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="guardando">
-      {{ guardando ? 'Guardando...' : 'Guardar' }}
+    <p *ngIf="errorCatalogos" role="status">{{ errorCatalogos }}</p>
+    <ion-select label="Marca" labelPlacement="stacked" formControlName="marca" interface="popover"><ion-select-option [value]="null">Sin marca</ion-select-option><ion-select-option *ngFor="let marca of marcas" [value]="marca['id']">{{ marca['nombre'] }}</ion-select-option></ion-select>
+    <ion-select label="Proveedor" labelPlacement="stacked" formControlName="proveedor" interface="popover"><ion-select-option [value]="null">Sin proveedor</ion-select-option><ion-select-option *ngFor="let proveedor of proveedores" [value]="proveedor['id']">{{ proveedor['nombre'] }}</ion-select-option></ion-select>
+    <section>
+      <h2>Categorías</h2>
+      <p *ngIf="mensajeCategorias" role="status">{{ mensajeCategorias }}</p>
+      <ion-button fill="solid" type="button" (click)="agregarCategoria()" aria-label="Agregar categoría"><ion-icon slot="icon-only" name="add"></ion-icon></ion-button>
+      <div formArrayName="categorias">
+        <ion-item *ngFor="let control of categoriasFA.controls; let i = index">
+          <ion-select label="Categoría" labelPlacement="stacked" [formControlName]="i" interface="popover">
+            <ion-select-option *ngFor="let categoria of categorias" [value]="categoria.id">{{ categoria.nombre }}</ion-select-option>
+          </ion-select>
+          <ion-button fill="solid" type="button" color="danger" (click)="eliminarCategoria(i)" aria-label="Quitar categoría"><ion-icon slot="icon-only" name="trash"></ion-icon></ion-button>
+        </ion-item>
+      </div>
+    </section>
+
+    <section class="ion-margin-top">
+      <h2>Imagen del producto</h2>
+      <label for="imagen-producto">Selecciona una imagen</label>
+      <input id="imagen-producto" type="file" accept="image/*" (change)="onImagenSeleccionada($event)" [disabled]="guardando">
+      <p *ngIf="esEdicion">Si no seleccionas otra imagen, se conserva la actual.</p>
+      <p *ngIf="mensajeImagen" role="status">{{ mensajeImagen }}</p>
+      <img *ngIf="imagenUrl" [src]="imagenUrl" alt="Vista previa de la imagen del producto" class="imagen-producto">
+    </section>
+
+    <ion-button fill="solid" expand="block" type="submit" class="ion-margin-top" [disabled]="guardando || cargando || !!errorCatalogos">
+      {{ guardando ? 'Guardando...' : (esEdicion ? 'Actualizar' : 'Guardar') }}
     </ion-button>
   </form>
 </ion-content>

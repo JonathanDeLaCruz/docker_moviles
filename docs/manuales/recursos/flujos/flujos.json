@@ -2845,5 +2845,307 @@
       "consultar",
       "leer"
     ]
+  },
+  {
+    "nombre": "18-tabs",
+    "titulo": "Tabs y operaciones de las colecciones",
+    "imagen": "flujo-18-tabs-ramas.png",
+    "nodos": [
+      {
+        "id": "entrar",
+        "texto": "Iniciar sesión y abrir la aplicación",
+        "tipo": "pantalla"
+      },
+      {
+        "id": "tabs",
+        "texto": "El alumno elige un tab"
+      },
+      {
+        "id": "productos",
+        "texto": "Productos: imagen, categorías, marca y proveedor"
+      },
+      {
+        "id": "pedidos",
+        "texto": "Pedidos: cliente, producto y cantidad"
+      },
+      {
+        "id": "catalogos",
+        "texto": "Catálogos: elegir una colección"
+      },
+      {
+        "id": "lista",
+        "texto": "Cargar listado, búsqueda y paginación"
+      },
+      {
+        "id": "form",
+        "texto": "Abrir formulario con + o lápiz"
+      },
+      {
+        "id": "detalle",
+        "texto": "El icono de ojo solicita el detalle"
+      },
+      {
+        "id": "eliminar",
+        "texto": "Confirmar eliminación y comprobar relaciones"
+      },
+      {
+        "id": "valido",
+        "texto": "¿Datos válidos?",
+        "tipo": "decision"
+      },
+      {
+        "id": "corregir",
+        "texto": "Mostrar mensajes y corregir"
+      },
+      {
+        "id": "api",
+        "texto": "Servicio autenticado consulta o guarda en Directus"
+      },
+      {
+        "id": "db",
+        "texto": "MariaDB aplica tipos, relaciones y restricciones"
+      },
+      {
+        "id": "respuesta",
+        "texto": "Directus devuelve el resultado"
+      },
+      {
+        "id": "mostrar",
+        "texto": "Ionic muestra el detalle o recarga el listado",
+        "tipo": "pantalla"
+      }
+    ],
+    "aristas": [
+      {
+        "de": "entrar",
+        "a": "tabs"
+      },
+      {
+        "de": "tabs",
+        "a": "productos"
+      },
+      {
+        "de": "tabs",
+        "a": "pedidos"
+      },
+      {
+        "de": "tabs",
+        "a": "catalogos"
+      },
+      {
+        "de": "productos",
+        "a": "lista"
+      },
+      {
+        "de": "pedidos",
+        "a": "lista"
+      },
+      {
+        "de": "catalogos",
+        "a": "lista"
+      },
+      {
+        "de": "lista",
+        "a": "form",
+        "texto": "Crear o editar"
+      },
+      {
+        "de": "lista",
+        "a": "detalle",
+        "texto": "Consultar"
+      },
+      {
+        "de": "lista",
+        "a": "eliminar",
+        "texto": "Borrar"
+      },
+      {
+        "de": "form",
+        "a": "valido"
+      },
+      {
+        "de": "valido",
+        "a": "corregir",
+        "texto": "No",
+        "tipo": "alternativa"
+      },
+      {
+        "de": "corregir",
+        "a": "form",
+        "tipo": "retorno",
+        "influye": false
+      },
+      {
+        "de": "valido",
+        "a": "api",
+        "texto": "Sí: POST / PATCH"
+      },
+      {
+        "de": "detalle",
+        "a": "api",
+        "texto": "GET por ID"
+      },
+      {
+        "de": "api",
+        "a": "db"
+      },
+      {
+        "de": "db",
+        "a": "respuesta"
+      },
+      {
+        "de": "respuesta",
+        "a": "mostrar"
+      },
+      {
+        "de": "mostrar",
+        "a": "tabs",
+        "tipo": "retorno",
+        "texto": "Cambiar de sección",
+        "influye": false
+      },
+      {
+        "de": "eliminar",
+        "a": "api",
+        "texto": "Sin referencias: DELETE"
+      },
+      {
+        "de": "eliminar",
+        "a": "lista",
+        "texto": "Cancelar o registro en uso",
+        "tipo": "retorno",
+        "influye": false
+      }
+    ],
+    "filas": [
+      [
+        "productos",
+        "pedidos",
+        "catalogos"
+      ],
+      [
+        "form",
+        "detalle",
+        "eliminar"
+      ],
+      [
+        "valido",
+        "corregir"
+      ]
+    ],
+    "principal": [
+      "entrar",
+      "tabs",
+      "pedidos",
+      "lista",
+      "form",
+      "valido",
+      "api",
+      "db",
+      "respuesta",
+      "mostrar"
+    ]
+  },
+  {
+    "nombre": "18-relaciones",
+    "titulo": "Colecciones de productos y sus relaciones",
+    "imagen": "flujo-18-relaciones-ramas.png",
+    "nodos": [
+      {
+        "id": "marcas",
+        "texto": "marcas\nid, nombre, descripción"
+      },
+      {
+        "id": "proveedores",
+        "texto": "proveedores\nid, nombre, correo, teléfono, activo"
+      },
+      {
+        "id": "productos",
+        "texto": "productos\nid, datos, imagen, marca y proveedor"
+      },
+      {
+        "id": "categorias",
+        "texto": "categorias\nid, nombre"
+      },
+      {
+        "id": "union",
+        "texto": "productos_categorias\nproducto y categoría"
+      },
+      {
+        "id": "clientes",
+        "texto": "clientes\nid, nombre, correo y teléfono"
+      },
+      {
+        "id": "pedidos",
+        "texto": "pedidos\ncliente, producto, cantidad, estado y fecha"
+      },
+      {
+        "id": "origenes",
+        "texto": "origenes_ejemplo\nid, código y nombre"
+      },
+      {
+        "id": "ejemplos",
+        "texto": "ejemplos_campos\ncontroles y origen relacionado"
+      }
+    ],
+    "aristas": [
+      {
+        "de": "marcas",
+        "a": "productos",
+        "texto": "1 a muchos: marca"
+      },
+      {
+        "de": "proveedores",
+        "a": "productos",
+        "texto": "1 a muchos: proveedor"
+      },
+      {
+        "de": "productos",
+        "a": "union",
+        "texto": "1 a muchos"
+      },
+      {
+        "de": "categorias",
+        "a": "union",
+        "texto": "1 a muchos"
+      },
+      {
+        "de": "productos",
+        "a": "pedidos",
+        "texto": "1 a muchos: producto"
+      },
+      {
+        "de": "clientes",
+        "a": "pedidos",
+        "texto": "1 a muchos: cliente"
+      },
+      {
+        "de": "origenes",
+        "a": "ejemplos",
+        "texto": "1 a muchos: origen"
+      }
+    ],
+    "filas": [
+      [
+        "marcas",
+        "proveedores",
+        "categorias",
+        "origenes"
+      ],
+      [
+        "productos",
+        "clientes",
+        "ejemplos"
+      ],
+      [
+        "union",
+        "pedidos"
+      ]
+    ],
+    "principal": [
+      "marcas",
+      "productos",
+      "pedidos"
+    ]
   }
 ]

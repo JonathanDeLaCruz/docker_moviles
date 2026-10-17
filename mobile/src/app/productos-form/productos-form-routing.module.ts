@@ -5,6 +5,10 @@ import { ProductosFormPage } from './productos-form.page';
 
 const routes: Routes = [
   {
+    path: ':id',
+    component: ProductosFormPage
+  },
+  {
     path: '',
     component: ProductosFormPage
   }

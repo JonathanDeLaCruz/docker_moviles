@@ -1,0 +1,22 @@
+<ion-header><ion-toolbar color="personalizado"><ion-buttons slot="start"><ion-back-button [defaultHref]="base"></ion-back-button></ion-buttons><ion-title>{{ id === undefined ? 'Crear' : 'Editar' }} {{ config.singular }}</ion-title></ion-toolbar></ion-header>
+<ion-content class="ion-padding">
+  <p *ngIf="mensaje" role="status">{{ mensaje }}</p><p *ngIf="cargando">Cargando...</p>
+  <form *ngIf="!cargando && listo" [formGroup]="form" (ngSubmit)="guardar()">
+    <div *ngFor="let campo of config.campos" class="ion-margin-bottom">
+      <ion-textarea *ngIf="campo.tipo === 'textarea'" [label]="campo.etiqueta" labelPlacement="stacked" [autoGrow]="true" [formControlName]="campo.clave"></ion-textarea>
+      <ion-toggle *ngIf="campo.tipo === 'boolean'" [formControlName]="campo.clave">{{ campo.etiqueta }}</ion-toggle>
+      <ion-checkbox *ngIf="campo.tipo === 'aceptacion'" [formControlName]="campo.clave">{{ campo.etiqueta }}</ion-checkbox>
+      <ion-select *ngIf="campo.tipo === 'select' || campo.tipo === 'multiple'" [label]="campo.etiqueta" labelPlacement="stacked" [multiple]="campo.tipo === 'multiple'" [formControlName]="campo.clave" cancelText="Cancelar" okText="Aceptar">
+        <ion-select-option *ngFor="let opcion of campo.opciones" [value]="opcion.valor">{{ opcion.texto }}</ion-select-option>
+        <ion-select-option *ngFor="let opcion of opciones[campo.clave]" [value]="opcion['id']">{{ opcion['nombre'] }}</ion-select-option>
+      </ion-select>
+      <p *ngIf="campo.relacion && opciones[campo.clave]?.length === 0">Primero crea un registro en {{ campo.relacion }}.</p>
+      <div *ngIf="campo.tipo === 'radio'"><p>{{ campo.etiqueta }}</p><ion-radio-group [formControlName]="campo.clave"><ion-radio *ngFor="let opcion of campo.opciones" [value]="opcion.valor" class="ion-margin-end">{{ opcion.texto }}</ion-radio></ion-radio-group></div>
+      <div *ngIf="campo.tipo === 'casillas'"><p>{{ campo.etiqueta }}</p><ion-checkbox *ngFor="let opcion of campo.opciones" [checked]="form.controls[campo.clave].value.includes(opcion.valor)" (ionChange)="marcar(campo, opcion.valor, $event.detail.checked)" class="ion-margin-end">{{ opcion.texto }}</ion-checkbox></div>
+      <ion-range *ngIf="campo.tipo === 'range'" [label]="campo.etiqueta" [min]="campo.min ?? 0" [max]="campo.max ?? 10" [snaps]="true" [pin]="true" [formControlName]="campo.clave"></ion-range>
+      <ion-input *ngIf="!['textarea','boolean','aceptacion','select','multiple','radio','casillas','range'].includes(campo.tipo)" [label]="campo.etiqueta" labelPlacement="stacked" [type]="campo.tipo" [maxlength]="campo.longitud ?? null" [min]="campo.min" [max]="campo.max" [step]="campo.entero ? '1' : '0.01'" [formControlName]="campo.clave"></ion-input>
+      <ion-note color="danger" *ngIf="error(campo) as texto">{{ texto }}</ion-note>
+    </div>
+    <ion-button fill="solid" expand="block" type="submit" [disabled]="guardando">{{ guardando ? 'Guardando...' : (id === undefined ? 'Guardar' : 'Actualizar') }}</ion-button>
+  </form>
+</ion-content>

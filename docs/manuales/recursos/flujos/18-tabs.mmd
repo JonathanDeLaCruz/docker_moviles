@@ -1,0 +1,37 @@
+flowchart TD
+  entrar["Iniciar sesión y abrir la aplicación"]
+  tabs["El alumno elige un tab"]
+  productos["Productos: imagen, categorías, marca y proveedor"]
+  pedidos["Pedidos: cliente, producto y cantidad"]
+  catalogos["Catálogos: elegir una colección"]
+  lista["Cargar listado, búsqueda y paginación"]
+  form["Abrir formulario con + o lápiz"]
+  detalle["El icono de ojo solicita el detalle"]
+  eliminar["Confirmar eliminación y comprobar relaciones"]
+  valido{"¿Datos válidos?"}
+  corregir["Mostrar mensajes y corregir"]
+  api["Servicio autenticado consulta o guarda en Directus"]
+  db["MariaDB aplica tipos, relaciones y restricciones"]
+  respuesta["Directus devuelve el resultado"]
+  mostrar["Ionic muestra el detalle o recarga el listado"]
+  entrar --> tabs
+  tabs --> productos
+  tabs --> pedidos
+  tabs --> catalogos
+  productos --> lista
+  pedidos --> lista
+  catalogos --> lista
+  lista -->|"Crear o editar"| form
+  lista -->|"Consultar"| detalle
+  lista -->|"Borrar"| eliminar
+  form --> valido
+  valido -->|"No"| corregir
+  corregir -.-> form
+  valido -->|"Sí: POST / PATCH"| api
+  detalle -->|"GET por ID"| api
+  api --> db
+  db --> respuesta
+  respuesta --> mostrar
+  mostrar -.->|"Cambiar de sección"| tabs
+  eliminar -->|"Sin referencias: DELETE"| api
+  eliminar -.->|"Cancelar o registro en uso"| lista

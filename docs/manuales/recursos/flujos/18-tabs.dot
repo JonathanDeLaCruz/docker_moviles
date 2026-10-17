@@ -1,0 +1,44 @@
+digraph Flujo {
+  graph [rankdir=TB, bgcolor="#181818", pad="0.24", nodesep="0.42", ranksep="0.55", splines=spline, outputorder=edgesfirst];
+  node [shape=box, style="rounded,filled", fillcolor="#0e2a4d", color="#304b67", fontcolor="#b5d3f6", fontname="Arial", fontsize=17, penwidth=1.15, margin="0.22,0.20"];
+  edge [color="#89929c", fontcolor="#b5d3f6", fontname="Arial", fontsize=13, arrowsize=0.65, penwidth=1.15];
+  entrar [label="Iniciar sesión y abrir la\naplicación", group=main, penwidth=1.7];
+  tabs [label="El alumno elige un tab", group=main];
+  productos [label="Productos: imagen,\ncategorías, marca y\nproveedor"];
+  pedidos [label="Pedidos: cliente, producto\ny cantidad", group=main];
+  catalogos [label="Catálogos: elegir una\ncolección"];
+  lista [label="Cargar listado, búsqueda y\npaginación", group=main];
+  form [label="Abrir formulario con + o\nlápiz", group=main];
+  detalle [label="El icono de ojo solicita el\ndetalle"];
+  eliminar [label="Confirmar eliminación y\ncomprobar relaciones"];
+  valido [label="¿Datos válidos?", group=main, shape=diamond, style=filled, margin="0.12,0.08"];
+  corregir [label="Mostrar mensajes y corregir"];
+  api [label="Servicio autenticado\nconsulta o guarda en\nDirectus", group=main];
+  db [label="MariaDB aplica tipos,\nrelaciones y restricciones", group=main];
+  respuesta [label="Directus devuelve el\nresultado", group=main];
+  mostrar [label="Ionic muestra el detalle o\nrecarga el listado", group=main, penwidth=1.7];
+  subgraph cluster_row0 { style=invis; margin=8; {rank=same; productos; pedidos; catalogos;} }
+  subgraph cluster_row1 { style=invis; margin=8; {rank=same; form; detalle; eliminar;} }
+  subgraph cluster_row2 { style=invis; margin=8; {rank=same; valido; corregir;} }
+  entrar -> tabs [weight=12];
+  tabs -> productos;
+  tabs -> pedidos [weight=12];
+  tabs -> catalogos;
+  productos -> lista;
+  pedidos -> lista [weight=12];
+  catalogos -> lista;
+  lista -> form [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Crear o editar</TD></TR></TABLE>>];
+  lista -> detalle [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Consultar</TD></TR></TABLE>>];
+  lista -> eliminar [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Borrar</TD></TR></TABLE>>];
+  form -> valido [weight=12];
+  valido -> corregir [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>No</TD></TR></TABLE>>, style=dashed];
+  corregir -> form [constraint=false, style=dashed, color="#80a6c9"];
+  valido -> api [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Sí: POST / PATCH</TD></TR></TABLE>>];
+  detalle -> api [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>GET por ID</TD></TR></TABLE>>];
+  api -> db [weight=12];
+  db -> respuesta [weight=12];
+  respuesta -> mostrar [weight=12];
+  mostrar -> tabs [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Cambiar de sección</TD></TR></TABLE>>, constraint=false, style=dashed, color="#80a6c9"];
+  eliminar -> api [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Sin referencias:<BR/>DELETE</TD></TR></TABLE>>];
+  eliminar -> lista [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Cancelar o registro<BR/>en uso</TD></TR></TABLE>>, constraint=false, style=dashed, color="#80a6c9"];
+}

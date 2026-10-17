@@ -1,0 +1,20 @@
+.paginacion {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  margin-top: 16px;
+}
+
+.paginacion ion-button {
+  margin: 0;
+  --padding-start: 12px;
+  --padding-end: 12px;
+}
+
+.informacion {
+  text-align: center;
+  margin-top: 8px;
+  margin-bottom: 0;
+}

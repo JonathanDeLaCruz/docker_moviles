@@ -1,17 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { LoadingController } from '@ionic/angular';
-import axios from 'axios';
+import { firstValueFrom } from 'rxjs';
+import { Producto, ProductosService } from '../services/productos';
+import { ImagenesService } from '../services/imagenes';
 import { environment } from '../../environments/environment';
-
-interface Producto {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  precio: string;
-  stock: number;
-  fecha_registro: string;
-}
 
 @Component({
   selector: 'app-productos-view',
@@ -19,23 +12,30 @@ interface Producto {
   styleUrls: ['./productos-view.page.scss'],
   standalone: false
 })
-export class ProductosViewPage implements OnInit {
+export class ProductosViewPage implements OnDestroy {
+  imagenUrl = '';
+  mensajeImagen = '';
 
   producto: Producto | null = null;
   mensajeError: string = '';
 
   constructor(
     private route: ActivatedRoute,
+    private productosService: ProductosService,
+    private imagenesService: ImagenesService,
     private loading: LoadingController
   ) { }
 
-  ngOnInit() {
+  ionViewWillEnter() {
     this.cargarProducto();
   }
 
   async cargarProducto(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
 
+    if (this.imagenUrl) URL.revokeObjectURL(this.imagenUrl);
+    this.imagenUrl = '';
+    this.mensajeImagen = '';
     this.producto = null;
     this.mensajeError = '';
 
@@ -52,17 +52,21 @@ export class ProductosViewPage implements OnInit {
     await loading.present();
 
     try {
-      const response = await axios.get<{ data: Producto }>(
-        `${environment.apiUrl}/items/productos/${encodeURIComponent(id)}`
-      );
-
-      this.producto = response.data.data;
+      this.producto = await firstValueFrom(this.productosService.detalle(Number(id)));
+      if (this.producto.imagen) {
+        try { this.imagenUrl = URL.createObjectURL(await this.imagenesService.obtener(this.producto.imagen)); }
+        catch { this.mensajeImagen = 'No fue posible cargar la imagen del producto.'; }
+      }
     } catch (error) {
       console.error('Error al cargar el producto:', error);
       this.mensajeError = 'No se pudo cargar el producto. Revisa el ID, la conexión y los permisos de lectura.';
     } finally {
       await loading.dismiss();
     }
+  }
+
+  ngOnDestroy(): void {
+    if (this.imagenUrl) URL.revokeObjectURL(this.imagenUrl);
   }
 
   abrirPagina(): void {

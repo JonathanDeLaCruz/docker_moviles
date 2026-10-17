@@ -1,0 +1,440 @@
+{
+  "collections": [
+    {
+      "collection": "marcas",
+      "schema": {},
+      "meta": {
+        "icon": "sell",
+        "display_template": "{{nombre}}"
+      },
+      "fields": [
+        {
+          "field": "id",
+          "type": "integer",
+          "schema": {
+            "is_nullable": false,
+            "is_primary_key": true,
+            "has_auto_increment": true
+          },
+          "meta": {
+            "interface": "input",
+            "hidden": true,
+            "readonly": true
+          }
+        },
+        {
+          "field": "nombre",
+          "type": "string",
+          "schema": {
+            "is_nullable": false,
+            "max_length": 100
+          },
+          "meta": {
+            "interface": "input"
+          }
+        },
+        {
+          "field": "descripcion",
+          "type": "text",
+          "schema": {
+            "is_nullable": true
+          },
+          "meta": {
+            "interface": "input-multiline"
+          }
+        }
+      ]
+    },
+    {
+      "collection": "proveedores",
+      "schema": {},
+      "meta": {
+        "icon": "local_shipping",
+        "display_template": "{{nombre}}"
+      },
+      "fields": [
+        {
+          "field": "id",
+          "type": "integer",
+          "schema": {
+            "is_nullable": false,
+            "is_primary_key": true,
+            "has_auto_increment": true
+          },
+          "meta": {
+            "interface": "input",
+            "hidden": true,
+            "readonly": true
+          }
+        },
+        {
+          "field": "nombre",
+          "type": "string",
+          "schema": {
+            "is_nullable": false,
+            "max_length": 100
+          },
+          "meta": {
+            "interface": "input"
+          }
+        },
+        {
+          "field": "correo",
+          "type": "string",
+          "schema": {
+            "is_nullable": true,
+            "max_length": 100
+          },
+          "meta": {
+            "interface": "input",
+            "options": {
+              "type": "email"
+            }
+          }
+        },
+        {
+          "field": "telefono",
+          "type": "string",
+          "schema": {
+            "is_nullable": true,
+            "max_length": 20
+          },
+          "meta": {
+            "interface": "input"
+          }
+        },
+        {
+          "field": "activo",
+          "type": "boolean",
+          "schema": {
+            "is_nullable": false,
+            "default_value": true
+          },
+          "meta": {
+            "interface": "boolean",
+            "special": [
+              "cast-boolean"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "collection": "clientes",
+      "schema": {},
+      "meta": {
+        "icon": "people",
+        "display_template": "{{nombre}}"
+      },
+      "fields": [
+        {
+          "field": "id",
+          "type": "integer",
+          "schema": {
+            "is_nullable": false,
+            "is_primary_key": true,
+            "has_auto_increment": true
+          },
+          "meta": {
+            "interface": "input",
+            "hidden": true,
+            "readonly": true
+          }
+        },
+        {
+          "field": "nombre",
+          "type": "string",
+          "schema": {
+            "is_nullable": false,
+            "max_length": 100
+          },
+          "meta": {
+            "interface": "input"
+          }
+        },
+        {
+          "field": "correo",
+          "type": "string",
+          "schema": {
+            "is_nullable": true,
+            "max_length": 100
+          },
+          "meta": {
+            "interface": "input",
+            "options": {
+              "type": "email"
+            }
+          }
+        },
+        {
+          "field": "telefono",
+          "type": "string",
+          "schema": {
+            "is_nullable": true,
+            "max_length": 20
+          },
+          "meta": {
+            "interface": "input"
+          }
+        }
+      ]
+    },
+    {
+      "collection": "pedidos",
+      "schema": {},
+      "meta": {
+        "icon": "receipt_long",
+        "display_template": "Pedido {{id}}"
+      },
+      "fields": [
+        {
+          "field": "id",
+          "type": "integer",
+          "schema": {
+            "is_nullable": false,
+            "is_primary_key": true,
+            "has_auto_increment": true
+          },
+          "meta": {
+            "interface": "input",
+            "hidden": true,
+            "readonly": true
+          }
+        },
+        {
+          "field": "cliente",
+          "type": "integer",
+          "schema": {
+            "is_nullable": false
+          },
+          "meta": {
+            "interface": "select-dropdown-m2o",
+            "special": [
+              "m2o"
+            ],
+            "options": {
+              "template": "{{nombre}}"
+            }
+          }
+        },
+        {
+          "field": "producto",
+          "type": "integer",
+          "schema": {
+            "is_nullable": false
+          },
+          "meta": {
+            "interface": "select-dropdown-m2o",
+            "special": [
+              "m2o"
+            ],
+            "options": {
+              "template": "{{nombre}}"
+            }
+          }
+        },
+        {
+          "field": "cantidad",
+          "type": "integer",
+          "schema": {
+            "is_nullable": false,
+            "default_value": 1
+          },
+          "meta": {
+            "interface": "input",
+            "options": {
+              "min": 1
+            }
+          }
+        },
+        {
+          "field": "estado",
+          "type": "string",
+          "schema": {
+            "is_nullable": false,
+            "max_length": 30,
+            "default_value": "pendiente"
+          },
+          "meta": {
+            "interface": "select-dropdown",
+            "options": {
+              "choices": [
+                {
+                  "text": "pendiente",
+                  "value": "pendiente"
+                },
+                {
+                  "text": "entregado",
+                  "value": "entregado"
+                },
+                {
+                  "text": "cancelado",
+                  "value": "cancelado"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "field": "observaciones",
+          "type": "text",
+          "schema": {
+            "is_nullable": true
+          },
+          "meta": {
+            "interface": "input-multiline"
+          }
+        },
+        {
+          "field": "fecha_creacion",
+          "type": "timestamp",
+          "schema": {
+            "is_nullable": true
+          },
+          "meta": {
+            "interface": "datetime",
+            "special": [
+              "date-created"
+            ],
+            "readonly": true
+          }
+        }
+      ]
+    }
+  ],
+  "productoFields": [
+    {
+      "field": "marca",
+      "type": "integer",
+      "schema": {
+        "is_nullable": true
+      },
+      "meta": {
+        "interface": "select-dropdown-m2o",
+        "special": [
+          "m2o"
+        ],
+        "options": {
+          "template": "{{nombre}}"
+        }
+      }
+    },
+    {
+      "field": "proveedor",
+      "type": "integer",
+      "schema": {
+        "is_nullable": true
+      },
+      "meta": {
+        "interface": "select-dropdown-m2o",
+        "special": [
+          "m2o"
+        ],
+        "options": {
+          "template": "{{nombre}}"
+        }
+      }
+    }
+  ],
+  "relations": [
+    {
+      "collection": "productos",
+      "field": "marca",
+      "related_collection": "marcas",
+      "schema": {
+        "on_delete": "RESTRICT",
+        "on_update": "CASCADE"
+      },
+      "meta": {
+        "many_collection": "productos",
+        "many_field": "marca",
+        "one_collection": "marcas",
+        "one_field": null
+      }
+    },
+    {
+      "collection": "productos",
+      "field": "proveedor",
+      "related_collection": "proveedores",
+      "schema": {
+        "on_delete": "RESTRICT",
+        "on_update": "CASCADE"
+      },
+      "meta": {
+        "many_collection": "productos",
+        "many_field": "proveedor",
+        "one_collection": "proveedores",
+        "one_field": null
+      }
+    },
+    {
+      "collection": "pedidos",
+      "field": "cliente",
+      "related_collection": "clientes",
+      "schema": {
+        "on_delete": "RESTRICT",
+        "on_update": "CASCADE"
+      },
+      "meta": {
+        "many_collection": "pedidos",
+        "many_field": "cliente",
+        "one_collection": "clientes",
+        "one_field": null
+      }
+    },
+    {
+      "collection": "pedidos",
+      "field": "producto",
+      "related_collection": "productos",
+      "schema": {
+        "on_delete": "RESTRICT",
+        "on_update": "CASCADE"
+      },
+      "meta": {
+        "many_collection": "pedidos",
+        "many_field": "producto",
+        "one_collection": "productos",
+        "one_field": null
+      }
+    }
+  ],
+  "seeds": {
+    "marcas": [
+      {
+        "nombre": "AulaTech",
+        "descripcion": "Marca de ejemplo del curso"
+      },
+      {
+        "nombre": "Nova",
+        "descripcion": "Marca de ejemplo del curso"
+      },
+      {
+        "nombre": "Conecta",
+        "descripcion": "Marca de ejemplo del curso"
+      },
+      {
+        "nombre": "Pixel",
+        "descripcion": "Marca de ejemplo del curso"
+      },
+      {
+        "nombre": "Vector",
+        "descripcion": "Marca de ejemplo del curso"
+      }
+    ],
+    "proveedores": [
+      {
+        "nombre": "Distribuidora Aula",
+        "correo": "ventas@proveedor.example.com",
+        "telefono": "+52 5551234567",
+        "activo": true
+      }
+    ],
+    "clientes": [
+      {
+        "nombre": "Cliente de práctica",
+        "correo": "cliente@example.com",
+        "telefono": "+52 5557654321"
+      }
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+<div class="paginacion" *ngIf="totalPaginas > 1">
+
+  <ion-button fill="solid" size="small" [disabled]="paginaActual === 1" (click)="anterior()">
+    Anterior
+  </ion-button>
+
+  <ion-button *ngFor="let pagina of paginasVisibles" size="small" fill="solid" [color]="pagina === paginaActual ? 'primary' : 'medium'" (click)="cambiarPagina(pagina)">
+    {{ pagina }}
+  </ion-button>
+
+  <ion-button fill="solid" size="small" [disabled]="paginaActual === totalPaginas" (click)="siguiente()">
+    Siguiente
+  </ion-button>
+
+</div>
+
+<p class="informacion" *ngIf="total > 0">
+  Página {{ paginaActual }} de {{ totalPaginas }} · {{ total }} registros
+</p>

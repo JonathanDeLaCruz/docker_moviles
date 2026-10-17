@@ -1,0 +1,11 @@
+<ion-header><ion-toolbar><ion-buttons slot="start"><ion-back-button defaultHref="/login"></ion-back-button></ion-buttons><ion-title>Crear cuenta</ion-title></ion-toolbar></ion-header>
+<ion-content class="ion-padding">
+  <form [formGroup]="form" (ngSubmit)="registrar()">
+    <ion-input label="Nombre" labelPlacement="stacked" formControlName="nombre" autocomplete="given-name"></ion-input>
+    <ion-input label="Correo" labelPlacement="stacked" type="email" formControlName="email" autocomplete="email"></ion-input>
+    <ion-input label="Contraseña" labelPlacement="stacked" type="password" formControlName="password" autocomplete="new-password"></ion-input>
+    <ion-note color="danger" *ngIf="form.touched && form.invalid">Completa el nombre, un correo válido y una contraseña de al menos 8 caracteres.</ion-note>
+    <p *ngIf="mensaje" role="status">{{ mensaje }}</p>
+    <ion-button fill="solid" expand="block" type="submit" [disabled]="enviando">{{ enviando ? 'Enviando...' : 'Registrarme' }}</ion-button>
+  </form>
+</ion-content>

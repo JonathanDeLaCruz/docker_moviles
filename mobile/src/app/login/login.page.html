@@ -1,0 +1,11 @@
+<ion-header><ion-toolbar><ion-title>Iniciar sesión</ion-title></ion-toolbar></ion-header>
+<ion-content class="ion-padding">
+  <form [formGroup]="form" (ngSubmit)="ingresar()">
+    <ion-input label="Correo" labelPlacement="stacked" type="email" autocomplete="username" formControlName="email"></ion-input>
+    <ion-input label="Contraseña" labelPlacement="stacked" type="password" autocomplete="current-password" formControlName="password"></ion-input>
+    <ion-note color="danger" *ngIf="form.touched && form.invalid">Escribe un correo válido y tu contraseña.</ion-note>
+    <p *ngIf="mensaje" role="status">{{ mensaje }}</p>
+    <ion-button fill="solid" expand="block" type="submit" [disabled]="enviando">{{ enviando ? 'Ingresando...' : 'Ingresar' }}</ion-button>
+  </form>
+  <p><a routerLink="/registro">Crear cuenta</a></p>
+</ion-content>

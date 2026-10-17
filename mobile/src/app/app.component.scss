@@ -1,0 +1,28 @@
+@font-face {
+  font-family: 'Young Serif';
+  src: url('/assets/font/YoungSerif-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --ion-font-family: 'Young Serif', serif;
+  --ion-color-personalizado: #686090;
+  --ion-color-personalizado-rgb: 104, 96, 144;
+  --ion-color-personalizado-contrast: #ffffff;
+  --ion-color-personalizado-contrast-rgb: 255, 255, 255;
+  --ion-color-personalizado-shade: #5c547f;
+  --ion-color-personalizado-tint: #77709b;
+}
+
+.ion-color-personalizado {
+  --ion-color-base: var(--ion-color-personalizado);
+  --ion-color-base-rgb: var(--ion-color-personalizado-rgb);
+  --ion-color-contrast: var(--ion-color-personalizado-contrast);
+  --ion-color-contrast-rgb: var(--ion-color-personalizado-contrast-rgb);
+  --ion-color-shade: var(--ion-color-personalizado-shade);
+  --ion-color-tint: var(--ion-color-personalizado-tint);
+}
+
+ion-menu { --width: 260px; }

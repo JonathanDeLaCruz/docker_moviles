@@ -1,0 +1,9 @@
+<ion-header><ion-toolbar color="personalizado"><ion-buttons slot="start"><ion-back-button defaultHref="/tabs/productos"></ion-back-button></ion-buttons><ion-title>Imagen del producto</ion-title></ion-toolbar></ion-header>
+<ion-content class="ion-padding">
+  <p>Producto #{{ idProducto }}</p>
+  <label for="archivo">Selecciona una imagen</label>
+  <input id="archivo" type="file" accept="image/*" (change)="onFileSelected($event)">
+  <ion-button fill="solid" expand="block" (click)="subir()" [disabled]="!archivo || enviando">{{ enviando ? 'Subiendo...' : 'Subir imagen' }}</ion-button>
+  <p *ngIf="mensaje" role="status">{{ mensaje }}</p>
+  <img *ngIf="imagenUrl" [src]="imagenUrl" alt="Imagen guardada del producto" class="preview">
+</ion-content>

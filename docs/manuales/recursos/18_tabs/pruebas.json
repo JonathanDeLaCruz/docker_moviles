@@ -1,0 +1,116 @@
+{
+  "fecha": "2026-10-17",
+  "api": [
+    {
+      "tabla": "productos",
+      "lectura": true,
+      "crearActualizarDetalle": true,
+      "eliminar": true
+    },
+    {
+      "tabla": "categorias",
+      "lectura": true,
+      "crearActualizarDetalle": true,
+      "eliminar": true
+    },
+    {
+      "tabla": "origenes_ejemplo",
+      "lectura": true,
+      "crearActualizarDetalle": true,
+      "eliminar": true
+    },
+    {
+      "tabla": "ejemplos_campos",
+      "lectura": true,
+      "crearActualizarDetalle": true,
+      "eliminar": true
+    },
+    {
+      "tabla": "marcas",
+      "lectura": true,
+      "crearActualizarDetalle": true,
+      "eliminar": true
+    },
+    {
+      "tabla": "proveedores",
+      "lectura": true,
+      "crearActualizarDetalle": true,
+      "eliminar": true
+    },
+    {
+      "tabla": "clientes",
+      "lectura": true,
+      "crearActualizarDetalle": true,
+      "eliminar": true
+    },
+    {
+      "tabla": "pedidos",
+      "lectura": true,
+      "crearActualizarDetalle": true,
+      "eliminar": true
+    }
+  ],
+  "restricciones": [
+    {
+      "caso": "Eliminar cliente con pedido",
+      "rechazado": true,
+      "http": 500,
+      "codigo": "INTERNAL_SERVER_ERROR"
+    },
+    {
+      "caso": "Eliminar marca usada",
+      "rechazado": true,
+      "http": 500,
+      "codigo": "INTERNAL_SERVER_ERROR"
+    },
+    {
+      "caso": "Cantidad cero por API",
+      "rechazado": true,
+      "http": 500
+    }
+  ],
+  "ionic": [
+    {
+      "caso": "Tabs Productos, Pedidos y Catálogos",
+      "resultado": "Navegación y pilas independientes comprobadas"
+    },
+    {
+      "caso": "Marcas",
+      "resultado": "Formulario vacío, creación, edición, detalle, búsqueda, paginación, cancelar y confirmar eliminación"
+    },
+    {
+      "caso": "Proveedores",
+      "id": 3,
+      "resultado": "Creación y detalle; activo=false conservado"
+    },
+    {
+      "caso": "Clientes",
+      "id": 3,
+      "resultado": "Creación, detalle y protección antes de eliminar porque tiene pedido"
+    },
+    {
+      "caso": "Productos",
+      "id": 16,
+      "resultado": "Creación y detalle con imagen, categoría, marca y proveedor"
+    },
+    {
+      "caso": "Pedidos",
+      "id": 2,
+      "resultado": "Campos obligatorios, cantidad mínima, creación, detalle y actualización a entregado"
+    },
+    {
+      "caso": "Botón flotante",
+      "resultado": "Captura real y apertura de Crear marca"
+    },
+    {
+      "caso": "Edición de producto",
+      "id": 16,
+      "resultado": "Stock actualizado a 13, misma imagen, marca, proveedor y categoría"
+    },
+    {
+      "caso": "Edición de ejemplo",
+      "id": 8,
+      "resultado": "Arreglos, booleanos y campos automáticos conservados"
+    }
+  ]
+}

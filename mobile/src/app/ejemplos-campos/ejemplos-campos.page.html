@@ -1,0 +1,74 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start"><ion-back-button defaultHref="/productos-list"></ion-back-button></ion-buttons>
+    <ion-title>Ejemplos de campos</ion-title>
+    <ion-buttons slot="end" *ngIf="!usarBotonFlotante">
+      <ion-button fill="solid" (click)="nuevo()" [disabled]="enviando" aria-label="Nuevo ejemplo"><ion-icon slot="icon-only" name="add"></ion-icon></ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-padding">
+  <p *ngIf="mensaje" role="status">{{ mensaje }}</p>
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <h2>1. Datos básicos</h2>
+    <ion-input label="Nombre" labelPlacement="stacked" formControlName="nombre" maxlength="100"></ion-input>
+    <ion-note color="danger" *ngIf="error('nombre') as texto">{{ texto }}</ion-note>
+    <ion-input label="Correo" labelPlacement="stacked" type="email" maxlength="100" formControlName="correo"></ion-input>
+    <ion-note color="danger" *ngIf="error('correo') as texto">{{ texto }}</ion-note>
+    <ion-input label="Teléfono (opcional)" labelPlacement="stacked" type="tel" formControlName="telefono"></ion-input>
+    <ion-note color="danger" *ngIf="error('telefono') as texto">{{ texto }}</ion-note>
+    <ion-input label="Sitio web (opcional)" labelPlacement="stacked" type="url" maxlength="100" placeholder="https://ejemplo.com" formControlName="sitio_web"></ion-input>
+    <ion-note color="danger" *ngIf="error('sitio_web') as texto">{{ texto }}</ion-note>
+    <ion-textarea label="Descripción" labelPlacement="stacked" formControlName="descripcion" [autoGrow]="true"></ion-textarea>
+    <ion-input label="Edad (opcional, 18 a 100)" labelPlacement="stacked" type="number" min="18" max="100" formControlName="edad"></ion-input>
+    <ion-note color="danger" *ngIf="error('edad') as texto">{{ texto }}</ion-note>
+    <ion-input label="Monto" labelPlacement="stacked" type="number" min="0" step="0.01" formControlName="monto"></ion-input>
+    <ion-note color="danger" *ngIf="error('monto') as texto">{{ texto }}</ion-note>
+
+    <h2>2. Selecciones</h2>
+    <ion-select label="Tipo" labelPlacement="stacked" interface="popover" formControlName="tipo">
+      <ion-select-option value="curso">Curso</ion-select-option><ion-select-option value="taller">Taller</ion-select-option>
+    </ion-select>
+    <ion-note color="danger" *ngIf="error('tipo') as texto">{{ texto }}</ion-note>
+    <h3>Modalidad (radio)</h3>
+    <ion-radio-group formControlName="modalidad">
+      <ion-radio value="presencial">Presencial</ion-radio>
+      <ion-radio value="en_linea">En línea</ion-radio>
+    </ion-radio-group>
+    <ion-select label="Tecnologías (selección múltiple)" labelPlacement="stacked" [multiple]="true" formControlName="tecnologias" cancelText="Cancelar" okText="Aceptar">
+      <ion-select-option value="ionic">Ionic</ion-select-option><ion-select-option value="angular">Angular</ion-select-option><ion-select-option value="directus">Directus</ion-select-option>
+    </ion-select>
+    <h3>Canales (grupo de checkbox)</h3>
+    <div formGroupName="canales">
+      <ion-checkbox formControlName="correo">Correo</ion-checkbox>
+      <ion-checkbox formControlName="whatsapp">WhatsApp</ion-checkbox>
+    </div>
+    <ion-checkbox formControlName="acepta_terminos">Acepto los términos del ejemplo</ion-checkbox>
+    <ion-note color="danger" *ngIf="error('acepta_terminos') as texto">Debes aceptar los términos del ejemplo.</ion-note>
+    <ion-toggle formControlName="recibir_avisos">Recibir avisos</ion-toggle>
+    <ion-range label="Prioridad" labelPlacement="stacked" [min]="0" [max]="10" [step]="1" [snaps]="true" [pin]="true" formControlName="prioridad"></ion-range>
+    <p>Prioridad seleccionada: {{ form.controls.prioridad.value }}</p>
+
+    <h2>3. Fecha y hora</h2>
+    <ion-input label="Fecha del evento (opcional)" labelPlacement="stacked" type="date" formControlName="fecha_evento"></ion-input>
+    <ion-input label="Hora del evento (opcional)" labelPlacement="stacked" type="time" formControlName="hora_evento"></ion-input>
+    <p>El estado inicial será pendiente. Directus generará la fecha de creación al guardar.</p>
+    <ion-button fill="solid" expand="block" type="submit" [disabled]="enviando || !!guardado">{{ enviando ? 'Procesando...' : 'Guardar ejemplo' }}</ion-button>
+  </form>
+  <ion-card *ngIf="guardado as registro">
+    <ion-card-header><ion-card-title>Registro guardado #{{ registro.id }}</ion-card-title></ion-card-header>
+    <ion-card-content>
+      <p>Nombre: {{ registro.nombre }}</p><p>Estado: {{ registro.estado }}</p><p>Origen: {{ registro.origen.nombre }} ({{ registro.origen.codigo }})</p>
+      <p>Fecha de envío: {{ registro.fecha_envio | date:'yyyy-MM-dd HH:mm:ss':'UTC' }} UTC</p>
+      <p>Fecha de creación: {{ registro.fecha_creacion | date:'yyyy-MM-dd HH:mm:ss':'UTC' }} UTC</p>
+      <ion-button fill="solid" (click)="consultarGuardado()" [disabled]="enviando">Consultar registro guardado</ion-button>
+      <ion-accordion-group>
+        <ion-accordion value="envio"><ion-item slot="header"><ion-label>JSON enviado</ion-label></ion-item><pre slot="content">{{ envio | json }}</pre></ion-accordion>
+        <ion-accordion value="respuesta"><ion-item slot="header"><ion-label>Registro recuperado</ion-label></ion-item><pre slot="content">{{ guardado | json }}</pre></ion-accordion>
+      </ion-accordion-group>
+    </ion-card-content>
+  </ion-card>
+  <ion-fab *ngIf="usarBotonFlotante" vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="nuevo()" [disabled]="enviando" aria-label="Nuevo ejemplo"><ion-icon name="add"></ion-icon></ion-fab-button>
+  </ion-fab>
+</ion-content>

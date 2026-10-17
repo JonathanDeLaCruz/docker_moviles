@@ -1,0 +1,24 @@
+digraph Flujo {
+  graph [rankdir=TB, bgcolor="#181818", pad="0.24", nodesep="0.42", ranksep="0.55", splines=spline, outputorder=edgesfirst];
+  node [shape=box, style="rounded,filled", fillcolor="#0e2a4d", color="#304b67", fontcolor="#b5d3f6", fontname="Arial", fontsize=17, penwidth=1.15, margin="0.22,0.20"];
+  edge [color="#89929c", fontcolor="#b5d3f6", fontname="Arial", fontsize=13, arrowsize=0.65, penwidth=1.15];
+  marcas [label="marcas\nid, nombre, descripción", group=main];
+  proveedores [label="proveedores\nid, nombre, correo,\nteléfono, activo"];
+  productos [label="productos\nid, datos, imagen, marca y\nproveedor", group=main];
+  categorias [label="categorias\nid, nombre"];
+  union [label="productos_categorias\nproducto y categoría"];
+  clientes [label="clientes\nid, nombre, correo y\nteléfono"];
+  pedidos [label="pedidos\ncliente, producto,\ncantidad, estado y fecha", group=main];
+  origenes [label="origenes_ejemplo\nid, código y nombre"];
+  ejemplos [label="ejemplos_campos\ncontroles y origen\nrelacionado"];
+  subgraph cluster_row0 { style=invis; margin=8; {rank=same; marcas; proveedores; categorias; origenes;} }
+  subgraph cluster_row1 { style=invis; margin=8; {rank=same; productos; clientes; ejemplos;} }
+  subgraph cluster_row2 { style=invis; margin=8; {rank=same; union; pedidos;} }
+  marcas -> productos [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>1 a muchos: marca</TD></TR></TABLE>>];
+  proveedores -> productos [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>1 a muchos: proveedor</TD></TR></TABLE>>];
+  productos -> union [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>1 a muchos</TD></TR></TABLE>>];
+  categorias -> union [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>1 a muchos</TD></TR></TABLE>>];
+  productos -> pedidos [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>1 a muchos: producto</TD></TR></TABLE>>];
+  clientes -> pedidos [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>1 a muchos: cliente</TD></TR></TABLE>>];
+  origenes -> ejemplos [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>1 a muchos: origen</TD></TR></TABLE>>];
+}

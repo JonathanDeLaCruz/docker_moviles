@@ -1,0 +1,20 @@
+<ion-header><ion-toolbar color="personalizado">
+  <ion-buttons slot="start"><ion-back-button *ngIf="config.tabla !== 'pedidos'" defaultHref="/tabs/catalogos"></ion-back-button><ion-menu-button *ngIf="config.tabla === 'pedidos'"></ion-menu-button></ion-buttons>
+  <ion-title>{{ config.titulo }}</ion-title>
+  <ion-buttons slot="end" *ngIf="!usarBotonFlotante"><ion-button fill="solid" [routerLink]="[base, 'formulario']" [attr.aria-label]="'Crear ' + config.singular"><ion-icon slot="icon-only" name="add"></ion-icon></ion-button></ion-buttons>
+</ion-toolbar></ion-header>
+<ion-content>
+  <ion-searchbar [value]="texto" [debounce]="300" (ionInput)="buscar($event)" [placeholder]="config.tabla === 'pedidos' ? 'Buscar observaciones' : 'Buscar registros'" aria-label="Buscar registros"></ion-searchbar>
+  <p *ngIf="mensaje" class="ion-padding" role="status">{{ mensaje }}</p>
+  <p *ngIf="!cargando && !mensaje && !total" class="ion-padding">No se encontraron registros.</p>
+  <ion-list>
+    <ion-item *ngFor="let registro of registros">
+      <ion-label class="ion-text-wrap"><h2>{{ titulo(registro) }}</h2><p>{{ resumen(registro) }}</p></ion-label>
+      <ion-button fill="solid" [routerLink]="[base, 'detalle', registro['id']]" aria-label="Ver detalle"><ion-icon slot="icon-only" name="eye"></ion-icon></ion-button>
+      <ion-button fill="solid" color="warning" [routerLink]="[base, 'formulario', registro['id']]" aria-label="Editar registro"><ion-icon slot="icon-only" name="pencil"></ion-icon></ion-button>
+      <ion-button fill="solid" color="danger" (click)="eliminar(registro)" aria-label="Eliminar registro"><ion-icon slot="icon-only" name="trash"></ion-icon></ion-button>
+    </ion-item>
+  </ion-list>
+  <app-paginacion [total]="total" [porPagina]="porPagina" [paginaActual]="pagina" (paginaCambio)="cambiarPagina($event)"></app-paginacion>
+  <ion-fab *ngIf="usarBotonFlotante" vertical="bottom" horizontal="end" slot="fixed"><ion-fab-button [routerLink]="[base, 'formulario']" [attr.aria-label]="'Crear ' + config.singular"><ion-icon name="add"></ion-icon></ion-fab-button></ion-fab>
+</ion-content>
