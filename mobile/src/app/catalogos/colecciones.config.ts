@@ -52,5 +52,5 @@ export function buscarColeccion(ruta: string): Coleccion {
   return config;
 }
 export function rutaColeccion(config: Coleccion): string {
-  return config.tabla === 'pedidos' ? '/tabs/pedidos' : '/catalogos/' + config.ruta;
+  return config.tabla === 'pedidos' ? '/tabs/pedidos' : '/tabs/catalogos/' + config.ruta;
 }

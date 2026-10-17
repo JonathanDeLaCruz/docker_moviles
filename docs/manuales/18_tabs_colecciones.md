@@ -1,6 +1,6 @@
 # Integrar colecciones de productos y navegación con tabs
 
-La aplicación tendrá tres tabs: **Productos, Pedidos y Resumen**. El menú lateral dará acceso directo a los catálogos. Agregarás marcas, proveedores, clientes y pedidos a la base del curso, y usarás las páginas de listado, detalle y formulario para administrarlos. Productos conservará imagen y categorías, e incorporará marca y proveedor.
+La aplicación tendrá tres tabs: **Productos, Pedidos y Resumen**. El menú lateral dará acceso directo a los catálogos, que conservan visibles los tres tabs. Agregarás marcas, proveedores, clientes y pedidos a la base del curso, y usarás las páginas de listado, detalle y formulario para administrarlos. Productos conservará imagen y categorías, e incorporará marca y proveedor.
 
 ## 1. Antes de comenzar
 
@@ -80,9 +80,9 @@ Copia las rutas y páginas del punto 4. `app-routing.module.ts` envía el inicio
 | Productos | /tabs/productos | Listado; detalle/:id; formulario; formulario/:id; imagen/:id. |
 | Pedidos | /tabs/pedidos | Listado; detalle/:id; formulario; formulario/:id. |
 | Resumen | /tabs/resumen | Indicadores de inventario y estados de pedidos. |
-| Cada catálogo | /catalogos/marcas, proveedores, clientes, categorias, origenes-ejemplo o ejemplos-campos | Listado; detalle/:id; formulario; formulario/:id. |
+| Cada catálogo desde el menú | /tabs/catalogos/marcas, proveedores, clientes, categorias, origenes-ejemplo o ejemplos-campos | Listado; detalle/:id; formulario; formulario/:id. |
 
-La figura 2 muestra los tabs ya conectados al listado de productos. Las páginas de detalle y formulario pertenecen a la misma rama, por lo que la barra inferior sigue visible. Cada tab conserva su propia pila de navegación. El menú lateral abre los catálogos con `/catalogos/...`, fuera del contenedor de tabs. Al volver a Productos, Pedidos o Resumen desde el menú se abre esa sección.
+La figura 2 muestra los tabs ya conectados al listado de productos. Las páginas de detalle y formulario pertenecen a la misma rama, por lo que la barra inferior sigue visible. Cada tab conserva su propia pila de navegación. El menú lateral abre los catálogos con `/tabs/catalogos/...`, dentro del mismo contenedor. Sus listados, formularios y detalles conservan visibles los tres tabs. Al volver a Productos, Pedidos o Resumen desde el menú se abre esa sección.
 
 <p align="center">
   <img src="imagenes/18-tabs-productos.jpg" alt="Listado de productos dentro de los tres tabs funcionales" width="390"><br>
@@ -93,120 +93,127 @@ Sustituye los enlaces del menú por las rutas del punto 4. Después de comprobar
 
 ### Paso 4. Administrar los catálogos
 
-La figura 3 muestra los accesos a todas las colecciones auxiliares dentro del menú lateral. Abre el menú y elige directamente Categorías, Marcas, Proveedores, Clientes, Orígenes o Ejemplos de campos. Estas pantallas usan rutas propias fuera del contenedor de tabs. La configuración indica sus campos; las páginas compartidas usan esa información para crear los controles y el objeto de guardado. Los datos se envían al nombre real de la colección en Directus.
+La figura 3 muestra los accesos a todas las colecciones auxiliares dentro del menú lateral. Abre el menú y elige directamente Categorías, Marcas, Proveedores, Clientes, Orígenes o Ejemplos de campos. Estas pantallas se cargan dentro de TabsPage y mantienen la barra inferior. Los accesos de catálogos permanecen en el menú lateral; los tres botones inferiores corresponden a Productos, Pedidos y Resumen. La configuración indica sus campos; las páginas compartidas usan esa información para crear los controles y el objeto de guardado. Los datos se envían al nombre real de la colección en Directus.
 
 <p align="center">
   <img src="imagenes/18-catalogos.jpg" alt="Accesos a categorías, marcas, proveedores, clientes, orígenes y ejemplos" width="390"><br>
   <em>Figura 3. Colecciones disponibles directamente en el menú lateral.</em>
 </p>
 
-En el menú, abre Marcas y pulsa +. La figura 4 muestra el formulario con los datos de AulaTech cargados para editar. Guardar valida y crea el registro; después abre su detalle. El lápiz carga el mismo formulario con los valores existentes para actualizarlo. La figura 5 muestra la consulta de AulaTech.
+La figura 4 muestra Categorías con la barra inferior compartida. Desde ella puedes ir a Productos, Pedidos o Resumen, y abrir otra colección desde el menú.
+
+<p align="center">
+  <img src="imagenes/18-categorias-tabs.jpg" alt="Listado de categorías con los tres tabs visibles" width="390"><br>
+  <em>Figura 4. Los catálogos conservan visibles los tres tabs.</em>
+</p>
+
+En el menú, abre Marcas y pulsa +. La figura 5 muestra el formulario con los datos de AulaTech cargados para editar. Guardar valida y crea el registro; después abre su detalle. El lápiz carga el mismo formulario con los valores existentes para actualizarlo. La figura 6 muestra la consulta de AulaTech.
 
 <p align="center">
   <img src="imagenes/18-marca-formulario.jpg" alt="Formulario de marca con datos cargados para editar" width="390"><br>
-  <em>Figura 4. Formulario de marca desde Ionic.</em>
+  <em>Figura 5. Formulario de marca desde Ionic.</em>
 </p>
 
 <p align="center">
   <img src="imagenes/18-marca-detalle.jpg" alt="Detalle de la marca actualizada" width="390"><br>
-  <em>Figura 5. Consulta de una marca desde el menú.</em>
+  <em>Figura 6. Consulta de una marca desde el menú.</em>
 </p>
 
-El listado consulta tres registros por página. La búsqueda reinicia la página y aplica el mismo filtro al conteo y a los registros. La figura 6 muestra la búsqueda por nombre.
+El listado consulta tres registros por página. La búsqueda reinicia la página y aplica el mismo filtro al conteo y a los registros. La figura 7 muestra la búsqueda por nombre.
 
 <p align="center">
   <img src="imagenes/18-busqueda-marcas.jpg" alt="Búsqueda de una marca desde su listado" width="390"><br>
-  <em>Figura 6. Resultado filtrado con su conteo.</em>
+  <em>Figura 7. Resultado filtrado con su conteo.</em>
 </p>
 
 En Proveedores, captura nombre y los contactos opcionales. El interruptor Activo envía un booleano. Las figuras 7 y 8 muestran el formulario y el resultado con false conservado.
 
 <p align="center">
   <img src="imagenes/18-proveedor-formulario.jpg" alt="Formulario de proveedor con Activo desactivado" width="390"><br>
-  <em>Figura 7. Formulario del proveedor con datos de contacto.</em>
+  <em>Figura 8. Formulario del proveedor con datos de contacto.</em>
 </p>
 
 <p align="center">
   <img src="imagenes/18-proveedor-detalle.jpg" alt="Detalle del proveedor con Activo igual a No" width="390"><br>
-  <em>Figura 8. El valor false se conserva al consultar.</em>
+  <em>Figura 9. El valor false se conserva al consultar.</em>
 </p>
 
-En Clientes, crea el registro que usarás en el pedido. La figura 9 muestra el ejemplo. Categorías y Orígenes usan el mismo recorrido; los ejemplos de campos conservan sus controles de selección, radio, casillas, interruptor, rango, fecha y hora.
+En Clientes, crea el registro que usarás en el pedido. La figura 10 muestra el ejemplo. Categorías y Orígenes usan el mismo recorrido; los ejemplos de campos conservan sus controles de selección, radio, casillas, interruptor, rango, fecha y hora.
 
 <p align="center">
   <img src="imagenes/18-cliente-formulario.jpg" alt="Formulario de cliente del pedido de práctica" width="390"><br>
-  <em>Figura 9. Formulario del cliente relacionado con el pedido.</em>
+  <em>Figura 10. Formulario del cliente relacionado con el pedido.</em>
 </p>
 
 ### Paso 5. Integrar los catálogos en productos
 
 Agrega marca y proveedor a Producto y ProductoGuardar. En el detalle expande sus campos id y nombre. El formulario consulta ambos catálogos, carga los IDs al editar y los incluye en el cuerpo de creación o actualización. Un valor vacío se envía como null.
 
-Conserva los controles de categorías, la subida de imagen y la recuperación del archivo existente. La figura 10 muestra el formulario integrado y la figura 11 el detalle del producto de prueba con todas sus relaciones.
+Conserva los controles de categorías, la subida de imagen y la recuperación del archivo existente. La figura 11 muestra el formulario integrado y la figura 12 el detalle del producto de prueba con todas sus relaciones.
 
 <p align="center">
   <img src="imagenes/18-producto-formulario.jpg" alt="Formulario de producto con marca, proveedor, categoría e imagen" width="390"><br>
-  <em>Figura 10. Guardado integrado de producto y sus relaciones.</em>
+  <em>Figura 11. Guardado integrado de producto y sus relaciones.</em>
 </p>
 
 <p align="center">
   <img src="imagenes/18-producto-detalle.jpg" alt="Producto con imagen, marca, proveedor y categorías" width="390"><br>
-  <em>Figura 11. Detalle del producto 16 creado en Ionic.</em>
+  <em>Figura 12. Detalle del producto 16 creado en Ionic.</em>
 </p>
 
 ### Paso 6. Registrar y actualizar pedidos
 
-Abre el tab Pedidos y pulsa +. Selecciona cliente y producto, captura una cantidad entera mayor que cero y agrega observaciones si las necesitas. La figura 12 muestra el rechazo de cantidad cero en Ionic. La figura 13 muestra un pedido listo para guardar.
+Abre el tab Pedidos y pulsa +. Selecciona cliente y producto, captura una cantidad entera mayor que cero y agrega observaciones si las necesitas. La figura 13 muestra el rechazo de cantidad cero en Ionic. La figura 14 muestra un pedido listo para guardar.
 
 <p align="center">
   <img src="imagenes/18-pedido-validacion.jpg" alt="Validación de cantidad mínima en el pedido" width="390"><br>
-  <em>Figura 12. Ionic impide enviar una cantidad inferior a uno.</em>
+  <em>Figura 13. Ionic impide enviar una cantidad inferior a uno.</em>
 </p>
 
 <p align="center">
   <img src="imagenes/18-pedido-formulario.jpg" alt="Pedido con cliente, producto y cantidad seleccionados" width="390"><br>
-  <em>Figura 13. Formulario del pedido con dos llaves foráneas.</em>
+  <em>Figura 14. Formulario del pedido con dos llaves foráneas.</em>
 </p>
 
-El POST envía los IDs; el GET solicita los nombres relacionados. La fecha de creación la genera Directus. Edita el pedido, cambia su estado a entregado y actualiza. La figura 14 muestra el resultado.
+El POST envía los IDs; el GET solicita los nombres relacionados. La fecha de creación la genera Directus. Edita el pedido, cambia su estado a entregado y actualiza. La figura 15 muestra el resultado.
 
 <p align="center">
   <img src="imagenes/18-pedido-detalle.jpg" alt="Pedido actualizado a entregado con nombres relacionados" width="390"><br>
-  <em>Figura 14. Detalle del pedido 2 después de actualizarlo.</em>
+  <em>Figura 15. Detalle del pedido 2 después de actualizarlo.</em>
 </p>
 
 ### Paso 7. Confirmar eliminaciones y proteger relaciones
 
-El botón de basura abre la confirmación de la figura 15. Cancelar conserva el registro. Al confirmar, el servicio comprueba si el catálogo está en uso; si tiene relaciones muestra el aviso de la figura 16. La llave foránea de la base también protege la relación.
+El botón de basura abre la confirmación de la figura 16. Cancelar conserva el registro. Al confirmar, el servicio comprueba si el catálogo está en uso; si tiene relaciones muestra el aviso de la figura 17. La llave foránea de la base también protege la relación.
 
 <p align="center">
   <img src="imagenes/18-confirmar-eliminar.jpg" alt="Confirmación de eliminación de una marca, antes de cancelar" width="390"><br>
-  <em>Figura 15. La eliminación requiere una acción explícita.</em>
+  <em>Figura 16. La eliminación requiere una acción explícita.</em>
 </p>
 
 <p align="center">
   <img src="imagenes/18-relacion-en-uso.jpg" alt="Mensaje que impide eliminar un cliente con pedido" width="390"><br>
-  <em>Figura 16. El cliente se conserva mientras el pedido lo referencia.</em>
+  <em>Figura 17. El cliente se conserva mientras el pedido lo referencia.</em>
 </p>
 
 ### Paso 8. Elegir la ubicación del botón de creación
 
-En colecciones-list.page.ts elige `usarBotonFlotante = false` para el + sólido en la barra, o true para la variante de la figura 17. El HTML incluye ambas opciones con condiciones para mostrar solo una. Los botones de detalle usan ojo y los de creación +, con etiquetas accesibles y sin texto visible.
+En colecciones-list.page.ts elige `usarBotonFlotante = false` para el + sólido en la barra, o true para la variante de la figura 18. El HTML incluye ambas opciones con condiciones para mostrar solo una. Los botones de detalle usan ojo y los de creación +, con etiquetas accesibles y sin texto visible.
 
 <p align="center">
   <img src="imagenes/18-boton-flotante.jpg" alt="Listado de marcas con botón flotante de creación" width="390"><br>
-  <em>Figura 17. Variante flotante dentro del catálogo abierto desde el menú.</em>
+  <em>Figura 18. Variante flotante dentro del catálogo abierto desde el menú.</em>
 </p>
 
 ### Paso 9. Mostrar indicadores en el tercer tab
 
-Crea `resumen.page` y `ResumenService` con el código del punto 4. El tab **Resumen** muestra tarjetas de productos, unidades en stock, productos sin stock y pedidos. Las barras muestran cuántos pedidos están pendientes, entregados o cancelados. La figura 18 presenta los datos consultados en Directus.
+Crea `resumen.page` y `ResumenService` con el código del punto 4. El tab **Resumen** muestra tarjetas de productos, unidades en stock, productos sin stock y pedidos. Las barras muestran cuántos pedidos están pendientes, entregados o cancelados. La figura 19 presenta los datos consultados en Directus.
 
 El servicio usa `aggregate[count]` y `aggregate[sum]` sobre productos y agrupa los pedidos por estado con `groupBy[]`. No descarga todos los registros para contarlos. Los totales respetan los permisos de la cuenta; se consultan al entrar al tab y al pulsar el icono de actualizar. Si no hay pedidos, las proporciones valen cero. Si falla la consulta, se muestra el mensaje para reintentar y se retiran los valores anteriores.
 
 <p align="center">
   <img src="imagenes/18-resumen.jpg" alt="Resumen de inventario y pedidos con tarjetas y barras por estado" width="390"><br>
-  <em>Figura 18. Tercer tab con indicadores actuales de inventario y pedidos.</em>
+  <em>Figura 19. Tercer tab con indicadores actuales de inventario y pedidos.</em>
 </p>
 
 ## 4. Código completo de referencia
@@ -220,13 +227,17 @@ import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { authGuard } from './guard/auth.guard';
 import { COLECCIONES } from './catalogos/colecciones.config';
-import { rutasColeccion } from './catalogos/rutas-coleccion';
 const routes: Routes = [
   { path: 'login', loadChildren: () => import('./login/login.module').then(m => m.LoginPageModule) },
   { path: 'registro', loadChildren: () => import('./registro/registro.module').then(m => m.RegistroPageModule) },
   { path: 'tabs', canActivate: [authGuard], loadChildren: () => import('./tabs/tabs.module').then(m => m.TabsPageModule) },
   { path: 'catalogos', canActivate: [authGuard], canActivateChild: [authGuard], children: [
-    ...COLECCIONES.filter(c => c.tabla !== 'pedidos').reduce<Routes>((rutas, c) => [...rutas, ...rutasColeccion(c.ruta, c.ruta)], []),
+    ...COLECCIONES.filter(c => c.tabla !== 'pedidos').reduce<Routes>((rutas, c) => [...rutas,
+      { path: c.ruta + '/formulario/:id', redirectTo: '/tabs/catalogos/' + c.ruta + '/formulario/:id', pathMatch: 'full' },
+      { path: c.ruta + '/formulario', redirectTo: '/tabs/catalogos/' + c.ruta + '/formulario', pathMatch: 'full' },
+      { path: c.ruta + '/detalle/:id', redirectTo: '/tabs/catalogos/' + c.ruta + '/detalle/:id', pathMatch: 'full' },
+      { path: c.ruta, redirectTo: '/tabs/catalogos/' + c.ruta, pathMatch: 'full' }
+    ], []),
     { path: '', redirectTo: '/tabs/resumen', pathMatch: 'full' }
   ] },
   { path: 'productos-list', redirectTo: 'tabs/productos', pathMatch: 'full' },
@@ -258,12 +269,7 @@ const routes: Routes = [{ path: '', component: TabsPage, canActivateChild: [auth
   { path: 'productos', loadChildren: () => import('../productos-list/productos-list.module').then(m => m.ProductosListPageModule) },
   ...rutasColeccion('pedidos', 'pedidos'),
   { path: 'resumen', loadChildren: () => import('../resumen/resumen.module').then(m => m.ResumenPageModule) },
-  ...COLECCIONES.filter(c => c.tabla !== 'pedidos').reduce<Routes>((rutas, c) => [...rutas,
-    { path: 'catalogos/' + c.ruta + '/formulario/:id', redirectTo: '/catalogos/' + c.ruta + '/formulario/:id', pathMatch: 'full' },
-    { path: 'catalogos/' + c.ruta + '/formulario', redirectTo: '/catalogos/' + c.ruta + '/formulario', pathMatch: 'full' },
-    { path: 'catalogos/' + c.ruta + '/detalle/:id', redirectTo: '/catalogos/' + c.ruta + '/detalle/:id', pathMatch: 'full' },
-    { path: 'catalogos/' + c.ruta, redirectTo: '/catalogos/' + c.ruta, pathMatch: 'full' }
-  ], []),
+  ...COLECCIONES.filter(c => c.tabla !== 'pedidos').reduce<Routes>((rutas, c) => [...rutas, ...rutasColeccion('catalogos/' + c.ruta, c.ruta)], []),
   { path: 'catalogos', redirectTo: 'resumen', pathMatch: 'full' },
   { path: 'tab1', redirectTo: 'productos', pathMatch: 'full' },
   { path: 'tab2', redirectTo: 'pedidos', pathMatch: 'full' },
@@ -323,7 +329,7 @@ export class AppComponent {
         </ion-menu-toggle>
         <ion-list-header><ion-label>Catálogos y ejemplos</ion-label></ion-list-header>
         <ion-menu-toggle *ngFor="let catalogo of catalogos" autoHide="false">
-          <ion-item [routerLink]="['/catalogos', catalogo.ruta]" routerDirection="root" button detail="false">
+          <ion-item [routerLink]="['/tabs/catalogos', catalogo.ruta]" routerDirection="root" button detail="false">
             <ion-icon slot="start" [name]="catalogo.icono" aria-hidden="true"></ion-icon><ion-label>{{ catalogo.titulo }}</ion-label>
           </ion-item>
         </ion-menu-toggle>
@@ -392,7 +398,7 @@ export function buscarColeccion(ruta: string): Coleccion {
   return config;
 }
 export function rutaColeccion(config: Coleccion): string {
-  return config.tabla === 'pedidos' ? '/tabs/pedidos' : '/catalogos/' + config.ruta;
+  return config.tabla === 'pedidos' ? '/tabs/pedidos' : '/tabs/catalogos/' + config.ruta;
 }
 ```
 
@@ -1355,7 +1361,7 @@ Ejecuta la aplicación existente del proyecto y compila el código:
 docker compose exec mobile npx ng build --configuration development
 ```
 
-1. Inicia sesión. Debe abrir Productos con los tabs Productos, Pedidos y Resumen. Abre Resumen, comprueba sus totales y pulsa actualizar. Desde su menú abre cada catálogo y verifica que el listado queda fuera de los tabs.
+1. Inicia sesión. Debe abrir Productos con los tabs Productos, Pedidos y Resumen. Abre Resumen, comprueba sus totales y pulsa actualizar. Desde su menú abre cada catálogo y verifica que todos sus listados mantienen visibles los tres tabs. Desde un catálogo cambia a cada tab y vuelve a abrir el catálogo desde el menú.
 2. En Marcas, guarda vacío y comprueba el mensaje. Crea una marca temporal, abre su detalle, edita el nombre y confirma la actualización.
 3. Busca AulaTech y comprueba el conteo. Limpia la búsqueda, pasa a la segunda página y vuelve a la primera.
 4. Crea un proveedor con Activo desactivado; el detalle debe mostrar No. Crea un cliente de práctica.
@@ -1377,7 +1383,7 @@ Las capturas corresponden a la aplicación Ionic real del proyecto. El [registro
 | Proveedor y cliente en Ionic | Proveedor 3 con activo=false y cliente 3 creados y consultados. |
 | Producto integrado en Ionic | Producto 16 con imagen, marca AulaTech, proveedor Distribuidora Aula y categoría Periféricos. Edición posterior de stock sin seleccionar otro archivo. |
 | Pedido en Ionic | Pedido 2 con cliente 3 y producto 16; cantidad mínima, creación, consulta y cambio a entregado. |
-| Tabs | Productos y Pedidos conservaron sus detalles al cambiar de tab; los catálogos se abren desde el menú fuera de los tabs. |
+| Tabs | Productos y Pedidos conservaron sus detalles al cambiar de tab; los catálogos se abren desde el menú y mantienen visibles los tres tabs. |
 | Resumen | 13 productos, 214 unidades, 0 sin stock y 1 pedido entregado; valores contrastados con MariaDB y actualización desde Ionic. |
 | Ejemplos | Registro 8 cargado en el formulario compartido y actualizado sin perder arreglos, booleanos, origen y fechas automáticas. |
 | Relaciones protegidas | Aviso comprobado en Ionic al intentar eliminar el cliente 3 utilizado por el pedido. |
@@ -1389,16 +1395,16 @@ La comprobación se realizó en el navegador con Ionic, no mediante una instalac
 
 ## 6. Explicación detallada del flujo
 
-La figura 19 muestra el recorrido desde los tabs y el menú hasta Directus y MariaDB, con las ramas de consulta, guardado, validación y eliminación. El PNG permite verlo también en lectores Markdown que no ejecutan Mermaid.
+La figura 20 muestra el recorrido desde los tabs y el menú hasta Directus y MariaDB, con las ramas de consulta, guardado, validación y eliminación. El PNG permite verlo también en lectores Markdown que no ejecutan Mermaid.
 
 <p align="center">
   <img src="imagenes/flujo-18-tabs-ramas.png" alt="Flujo de tabs, formularios, validación y operaciones de la API" width="1000"><br>
-  <em>Figura 19. Navegación y operaciones de las colecciones.</em>
+  <em>Figura 20. Navegación y operaciones de las colecciones.</em>
 </p>
 
 ### El contenedor y sus pantallas
 
-El router principal carga TabsPage después de validar la sesión. ion-tabs utiliza el router de Ionic para mostrar las rutas hijas; ion-tab-bar contiene los tres botones. Dentro de Productos, las rutas de detalle y formulario comparten el prefijo /tabs/productos. Pedidos y Resumen tienen sus propias ramas y conservan su historial al cambiar de tab. Los catálogos se cargan mediante rutas protegidas de app-routing.module.ts, fuera de TabsPage. El menú lateral contiene sus accesos directos. Resumen consulta indicadores agregados y los representa mediante tarjetas y barras.
+El router principal carga TabsPage después de validar la sesión. ion-tabs utiliza el router de Ionic para mostrar las rutas hijas; ion-tab-bar contiene los tres botones. Dentro de Productos, las rutas de detalle y formulario comparten el prefijo /tabs/productos. Pedidos y Resumen tienen sus propias ramas y conservan su historial al cambiar de tab. Los catálogos se cargan como rutas hijas protegidas de TabsPage, por lo que comparten la barra inferior. El menú lateral contiene sus accesos directos. app-routing.module.ts redirige las direcciones /catalogos/... hacia /tabs/catalogos/... para conservar los enlaces anteriores. No se agrega un cuarto botón a la barra: el menú elige la colección y los tabs permiten cambiar a Productos, Pedidos o Resumen. Resumen consulta indicadores agregados y los representa mediante tarjetas y barras.
 
 app.component mantiene el menú lateral y el punto de entrada principal. tabs.page.html muestra navegación; las consultas, formularios y acciones permanecen en sus páginas y servicios correspondientes.
 

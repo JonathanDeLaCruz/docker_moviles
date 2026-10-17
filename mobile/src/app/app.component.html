@@ -12,7 +12,7 @@
         </ion-menu-toggle>
         <ion-list-header><ion-label>Catálogos y ejemplos</ion-label></ion-list-header>
         <ion-menu-toggle *ngFor="let catalogo of catalogos" autoHide="false">
-          <ion-item [routerLink]="['/catalogos', catalogo.ruta]" routerDirection="root" button detail="false">
+          <ion-item [routerLink]="['/tabs/catalogos', catalogo.ruta]" routerDirection="root" button detail="false">
             <ion-icon slot="start" [name]="catalogo.icono" aria-hidden="true"></ion-icon><ion-label>{{ catalogo.titulo }}</ion-label>
           </ion-item>
         </ion-menu-toggle>

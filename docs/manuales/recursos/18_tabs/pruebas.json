@@ -71,8 +71,8 @@
   ],
   "ionic": [
     {
-      "caso": "Tabs Productos, Pedidos y Resumen; catálogos en menú",
-      "resultado": "Tres tabs comprobados; detalle de producto conservado al cambiar de sección. Los seis catálogos abren rutas /catalogos/... fuera de tabs."
+      "caso": "Tabs compartidos con catálogos",
+      "resultado": "Los seis listados de catálogos mantienen Productos, Pedidos y Resumen visibles. Cambio de sección comprobado desde Categorías. Formularios y detalles conservan la barra."
     },
     {
       "caso": "Marcas",
@@ -129,6 +129,20 @@
     "actualizarResumen": true,
     "cantidadCero": "Rechazada en formulario de edición, sin guardar",
     "clienteRelacionado": "Aviso de relación en uso, conservado",
-    "capturas": "Renovadas para reflejar tabs y menú actuales"
+    "capturas": "Capturas de catálogos renovadas con tabs visibles"
+  },
+  "tabsEnCatalogos": {
+    "compilacion": "6073ef7619ea60d3",
+    "rutas": "/tabs/catalogos/...",
+    "enlacesPrevios": "/catalogos/... redirige al contenedor de tabs",
+    "listados": [
+      "categorias",
+      "marcas",
+      "proveedores",
+      "clientes",
+      "origenes_ejemplo",
+      "ejemplos_campos"
+    ],
+    "formulariosYDetalles": "Barra visible comprobada en marcas y proveedores; formulario de cliente también comprobado"
   }
 }

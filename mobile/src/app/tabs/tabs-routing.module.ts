@@ -11,12 +11,7 @@ const routes: Routes = [{ path: '', component: TabsPage, canActivateChild: [auth
   { path: 'productos', loadChildren: () => import('../productos-list/productos-list.module').then(m => m.ProductosListPageModule) },
   ...rutasColeccion('pedidos', 'pedidos'),
   { path: 'resumen', loadChildren: () => import('../resumen/resumen.module').then(m => m.ResumenPageModule) },
-  ...COLECCIONES.filter(c => c.tabla !== 'pedidos').reduce<Routes>((rutas, c) => [...rutas,
-    { path: 'catalogos/' + c.ruta + '/formulario/:id', redirectTo: '/catalogos/' + c.ruta + '/formulario/:id', pathMatch: 'full' },
-    { path: 'catalogos/' + c.ruta + '/formulario', redirectTo: '/catalogos/' + c.ruta + '/formulario', pathMatch: 'full' },
-    { path: 'catalogos/' + c.ruta + '/detalle/:id', redirectTo: '/catalogos/' + c.ruta + '/detalle/:id', pathMatch: 'full' },
-    { path: 'catalogos/' + c.ruta, redirectTo: '/catalogos/' + c.ruta, pathMatch: 'full' }
-  ], []),
+  ...COLECCIONES.filter(c => c.tabla !== 'pedidos').reduce<Routes>((rutas, c) => [...rutas, ...rutasColeccion('catalogos/' + c.ruta, c.ruta)], []),
   { path: 'catalogos', redirectTo: 'resumen', pathMatch: 'full' },
   { path: 'tab1', redirectTo: 'productos', pathMatch: 'full' },
   { path: 'tab2', redirectTo: 'pedidos', pathMatch: 'full' },

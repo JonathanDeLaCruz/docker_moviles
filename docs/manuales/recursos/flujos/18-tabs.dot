@@ -6,7 +6,7 @@ digraph Flujo {
   tabs [label="El alumno elige un tab", group=main];
   productos [label="Productos: imagen,\ncategorías, marca y\nproveedor"];
   pedidos [label="Pedidos: cliente, producto\ny cantidad", group=main];
-  catalogos [label="Menú lateral: catálogos y\nejemplos"];
+  catalogos [label="Menú: catálogos y ejemplos\ncon tabs visibles"];
   lista [label="Cargar listado, búsqueda y\npaginación", group=main];
   form [label="Abrir formulario con + o\nlápiz", group=main];
   detalle [label="El icono de ojo solicita el\ndetalle"];
