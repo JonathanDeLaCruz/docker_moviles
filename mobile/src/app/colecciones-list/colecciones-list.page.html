@@ -1,5 +1,5 @@
 <ion-header><ion-toolbar color="personalizado">
-  <ion-buttons slot="start"><ion-back-button *ngIf="config.tabla !== 'pedidos'" defaultHref="/tabs/catalogos"></ion-back-button><ion-menu-button *ngIf="config.tabla === 'pedidos'"></ion-menu-button></ion-buttons>
+  <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
   <ion-title>{{ config.titulo }}</ion-title>
   <ion-buttons slot="end" *ngIf="!usarBotonFlotante"><ion-button fill="solid" [routerLink]="[base, 'formulario']" [attr.aria-label]="'Crear ' + config.singular"><ion-icon slot="icon-only" name="add"></ion-icon></ion-button></ion-buttons>
 </ion-toolbar></ion-header>

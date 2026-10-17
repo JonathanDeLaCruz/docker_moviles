@@ -2870,7 +2870,7 @@
       },
       {
         "id": "catalogos",
-        "texto": "Catálogos: elegir una colección"
+        "texto": "Menú lateral: catálogos y ejemplos"
       },
       {
         "id": "lista",
@@ -2913,6 +2913,14 @@
         "id": "mostrar",
         "texto": "Ionic muestra el detalle o recarga el listado",
         "tipo": "pantalla"
+      },
+      {
+        "id": "resumen",
+        "texto": "Tab Resumen: indicadores de inventario y pedidos"
+      },
+      {
+        "id": "agregados",
+        "texto": "Directus cuenta, suma stock y agrupa pedidos por estado"
       }
     ],
     "aristas": [
@@ -2927,10 +2935,6 @@
       {
         "de": "tabs",
         "a": "pedidos"
-      },
-      {
-        "de": "tabs",
-        "a": "catalogos"
       },
       {
         "de": "productos",
@@ -3015,13 +3019,38 @@
         "texto": "Cancelar o registro en uso",
         "tipo": "retorno",
         "influye": false
+      },
+      {
+        "de": "entrar",
+        "a": "catalogos",
+        "texto": "Abrir menú"
+      },
+      {
+        "de": "tabs",
+        "a": "resumen"
+      },
+      {
+        "de": "resumen",
+        "a": "agregados",
+        "texto": "Entrar o actualizar"
+      },
+      {
+        "de": "agregados",
+        "a": "db"
+      },
+      {
+        "de": "agregados",
+        "a": "resumen",
+        "texto": "Totales y barras",
+        "tipo": "retorno",
+        "influye": false
       }
     ],
     "filas": [
       [
         "productos",
         "pedidos",
-        "catalogos"
+        "resumen"
       ],
       [
         "form",

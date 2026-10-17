@@ -3,7 +3,7 @@ flowchart TD
   tabs["El alumno elige un tab"]
   productos["Productos: imagen, categorías, marca y proveedor"]
   pedidos["Pedidos: cliente, producto y cantidad"]
-  catalogos["Catálogos: elegir una colección"]
+  catalogos["Menú lateral: catálogos y ejemplos"]
   lista["Cargar listado, búsqueda y paginación"]
   form["Abrir formulario con + o lápiz"]
   detalle["El icono de ojo solicita el detalle"]
@@ -14,10 +14,11 @@ flowchart TD
   db["MariaDB aplica tipos, relaciones y restricciones"]
   respuesta["Directus devuelve el resultado"]
   mostrar["Ionic muestra el detalle o recarga el listado"]
+  resumen["Tab Resumen: indicadores de inventario y pedidos"]
+  agregados["Directus cuenta, suma stock y agrupa pedidos por estado"]
   entrar --> tabs
   tabs --> productos
   tabs --> pedidos
-  tabs --> catalogos
   productos --> lista
   pedidos --> lista
   catalogos --> lista
@@ -35,3 +36,8 @@ flowchart TD
   mostrar -.->|"Cambiar de sección"| tabs
   eliminar -->|"Sin referencias: DELETE"| api
   eliminar -.->|"Cancelar o registro en uso"| lista
+  entrar -->|"Abrir menú"| catalogos
+  tabs --> resumen
+  resumen -->|"Entrar o actualizar"| agregados
+  agregados --> db
+  agregados -.->|"Totales y barras"| resumen

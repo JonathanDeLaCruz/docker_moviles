@@ -96,7 +96,7 @@ Las capturas y los diagramas se incluyen como imágenes centradas con pie de fig
 
 - **09–11, 13 y 14:** pruebas realizadas con la aplicación y la API del entorno del curso.
 - **12:** acceso y validaciones comprobados; registro completo pendiente de habilitar el registro y configurar el correo de verificación.
-- **18:** integración de marcas, proveedores, clientes y pedidos, tabs, catálogos y CRUD comprobados en Ionic y API.
+- **18:** marcas, proveedores, clientes y pedidos; catálogos en el menú lateral y tabs Productos, Pedidos y Resumen, con indicadores de inventario y CRUD comprobados en Ionic y API.
 - **17:** controles de formulario, ENUM, catálogo con llave foránea, valores automáticos, guardado y consulta comprobados en Ionic y Directus.
 - **15:** subida, asociación y recuperación de imágenes comprobadas con una cuenta de práctica y archivos compartidos.
 

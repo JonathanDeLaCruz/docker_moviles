@@ -71,8 +71,8 @@
   ],
   "ionic": [
     {
-      "caso": "Tabs Productos, Pedidos y Catálogos",
-      "resultado": "Navegación y pilas independientes comprobadas"
+      "caso": "Tabs Productos, Pedidos y Resumen; catálogos en menú",
+      "resultado": "Tres tabs comprobados; detalle de producto conservado al cambiar de sección. Los seis catálogos abren rutas /catalogos/... fuera de tabs."
     },
     {
       "caso": "Marcas",
@@ -112,5 +112,23 @@
       "id": 8,
       "resultado": "Arreglos, booleanos y campos automáticos conservados"
     }
-  ]
+  ],
+  "ajusteMenu": {
+    "fecha": "2026-10-17",
+    "compilacion": "ae7551de17ed80c5",
+    "resumen": {
+      "productos": 13,
+      "unidades": 214,
+      "sinStock": 0,
+      "pedidos": 1,
+      "pendientes": 0,
+      "entregados": 1,
+      "cancelados": 0
+    },
+    "contraste": "Valores comprobados con consultas directas a MariaDB",
+    "actualizarResumen": true,
+    "cantidadCero": "Rechazada en formulario de edición, sin guardar",
+    "clienteRelacionado": "Aviso de relación en uso, conservado",
+    "capturas": "Renovadas para reflejar tabs y menú actuales"
+  }
 }

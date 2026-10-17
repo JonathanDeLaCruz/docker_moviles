@@ -1,6 +1,6 @@
 # Integrar colecciones de productos y navegación con tabs
 
-La aplicación tendrá tres secciones: **Productos, Pedidos y Catálogos**. Agregarás marcas, proveedores, clientes y pedidos a la base del curso, y usarás las páginas de listado, detalle y formulario para administrarlos. Productos conservará imagen y categorías, e incorporará marca y proveedor.
+La aplicación tendrá tres tabs: **Productos, Pedidos y Resumen**. El menú lateral dará acceso directo a los catálogos. Agregarás marcas, proveedores, clientes y pedidos a la base del curso, y usarás las páginas de listado, detalle y formulario para administrarlos. Productos conservará imagen y categorías, e incorporará marca y proveedor.
 
 ## 1. Antes de comenzar
 
@@ -15,7 +15,8 @@ Esta práctica parte de productos, categorias, productos_categorias, ejemplos_ca
 | tabs.page.html | Mostrar la barra inferior y sus tres accesos. |
 | tabs-routing.module.ts | Conectar cada tab con sus rutas hijas. |
 | productos-list/view/form | Pantallas específicas del producto con imagen y categorías. |
-| catalogos.page | Mostrar los accesos a categorías, marcas, proveedores, clientes, orígenes y ejemplos. |
+| app.component.html | Mostrar los accesos a los catálogos en el menú lateral. |
+| resumen.page / ResumenService | Consultar totales y mostrar indicadores de inventario y pedidos. |
 | colecciones-list/view/form | Pantallas compartidas por colecciones con el mismo comportamiento. |
 | colecciones.config.ts | Definir nombres, campos, validaciones, opciones y relaciones de cada colección. |
 | ColeccionesService | Consultar, buscar, contar, crear, actualizar y eliminar mediante AuthService. |
@@ -78,37 +79,37 @@ Copia las rutas y páginas del punto 4. `app-routing.module.ts` envía el inicio
 | --- | --- | --- |
 | Productos | /tabs/productos | Listado; detalle/:id; formulario; formulario/:id; imagen/:id. |
 | Pedidos | /tabs/pedidos | Listado; detalle/:id; formulario; formulario/:id. |
-| Catálogos | /tabs/catalogos | Selector de colección. |
-| Cada catálogo | /tabs/catalogos/marcas, proveedores, clientes, categorias, origenes-ejemplo o ejemplos-campos | Listado; detalle/:id; formulario; formulario/:id. |
+| Resumen | /tabs/resumen | Indicadores de inventario y estados de pedidos. |
+| Cada catálogo | /catalogos/marcas, proveedores, clientes, categorias, origenes-ejemplo o ejemplos-campos | Listado; detalle/:id; formulario; formulario/:id. |
 
-La figura 2 muestra los tabs ya conectados al listado de productos. Las páginas de detalle y formulario pertenecen a la misma rama, por lo que la barra inferior sigue visible. Cada tab conserva su propia pila de navegación.
+La figura 2 muestra los tabs ya conectados al listado de productos. Las páginas de detalle y formulario pertenecen a la misma rama, por lo que la barra inferior sigue visible. Cada tab conserva su propia pila de navegación. El menú lateral abre los catálogos con `/catalogos/...`, fuera del contenedor de tabs. Al volver a Productos, Pedidos o Resumen desde el menú se abre esa sección.
 
 <p align="center">
   <img src="imagenes/18-tabs-productos.jpg" alt="Listado de productos dentro de los tres tabs funcionales" width="390"><br>
-  <em>Figura 2. Productos, Pedidos y Catálogos en la barra inferior.</em>
+  <em>Figura 2. Productos, Pedidos y Resumen en la barra inferior.</em>
 </p>
 
 Sustituye los enlaces del menú por las rutas del punto 4. Después de comprobar las rutas, retira las carpetas tab1, tab2, tab3 y explore-container. Las direcciones antiguas de los manuales conservan redirecciones para abrir la pantalla correspondiente.
 
 ### Paso 4. Administrar los catálogos
 
-La figura 3 muestra los accesos a todas las colecciones auxiliares. La configuración indica sus campos; las páginas compartidas usan esa información para crear los controles y el objeto de guardado. Los datos se envían al nombre real de la colección en Directus.
+La figura 3 muestra los accesos a todas las colecciones auxiliares dentro del menú lateral. Abre el menú y elige directamente Categorías, Marcas, Proveedores, Clientes, Orígenes o Ejemplos de campos. Estas pantallas usan rutas propias fuera del contenedor de tabs. La configuración indica sus campos; las páginas compartidas usan esa información para crear los controles y el objeto de guardado. Los datos se envían al nombre real de la colección en Directus.
 
 <p align="center">
   <img src="imagenes/18-catalogos.jpg" alt="Accesos a categorías, marcas, proveedores, clientes, orígenes y ejemplos" width="390"><br>
-  <em>Figura 3. Colecciones disponibles desde Catálogos.</em>
+  <em>Figura 3. Colecciones disponibles directamente en el menú lateral.</em>
 </p>
 
-Abre Marcas y pulsa +. La figura 4 muestra el formulario. Guardar valida y crea el registro; después abre su detalle. El lápiz carga el mismo formulario con los valores existentes para actualizarlo, como en la figura 5.
+En el menú, abre Marcas y pulsa +. La figura 4 muestra el formulario con los datos de AulaTech cargados para editar. Guardar valida y crea el registro; después abre su detalle. El lápiz carga el mismo formulario con los valores existentes para actualizarlo. La figura 5 muestra la consulta de AulaTech.
 
 <p align="center">
-  <img src="imagenes/18-marca-formulario.jpg" alt="Formulario de creación de marca" width="390"><br>
-  <em>Figura 4. Crear una marca desde Ionic.</em>
+  <img src="imagenes/18-marca-formulario.jpg" alt="Formulario de marca con datos cargados para editar" width="390"><br>
+  <em>Figura 4. Formulario de marca desde Ionic.</em>
 </p>
 
 <p align="center">
   <img src="imagenes/18-marca-detalle.jpg" alt="Detalle de la marca actualizada" width="390"><br>
-  <em>Figura 5. Marca creada y actualizada desde la aplicación.</em>
+  <em>Figura 5. Consulta de una marca desde el menú.</em>
 </p>
 
 El listado consulta tres registros por página. La búsqueda reinicia la página y aplica el mismo filtro al conteo y a los registros. La figura 6 muestra la búsqueda por nombre.
@@ -122,7 +123,7 @@ En Proveedores, captura nombre y los contactos opcionales. El interruptor Activo
 
 <p align="center">
   <img src="imagenes/18-proveedor-formulario.jpg" alt="Formulario de proveedor con Activo desactivado" width="390"><br>
-  <em>Figura 7. Crear proveedor con datos de contacto.</em>
+  <em>Figura 7. Formulario del proveedor con datos de contacto.</em>
 </p>
 
 <p align="center">
@@ -134,7 +135,7 @@ En Clientes, crea el registro que usarás en el pedido. La figura 9 muestra el e
 
 <p align="center">
   <img src="imagenes/18-cliente-formulario.jpg" alt="Formulario de cliente del pedido de práctica" width="390"><br>
-  <em>Figura 9. Cliente creado para relacionarlo con el pedido.</em>
+  <em>Figura 9. Formulario del cliente relacionado con el pedido.</em>
 </p>
 
 ### Paso 5. Integrar los catálogos en productos
@@ -164,7 +165,7 @@ Abre el tab Pedidos y pulsa +. Selecciona cliente y producto, captura una cantid
 
 <p align="center">
   <img src="imagenes/18-pedido-formulario.jpg" alt="Pedido con cliente, producto y cantidad seleccionados" width="390"><br>
-  <em>Figura 13. Crear pedido con dos llaves foráneas.</em>
+  <em>Figura 13. Formulario del pedido con dos llaves foráneas.</em>
 </p>
 
 El POST envía los IDs; el GET solicita los nombres relacionados. La fecha de creación la genera Directus. Edita el pedido, cambia su estado a entregado y actualiza. La figura 14 muestra el resultado.
@@ -179,7 +180,7 @@ El POST envía los IDs; el GET solicita los nombres relacionados. La fecha de cr
 El botón de basura abre la confirmación de la figura 15. Cancelar conserva el registro. Al confirmar, el servicio comprueba si el catálogo está en uso; si tiene relaciones muestra el aviso de la figura 16. La llave foránea de la base también protege la relación.
 
 <p align="center">
-  <img src="imagenes/18-confirmar-eliminar.jpg" alt="Confirmación de eliminación de la marca temporal" width="390"><br>
+  <img src="imagenes/18-confirmar-eliminar.jpg" alt="Confirmación de eliminación de una marca, antes de cancelar" width="390"><br>
   <em>Figura 15. La eliminación requiere una acción explícita.</em>
 </p>
 
@@ -194,12 +195,23 @@ En colecciones-list.page.ts elige `usarBotonFlotante = false` para el + sólido 
 
 <p align="center">
   <img src="imagenes/18-boton-flotante.jpg" alt="Listado de marcas con botón flotante de creación" width="390"><br>
-  <em>Figura 17. Variante flotante, colocada sobre la barra de tabs.</em>
+  <em>Figura 17. Variante flotante dentro del catálogo abierto desde el menú.</em>
+</p>
+
+### Paso 9. Mostrar indicadores en el tercer tab
+
+Crea `resumen.page` y `ResumenService` con el código del punto 4. El tab **Resumen** muestra tarjetas de productos, unidades en stock, productos sin stock y pedidos. Las barras muestran cuántos pedidos están pendientes, entregados o cancelados. La figura 18 presenta los datos consultados en Directus.
+
+El servicio usa `aggregate[count]` y `aggregate[sum]` sobre productos y agrupa los pedidos por estado con `groupBy[]`. No descarga todos los registros para contarlos. Los totales respetan los permisos de la cuenta; se consultan al entrar al tab y al pulsar el icono de actualizar. Si no hay pedidos, las proporciones valen cero. Si falla la consulta, se muestra el mensaje para reintentar y se retiran los valores anteriores.
+
+<p align="center">
+  <img src="imagenes/18-resumen.jpg" alt="Resumen de inventario y pedidos con tarjetas y barras por estado" width="390"><br>
+  <em>Figura 18. Tercer tab con indicadores actuales de inventario y pedidos.</em>
 </p>
 
 ## 4. Código completo de referencia
 
-Los archivos siguientes corresponden a la aplicación probada. Conserva los módulos, servicios y componentes de las prácticas previas. También puedes consultar el código de [mobile/src/app](../../mobile/src/app) en el repositorio. Los nombres de las clases, imports y rutas deben coincidir.
+Los archivos siguientes corresponden a la aplicación probada. Conserva los módulos, servicios y componentes de las prácticas previas. También puedes consultar el [código de la aplicación](../../mobile/src/app).
 
 ### `mobile/src/app/app-routing.module.ts`
 
@@ -207,10 +219,16 @@ Los archivos siguientes corresponden a la aplicación probada. Conserva los mód
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { authGuard } from './guard/auth.guard';
+import { COLECCIONES } from './catalogos/colecciones.config';
+import { rutasColeccion } from './catalogos/rutas-coleccion';
 const routes: Routes = [
   { path: 'login', loadChildren: () => import('./login/login.module').then(m => m.LoginPageModule) },
   { path: 'registro', loadChildren: () => import('./registro/registro.module').then(m => m.RegistroPageModule) },
   { path: 'tabs', canActivate: [authGuard], loadChildren: () => import('./tabs/tabs.module').then(m => m.TabsPageModule) },
+  { path: 'catalogos', canActivate: [authGuard], canActivateChild: [authGuard], children: [
+    ...COLECCIONES.filter(c => c.tabla !== 'pedidos').reduce<Routes>((rutas, c) => [...rutas, ...rutasColeccion(c.ruta, c.ruta)], []),
+    { path: '', redirectTo: '/tabs/resumen', pathMatch: 'full' }
+  ] },
   { path: 'productos-list', redirectTo: 'tabs/productos', pathMatch: 'full' },
   { path: 'productos-view/:id', redirectTo: 'tabs/productos/detalle/:id', pathMatch: 'full' },
   { path: 'productos-form/:id', redirectTo: 'tabs/productos/formulario/:id', pathMatch: 'full' },
@@ -232,29 +250,24 @@ import { RouterModule, Routes } from '@angular/router';
 import { TabsPage } from './tabs.page';
 import { COLECCIONES } from '../catalogos/colecciones.config';
 import { authGuard } from '../guard/auth.guard';
-const cargarLista = () => import('../colecciones-list/colecciones-list.module').then(m => m.ColeccionesListPageModule);
-const cargarDetalle = () => import('../colecciones-view/colecciones-view.module').then(m => m.ColeccionesViewPageModule);
-const cargarFormulario = () => import('../colecciones-form/colecciones-form.module').then(m => m.ColeccionesFormPageModule);
-function rutasColeccion(ruta: string, coleccion: string): Routes {
-  const data = { coleccion };
-  return [
-    { path: ruta + '/formulario/:id', data, loadChildren: cargarFormulario },
-    { path: ruta + '/formulario', data, loadChildren: cargarFormulario },
-    { path: ruta + '/detalle/:id', data, loadChildren: cargarDetalle },
-    { path: ruta, data, loadChildren: cargarLista }
-  ];
-}
+import { rutasColeccion } from '../catalogos/rutas-coleccion';
 const routes: Routes = [{ path: '', component: TabsPage, canActivateChild: [authGuard], children: [
   { path: 'productos/formulario', loadChildren: () => import('../productos-form/productos-form.module').then(m => m.ProductosFormPageModule) },
   { path: 'productos/detalle/:id', loadChildren: () => import('../productos-view/productos-view.module').then(m => m.ProductosViewPageModule) },
   { path: 'productos/imagen/:id', loadChildren: () => import('../producto-imagen/producto-imagen.module').then(m => m.ProductoImagenPageModule) },
   { path: 'productos', loadChildren: () => import('../productos-list/productos-list.module').then(m => m.ProductosListPageModule) },
   ...rutasColeccion('pedidos', 'pedidos'),
-  ...COLECCIONES.filter(c => c.tabla !== 'pedidos').reduce<Routes>((rutas, c) => [...rutas, ...rutasColeccion('catalogos/' + c.ruta, c.ruta)], []),
-  { path: 'catalogos', loadChildren: () => import('../catalogos/catalogos.module').then(m => m.CatalogosPageModule) },
+  { path: 'resumen', loadChildren: () => import('../resumen/resumen.module').then(m => m.ResumenPageModule) },
+  ...COLECCIONES.filter(c => c.tabla !== 'pedidos').reduce<Routes>((rutas, c) => [...rutas,
+    { path: 'catalogos/' + c.ruta + '/formulario/:id', redirectTo: '/catalogos/' + c.ruta + '/formulario/:id', pathMatch: 'full' },
+    { path: 'catalogos/' + c.ruta + '/formulario', redirectTo: '/catalogos/' + c.ruta + '/formulario', pathMatch: 'full' },
+    { path: 'catalogos/' + c.ruta + '/detalle/:id', redirectTo: '/catalogos/' + c.ruta + '/detalle/:id', pathMatch: 'full' },
+    { path: 'catalogos/' + c.ruta, redirectTo: '/catalogos/' + c.ruta, pathMatch: 'full' }
+  ], []),
+  { path: 'catalogos', redirectTo: 'resumen', pathMatch: 'full' },
   { path: 'tab1', redirectTo: 'productos', pathMatch: 'full' },
   { path: 'tab2', redirectTo: 'pedidos', pathMatch: 'full' },
-  { path: 'tab3', redirectTo: 'catalogos', pathMatch: 'full' },
+  { path: 'tab3', redirectTo: 'resumen', pathMatch: 'full' },
   { path: '', redirectTo: 'productos', pathMatch: 'full' }
 ]}];
 @NgModule({ imports: [RouterModule.forChild(routes)], exports: [RouterModule] })
@@ -268,7 +281,7 @@ export class TabsPageRoutingModule {}
   <ion-tab-bar slot="bottom">
     <ion-tab-button tab="productos" href="/tabs/productos"><ion-icon name="cube" aria-hidden="true"></ion-icon><ion-label>Productos</ion-label></ion-tab-button>
     <ion-tab-button tab="pedidos" href="/tabs/pedidos"><ion-icon name="receipt" aria-hidden="true"></ion-icon><ion-label>Pedidos</ion-label></ion-tab-button>
-    <ion-tab-button tab="catalogos" href="/tabs/catalogos"><ion-icon name="grid" aria-hidden="true"></ion-icon><ion-label>Catálogos</ion-label></ion-tab-button>
+    <ion-tab-button tab="resumen" href="/tabs/resumen"><ion-icon name="stats-chart" aria-hidden="true"></ion-icon><ion-label>Resumen</ion-label></ion-tab-button>
   </ion-tab-bar>
 </ion-tabs>
 ```
@@ -279,14 +292,15 @@ export class TabsPageRoutingModule {}
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from './services/auth';
+import { COLECCIONES } from './catalogos/colecciones.config';
 @Component({ selector: 'app-root', templateUrl: 'app.component.html', styleUrls: ['app.component.scss'], standalone: false })
 export class AppComponent {
   enlaces = [
     { ruta: '/tabs/productos', texto: 'Productos' },
     { ruta: '/tabs/pedidos', texto: 'Pedidos' },
-    { ruta: '/tabs/catalogos', texto: 'Catálogos' },
-    { ruta: '/tabs/catalogos/ejemplos-campos', texto: 'Ejemplos de campos' }
+    { ruta: '/tabs/resumen', texto: 'Resumen' }
   ];
+  catalogos = COLECCIONES.filter(c => c.tabla !== 'pedidos');
   constructor(private auth: AuthService, private router: Router) {}
   async salir(): Promise<void> { try { await this.auth.cerrarSesion(); } finally { await this.router.navigateByUrl('/login', { replaceUrl: true }); } }
 }
@@ -305,6 +319,12 @@ export class AppComponent {
         <ion-menu-toggle *ngFor="let enlace of enlaces" autoHide="false">
           <ion-item [routerLink]="enlace.ruta" routerDirection="root" button detail="false">
             <ion-label>{{ enlace.texto }}</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-list-header><ion-label>Catálogos y ejemplos</ion-label></ion-list-header>
+        <ion-menu-toggle *ngFor="let catalogo of catalogos" autoHide="false">
+          <ion-item [routerLink]="['/catalogos', catalogo.ruta]" routerDirection="root" button detail="false">
+            <ion-icon slot="start" [name]="catalogo.icono" aria-hidden="true"></ion-icon><ion-label>{{ catalogo.titulo }}</ion-label>
           </ion-item>
         </ion-menu-toggle>
         <ion-menu-toggle><ion-item button (click)="salir()"><ion-icon slot="start" name="log-out"></ion-icon><ion-label>Cerrar sesión</ion-label></ion-item></ion-menu-toggle>
@@ -372,7 +392,7 @@ export function buscarColeccion(ruta: string): Coleccion {
   return config;
 }
 export function rutaColeccion(config: Coleccion): string {
-  return config.tabla === 'pedidos' ? '/tabs/pedidos' : '/tabs/catalogos/' + config.ruta;
+  return config.tabla === 'pedidos' ? '/tabs/pedidos' : '/catalogos/' + config.ruta;
 }
 ```
 
@@ -444,41 +464,106 @@ export class ColeccionesService {
 }
 ```
 
-### `mobile/src/app/catalogos/catalogos.page.ts`
+### `mobile/src/app/catalogos/rutas-coleccion.ts`
 
 ```typescript
-import { Component } from '@angular/core';
-import { COLECCIONES } from './colecciones.config';
-@Component({ selector: 'app-catalogos', templateUrl: './catalogos.page.html', standalone: false })
-export class CatalogosPage {
-  colecciones = COLECCIONES.filter(c => c.tabla !== 'pedidos');
+import { Routes } from '@angular/router';
+export function rutasColeccion(ruta: string, coleccion: string): Routes {
+  const data = { coleccion };
+  return [
+    { path: ruta + '/formulario/:id', data, loadChildren: () => import('../colecciones-form/colecciones-form.module').then(m => m.ColeccionesFormPageModule) },
+    { path: ruta + '/formulario', data, loadChildren: () => import('../colecciones-form/colecciones-form.module').then(m => m.ColeccionesFormPageModule) },
+    { path: ruta + '/detalle/:id', data, loadChildren: () => import('../colecciones-view/colecciones-view.module').then(m => m.ColeccionesViewPageModule) },
+    { path: ruta, data, loadChildren: () => import('../colecciones-list/colecciones-list.module').then(m => m.ColeccionesListPageModule) }
+  ];
 }
 ```
 
-### `mobile/src/app/catalogos/catalogos.page.html`
+### `mobile/src/app/services/resumen.ts`
+
+```typescript
+import { Injectable } from '@angular/core';
+import { AuthService } from './auth';
+export interface Resumen {
+  productos: number; unidades: number; sinStock: number;
+  pendientes: number; entregados: number; cancelados: number; pedidos: number;
+}
+@Injectable({ providedIn: 'root' })
+export class ResumenService {
+  constructor(private auth: AuthService) {}
+  async consultar(): Promise<Resumen> {
+    const [productos, agotados, pedidos] = await Promise.all([
+      this.auth.cliente.get<{ data: { count: number | string; sum: { stock: number | string | null } }[] }>('/items/productos', { params: { 'aggregate[count]': '*', 'aggregate[sum]': 'stock' } }),
+      this.auth.cliente.get<{ data: { count: number | string }[] }>('/items/productos', { params: { 'aggregate[count]': '*', 'filter[stock][_eq]': 0 } }),
+      this.auth.cliente.get<{ data: { estado: string; count: number | string }[] }>('/items/pedidos', { params: { 'aggregate[count]': '*', 'groupBy[]': 'estado' } })
+    ]);
+    const total = (estado: string) => Number(pedidos.data.data.find(p => p.estado === estado)?.count ?? 0);
+    return {
+      productos: Number(productos.data.data[0]?.count ?? 0), unidades: Number(productos.data.data[0]?.sum?.stock ?? 0),
+      sinStock: Number(agotados.data.data[0]?.count ?? 0), pendientes: total('pendiente'), entregados: total('entregado'),
+      cancelados: total('cancelado'), pedidos: pedidos.data.data.reduce((suma, p) => suma + Number(p.count), 0)
+    };
+  }
+}
+```
+
+### `mobile/src/app/resumen/resumen.page.ts`
+
+```typescript
+import { Component } from '@angular/core';
+import { Resumen, ResumenService } from '../services/resumen';
+@Component({ selector: 'app-resumen', templateUrl: './resumen.page.html', standalone: false })
+export class ResumenPage {
+  datos: Resumen | null = null; cargando = false; mensaje = '';
+  constructor(private servicio: ResumenService) {}
+  ionViewWillEnter(): void { void this.cargar(); }
+  async cargar(): Promise<void> {
+    if (this.cargando) return;
+    this.cargando = true; this.mensaje = ''; this.datos = null;
+    try { this.datos = await this.servicio.consultar(); }
+    catch { this.mensaje = 'No se pudo cargar el resumen. Intenta actualizarlo.'; }
+    finally { this.cargando = false; }
+  }
+}
+```
+
+### `mobile/src/app/resumen/resumen.page.html`
 
 ```html
-<ion-header><ion-toolbar color="personalizado"><ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons><ion-title>Catálogos y ejemplos</ion-title></ion-toolbar></ion-header>
+<ion-header><ion-toolbar color="personalizado">
+  <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons><ion-title>Resumen</ion-title>
+  <ion-buttons slot="end"><ion-button fill="solid" aria-label="Actualizar resumen" (click)="cargar()" [disabled]="cargando"><ion-icon slot="icon-only" name="refresh"></ion-icon></ion-button></ion-buttons>
+</ion-toolbar></ion-header>
 <ion-content class="ion-padding">
-  <p>Elige una colección para consultar y administrar sus registros.</p>
-  <ion-list>
-    <ion-item *ngFor="let coleccion of colecciones" [routerLink]="['/tabs/catalogos', coleccion.ruta]" button>
-      <ion-icon slot="start" [name]="coleccion.icono"></ion-icon><ion-label>{{ coleccion.titulo }}</ion-label>
-    </ion-item>
-  </ion-list>
+  <h1>Inventario y pedidos</h1><p>Totales actuales de los registros disponibles para tu cuenta.</p>
+  <p *ngIf="cargando" role="status">Cargando resumen...</p><p *ngIf="mensaje" role="status">{{ mensaje }}</p>
+  <ng-container *ngIf="datos as resumen">
+    <ion-grid><ion-row>
+      <ion-col size="6"><ion-card><ion-card-header><ion-card-subtitle>Productos</ion-card-subtitle><ion-card-title>{{ resumen.productos }}</ion-card-title></ion-card-header></ion-card></ion-col>
+      <ion-col size="6"><ion-card><ion-card-header><ion-card-subtitle>Unidades en stock</ion-card-subtitle><ion-card-title>{{ resumen.unidades }}</ion-card-title></ion-card-header></ion-card></ion-col>
+      <ion-col size="6"><ion-card><ion-card-header><ion-card-subtitle>Sin stock</ion-card-subtitle><ion-card-title>{{ resumen.sinStock }}</ion-card-title></ion-card-header></ion-card></ion-col>
+      <ion-col size="6"><ion-card><ion-card-header><ion-card-subtitle>Pedidos</ion-card-subtitle><ion-card-title>{{ resumen.pedidos }}</ion-card-title></ion-card-header></ion-card></ion-col>
+    </ion-row></ion-grid>
+    <ion-card><ion-card-header><ion-card-title>Estado de los pedidos</ion-card-title></ion-card-header><ion-card-content>
+      <p *ngIf="!resumen.pedidos">Todavía no hay pedidos.</p>
+      <p>Pendientes: {{ resumen.pendientes }}</p><ion-progress-bar color="warning" aria-label="Proporción de pedidos pendientes" [value]="resumen.pedidos ? resumen.pendientes / resumen.pedidos : 0"></ion-progress-bar>
+      <p>Entregados: {{ resumen.entregados }}</p><ion-progress-bar color="success" aria-label="Proporción de pedidos entregados" [value]="resumen.pedidos ? resumen.entregados / resumen.pedidos : 0"></ion-progress-bar>
+      <p>Cancelados: {{ resumen.cancelados }}</p><ion-progress-bar color="danger" aria-label="Proporción de pedidos cancelados" [value]="resumen.pedidos ? resumen.cancelados / resumen.pedidos : 0"></ion-progress-bar>
+    </ion-card-content></ion-card>
+  </ng-container>
 </ion-content>
 ```
 
-### `mobile/src/app/catalogos/catalogos.module.ts`
+### `mobile/src/app/resumen/resumen.module.ts`
 
 ```typescript
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { RouterModule } from '@angular/router';
-import { CatalogosPage } from './catalogos.page';
-@NgModule({ declarations: [CatalogosPage], imports: [CommonModule, IonicModule, RouterModule.forChild([{ path: '', component: CatalogosPage }])] })
-export class CatalogosPageModule {}
+import { ResumenPage } from './resumen.page';
+@NgModule({ declarations: [ResumenPage], imports: [CommonModule, IonicModule, RouterModule.forChild([{ path: '', component: ResumenPage }])] })
+export class ResumenPageModule {}
 ```
 
 ### `mobile/src/app/colecciones-list/colecciones-list.page.ts`
@@ -532,7 +617,7 @@ export class ColeccionesListPage {
 
 ```html
 <ion-header><ion-toolbar color="personalizado">
-  <ion-buttons slot="start"><ion-back-button *ngIf="config.tabla !== 'pedidos'" defaultHref="/tabs/catalogos"></ion-back-button><ion-menu-button *ngIf="config.tabla === 'pedidos'"></ion-menu-button></ion-buttons>
+  <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
   <ion-title>{{ config.titulo }}</ion-title>
   <ion-buttons slot="end" *ngIf="!usarBotonFlotante"><ion-button fill="solid" [routerLink]="[base, 'formulario']" [attr.aria-label]="'Crear ' + config.singular"><ion-icon slot="icon-only" name="add"></ion-icon></ion-button></ion-buttons>
 </ion-toolbar></ion-header>
@@ -1261,6 +1346,7 @@ export class ProductosFormPage implements OnInit, OnDestroy {
   </ion-toolbar>
 </ion-footer>
 ```
+
 ## 5. Comprobar el resultado
 
 Ejecuta la aplicación existente del proyecto y compila el código:
@@ -1269,7 +1355,7 @@ Ejecuta la aplicación existente del proyecto y compila el código:
 docker compose exec mobile npx ng build --configuration development
 ```
 
-1. Inicia sesión. Debe abrir Productos con los tres tabs. Cambia entre ellos y comprueba cuál está seleccionado.
+1. Inicia sesión. Debe abrir Productos con los tabs Productos, Pedidos y Resumen. Abre Resumen, comprueba sus totales y pulsa actualizar. Desde su menú abre cada catálogo y verifica que el listado queda fuera de los tabs.
 2. En Marcas, guarda vacío y comprueba el mensaje. Crea una marca temporal, abre su detalle, edita el nombre y confirma la actualización.
 3. Busca AulaTech y comprueba el conteo. Limpia la búsqueda, pasa a la segunda página y vuelve a la primera.
 4. Crea un proveedor con Activo desactivado; el detalle debe mostrar No. Crea un cliente de práctica.
@@ -1291,7 +1377,8 @@ Las capturas corresponden a la aplicación Ionic real del proyecto. El [registro
 | Proveedor y cliente en Ionic | Proveedor 3 con activo=false y cliente 3 creados y consultados. |
 | Producto integrado en Ionic | Producto 16 con imagen, marca AulaTech, proveedor Distribuidora Aula y categoría Periféricos. Edición posterior de stock sin seleccionar otro archivo. |
 | Pedido en Ionic | Pedido 2 con cliente 3 y producto 16; cantidad mínima, creación, consulta y cambio a entregado. |
-| Tabs | Productos y Pedidos conservaron sus detalles al cambiar de tab; Catálogos conserva su propia navegación. |
+| Tabs | Productos y Pedidos conservaron sus detalles al cambiar de tab; los catálogos se abren desde el menú fuera de los tabs. |
+| Resumen | 13 productos, 214 unidades, 0 sin stock y 1 pedido entregado; valores contrastados con MariaDB y actualización desde Ionic. |
 | Ejemplos | Registro 8 cargado en el formulario compartido y actualizado sin perder arreglos, booleanos, origen y fechas automáticas. |
 | Relaciones protegidas | Aviso comprobado en Ionic al intentar eliminar el cliente 3 utilizado por el pedido. |
 | Botón de creación | Las dos variantes abrieron el formulario; captura independiente del botón flotante. |
@@ -1302,16 +1389,16 @@ La comprobación se realizó en el navegador con Ionic, no mediante una instalac
 
 ## 6. Explicación detallada del flujo
 
-La figura 18 muestra el recorrido desde los tabs hasta Directus y MariaDB, con las ramas de consulta, guardado, validación y eliminación. El PNG permite verlo también en lectores Markdown que no ejecutan Mermaid.
+La figura 19 muestra el recorrido desde los tabs y el menú hasta Directus y MariaDB, con las ramas de consulta, guardado, validación y eliminación. El PNG permite verlo también en lectores Markdown que no ejecutan Mermaid.
 
 <p align="center">
   <img src="imagenes/flujo-18-tabs-ramas.png" alt="Flujo de tabs, formularios, validación y operaciones de la API" width="1000"><br>
-  <em>Figura 18. Navegación y operaciones de las colecciones.</em>
+  <em>Figura 19. Navegación y operaciones de las colecciones.</em>
 </p>
 
 ### El contenedor y sus pantallas
 
-El router principal carga TabsPage después de validar la sesión. ion-tabs utiliza el router de Ionic para mostrar las rutas hijas; ion-tab-bar contiene los tres botones. Dentro de Productos, las rutas de detalle y formulario comparten el prefijo /tabs/productos. Pedidos y Catálogos tienen sus propias ramas y conservan su historial al cambiar de tab.
+El router principal carga TabsPage después de validar la sesión. ion-tabs utiliza el router de Ionic para mostrar las rutas hijas; ion-tab-bar contiene los tres botones. Dentro de Productos, las rutas de detalle y formulario comparten el prefijo /tabs/productos. Pedidos y Resumen tienen sus propias ramas y conservan su historial al cambiar de tab. Los catálogos se cargan mediante rutas protegidas de app-routing.module.ts, fuera de TabsPage. El menú lateral contiene sus accesos directos. Resumen consulta indicadores agregados y los representa mediante tarjetas y barras.
 
 app.component mantiene el menú lateral y el punto de entrada principal. tabs.page.html muestra navegación; las consultas, formularios y acciones permanecen en sus páginas y servicios correspondientes.
 

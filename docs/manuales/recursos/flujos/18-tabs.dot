@@ -6,7 +6,7 @@ digraph Flujo {
   tabs [label="El alumno elige un tab", group=main];
   productos [label="Productos: imagen,\ncategorías, marca y\nproveedor"];
   pedidos [label="Pedidos: cliente, producto\ny cantidad", group=main];
-  catalogos [label="Catálogos: elegir una\ncolección"];
+  catalogos [label="Menú lateral: catálogos y\nejemplos"];
   lista [label="Cargar listado, búsqueda y\npaginación", group=main];
   form [label="Abrir formulario con + o\nlápiz", group=main];
   detalle [label="El icono de ojo solicita el\ndetalle"];
@@ -17,13 +17,14 @@ digraph Flujo {
   db [label="MariaDB aplica tipos,\nrelaciones y restricciones", group=main];
   respuesta [label="Directus devuelve el\nresultado", group=main];
   mostrar [label="Ionic muestra el detalle o\nrecarga el listado", group=main, penwidth=1.7];
-  subgraph cluster_row0 { style=invis; margin=8; {rank=same; productos; pedidos; catalogos;} }
+  resumen [label="Tab Resumen: indicadores de\ninventario y pedidos"];
+  agregados [label="Directus cuenta, suma stock\ny agrupa pedidos por estado"];
+  subgraph cluster_row0 { style=invis; margin=8; {rank=same; productos; pedidos; resumen;} }
   subgraph cluster_row1 { style=invis; margin=8; {rank=same; form; detalle; eliminar;} }
   subgraph cluster_row2 { style=invis; margin=8; {rank=same; valido; corregir;} }
   entrar -> tabs [weight=12];
   tabs -> productos;
   tabs -> pedidos [weight=12];
-  tabs -> catalogos;
   productos -> lista;
   pedidos -> lista [weight=12];
   catalogos -> lista;
@@ -41,4 +42,9 @@ digraph Flujo {
   mostrar -> tabs [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Cambiar de sección</TD></TR></TABLE>>, constraint=false, style=dashed, color="#80a6c9"];
   eliminar -> api [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Sin referencias:<BR/>DELETE</TD></TR></TABLE>>];
   eliminar -> lista [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Cancelar o registro<BR/>en uso</TD></TR></TABLE>>, constraint=false, style=dashed, color="#80a6c9"];
+  entrar -> catalogos [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Abrir menú</TD></TR></TABLE>>];
+  tabs -> resumen;
+  resumen -> agregados [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Entrar o actualizar</TD></TR></TABLE>>];
+  agregados -> db;
+  agregados -> resumen [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Totales y barras</TD></TR></TABLE>>, constraint=false, style=dashed, color="#80a6c9"];
 }

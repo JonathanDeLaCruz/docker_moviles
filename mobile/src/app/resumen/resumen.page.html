@@ -1,0 +1,22 @@
+<ion-header><ion-toolbar color="personalizado">
+  <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons><ion-title>Resumen</ion-title>
+  <ion-buttons slot="end"><ion-button fill="solid" aria-label="Actualizar resumen" (click)="cargar()" [disabled]="cargando"><ion-icon slot="icon-only" name="refresh"></ion-icon></ion-button></ion-buttons>
+</ion-toolbar></ion-header>
+<ion-content class="ion-padding">
+  <h1>Inventario y pedidos</h1><p>Totales actuales de los registros disponibles para tu cuenta.</p>
+  <p *ngIf="cargando" role="status">Cargando resumen...</p><p *ngIf="mensaje" role="status">{{ mensaje }}</p>
+  <ng-container *ngIf="datos as resumen">
+    <ion-grid><ion-row>
+      <ion-col size="6"><ion-card><ion-card-header><ion-card-subtitle>Productos</ion-card-subtitle><ion-card-title>{{ resumen.productos }}</ion-card-title></ion-card-header></ion-card></ion-col>
+      <ion-col size="6"><ion-card><ion-card-header><ion-card-subtitle>Unidades en stock</ion-card-subtitle><ion-card-title>{{ resumen.unidades }}</ion-card-title></ion-card-header></ion-card></ion-col>
+      <ion-col size="6"><ion-card><ion-card-header><ion-card-subtitle>Sin stock</ion-card-subtitle><ion-card-title>{{ resumen.sinStock }}</ion-card-title></ion-card-header></ion-card></ion-col>
+      <ion-col size="6"><ion-card><ion-card-header><ion-card-subtitle>Pedidos</ion-card-subtitle><ion-card-title>{{ resumen.pedidos }}</ion-card-title></ion-card-header></ion-card></ion-col>
+    </ion-row></ion-grid>
+    <ion-card><ion-card-header><ion-card-title>Estado de los pedidos</ion-card-title></ion-card-header><ion-card-content>
+      <p *ngIf="!resumen.pedidos">Todavía no hay pedidos.</p>
+      <p>Pendientes: {{ resumen.pendientes }}</p><ion-progress-bar color="warning" aria-label="Proporción de pedidos pendientes" [value]="resumen.pedidos ? resumen.pendientes / resumen.pedidos : 0"></ion-progress-bar>
+      <p>Entregados: {{ resumen.entregados }}</p><ion-progress-bar color="success" aria-label="Proporción de pedidos entregados" [value]="resumen.pedidos ? resumen.entregados / resumen.pedidos : 0"></ion-progress-bar>
+      <p>Cancelados: {{ resumen.cancelados }}</p><ion-progress-bar color="danger" aria-label="Proporción de pedidos cancelados" [value]="resumen.pedidos ? resumen.cancelados / resumen.pedidos : 0"></ion-progress-bar>
+    </ion-card-content></ion-card>
+  </ng-container>
+</ion-content>
