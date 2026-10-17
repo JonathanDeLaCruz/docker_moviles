@@ -7,7 +7,7 @@ digraph Flujo {
   validar [label="¿El formulario es\nválido?", group=main, shape=diamond, style=filled, margin="0.12,0.08"];
   corregir [label="Mostrar mensajes y corregir\ncampos"];
   mapear [label="Convertir números,\nbooleanos y arreglos", group=main];
-  agregar [label="Agregar estado, origen y\nfecha de envío", group=main];
+  agregar [label="Agregar estado, ID de\norigen y fecha de envío", group=main];
   solicitar [label="Ionic envía POST a Directus", group=main];
   fechar [label="Directus asigna la fecha de\ncreación", group=main];
   base [label="MariaDB guarda el registro\ny genera su ID", group=main];
@@ -16,6 +16,7 @@ digraph Flujo {
   consultar [label="Consultar registro\nguardado: GET por ID", group=main];
   leer [label="Directus lee el registro en\nMariaDB", group=main];
   nuevo [label="El icono + reinicia el\nformulario"];
+  catalogo [label="Directus consulta\norigenes_ejemplo por código\napp_ionic", group=main];
   subgraph cluster_row0 { style=invis; margin=8; {rank=same; validar; corregir;} }
   subgraph cluster_row1 { style=invis; margin=8; {rank=same; consultar; nuevo;} }
   abrir -> capturar [weight=12];
@@ -23,7 +24,6 @@ digraph Flujo {
   validar -> mapear [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Sí</TD></TR></TABLE>>];
   validar -> corregir [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>No</TD></TR></TABLE>>, style=dashed];
   corregir -> capturar [constraint=false, style=dashed, color="#80a6c9"];
-  mapear -> agregar [weight=12];
   agregar -> solicitar [weight=12];
   solicitar -> fechar [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>/items/ejemplos_campos</TD></TR></TABLE>>];
   fechar -> base [weight=12];
@@ -34,4 +34,6 @@ digraph Flujo {
   leer -> mostrar [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Datos persistidos</TD></TR></TABLE>>, constraint=false, style=dashed, color="#80a6c9"];
   mostrar -> nuevo [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Otro ejemplo</TD></TR></TABLE>>, style=dashed];
   nuevo -> capturar [constraint=false, style=dashed, color="#80a6c9"];
+  mapear -> catalogo [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>GET del catálogo</TD></TR></TABLE>>];
+  catalogo -> agregar [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>ID existente</TD></TR></TABLE>>];
 }

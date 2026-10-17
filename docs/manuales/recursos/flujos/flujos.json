@@ -2694,7 +2694,7 @@
       },
       {
         "id": "agregar",
-        "texto": "Agregar estado, origen y fecha de envío"
+        "texto": "Agregar estado, ID de origen y fecha de envío"
       },
       {
         "id": "solicitar",
@@ -2728,6 +2728,10 @@
       {
         "id": "nuevo",
         "texto": "El icono + reinicia el formulario"
+      },
+      {
+        "id": "catalogo",
+        "texto": "Directus consulta origenes_ejemplo por código app_ionic"
       }
     ],
     "aristas": [
@@ -2755,10 +2759,6 @@
         "a": "capturar",
         "tipo": "retorno",
         "influye": false
-      },
-      {
-        "de": "mapear",
-        "a": "agregar"
       },
       {
         "de": "agregar",
@@ -2808,6 +2808,16 @@
         "a": "capturar",
         "tipo": "retorno",
         "influye": false
+      },
+      {
+        "de": "mapear",
+        "a": "catalogo",
+        "texto": "GET del catálogo"
+      },
+      {
+        "de": "catalogo",
+        "a": "agregar",
+        "texto": "ID existente"
       }
     ],
     "filas": [
@@ -2825,6 +2835,7 @@
       "capturar",
       "validar",
       "mapear",
+      "catalogo",
       "agregar",
       "solicitar",
       "fechar",

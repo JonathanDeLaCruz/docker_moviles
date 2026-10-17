@@ -1,0 +1,54 @@
+{
+  "fecha": "2026-10-17",
+  "directus": "12.3.1",
+  "pruebas": [
+    {
+      "caso": "Correo y sitio web de 100 caracteres",
+      "http": 200
+    },
+    {
+      "caso": "Correo de 101 caracteres",
+      "http": 400,
+      "codigo": "VALUE_TOO_LONG"
+    },
+    {
+      "caso": "Sitio web de 101 caracteres",
+      "http": 400,
+      "codigo": "VALUE_TOO_LONG"
+    },
+    {
+      "caso": "tipo fuera del ENUM",
+      "http": 400,
+      "codigo": "CONTAINS_NULL_VALUES"
+    },
+    {
+      "caso": "modalidad fuera del ENUM",
+      "http": 400,
+      "codigo": "CONTAINS_NULL_VALUES"
+    },
+    {
+      "caso": "estado fuera del ENUM",
+      "http": 400,
+      "codigo": "CONTAINS_NULL_VALUES"
+    },
+    {
+      "caso": "origen con ID inexistente",
+      "http": 400,
+      "codigo": "INVALID_FOREIGN_KEY"
+    },
+    {
+      "caso": "estado omitido",
+      "http": 200,
+      "estado": "pendiente"
+    },
+    {
+      "caso": "POST y GET desde Ionic",
+      "id": 8,
+      "origen": {
+        "id": 1,
+        "codigo": "app_ionic",
+        "nombre": "Aplicación Ionic"
+      }
+    }
+  ]
+}

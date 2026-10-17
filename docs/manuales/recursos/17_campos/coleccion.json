@@ -35,7 +35,7 @@
       "type": "string",
       "schema": {
         "is_nullable": false,
-        "max_length": 254
+        "max_length": 100
       },
       "meta": {
         "interface": "input",
@@ -60,7 +60,7 @@
       "type": "string",
       "schema": {
         "is_nullable": true,
-        "max_length": 255
+        "max_length": 100
       },
       "meta": {
         "interface": "input"
@@ -275,20 +275,40 @@
         "default_value": "pendiente"
       },
       "meta": {
-        "interface": "input",
+        "interface": "select-dropdown",
+        "options": {
+          "choices": [
+            {
+              "text": "pendiente",
+              "value": "pendiente"
+            },
+            {
+              "text": "confirmado",
+              "value": "confirmado"
+            },
+            {
+              "text": "cancelado",
+              "value": "cancelado"
+            }
+          ]
+        },
         "readonly": true
       }
     },
     {
       "field": "origen",
-      "type": "string",
+      "type": "integer",
       "schema": {
-        "is_nullable": false,
-        "max_length": 30,
-        "default_value": "app_ionic"
+        "is_nullable": false
       },
       "meta": {
-        "interface": "input",
+        "interface": "select-dropdown-m2o",
+        "special": [
+          "m2o"
+        ],
+        "options": {
+          "template": "{{nombre}}"
+        },
         "readonly": true
       }
     },

@@ -1,0 +1,47 @@
+{
+  "collection": "origenes_ejemplo",
+  "schema": {},
+  "meta": {
+    "icon": "list",
+    "display_template": "{{nombre}}",
+    "note": "Catálogo de orígenes para el manual 17"
+  },
+  "fields": [
+    {
+      "field": "id",
+      "type": "integer",
+      "schema": {
+        "is_primary_key": true,
+        "has_auto_increment": true,
+        "is_nullable": false
+      },
+      "meta": {
+        "hidden": true,
+        "readonly": true
+      }
+    },
+    {
+      "field": "codigo",
+      "type": "string",
+      "schema": {
+        "max_length": 30,
+        "is_nullable": false,
+        "is_unique": true
+      },
+      "meta": {
+        "interface": "input"
+      }
+    },
+    {
+      "field": "nombre",
+      "type": "string",
+      "schema": {
+        "max_length": 100,
+        "is_nullable": false
+      },
+      "meta": {
+        "interface": "input"
+      }
+    }
+  ]
+}

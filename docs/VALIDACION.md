@@ -75,3 +75,12 @@ Se guardó desde Ionic un segundo ejemplo (registro 4) con monto 0, recibir_avis
 La compilación final de desarrollo del ejemplo fue correcta. Se comprobó que los cinco archivos del punto 4 coinciden con los utilizados en la aplicación, que las ocho figuras tienen sus etiquetas cerradas y que los 20 diagramas del repositorio conservan referencias y fuentes válidas. La apertura de la vista Markdown local en Codex quedó en cola; su presentación se verificará en GitHub tras publicar.
 
 Después de publicar el manual 17 se verificó su vista Markdown en GitHub: las ocho imágenes cargaron con tamaño natural válido y quedaron centradas (desfase de 0 px respecto a su párrafo). Se inspeccionó visualmente la figura 1 dentro del documento; el PNG del flujo también se había revisado visualmente antes de publicar. Esta comprobación corresponde al navegador de GitHub, no a su aplicación móvil nativa.
+
+
+## Ajuste del manual 17: ENUM y catálogo relacionado
+
+Se redujeron correo y sitio_web a VARCHAR(100), con validación y maxlength de 100 en Ionic. Se conservaron los cuatro ejemplos existentes. Tipo, modalidad y estado se convirtieron en ENUM nativos de MariaDB; origen pasó a llave foránea entera hacia origenes_ejemplo.id. El catálogo contiene app_ionic e importacion y la cuenta de práctica solo necesita Read sobre él. La aplicación busca el ID por código, lo envía en el POST y expande la relación para mostrar nombre y código al consultar.
+
+Se comprobó en MariaDB el tipo nativo de las seis columnas y la restricción de origen. La API autenticada aceptó correo y sitio web de 100 caracteres, rechazó 101 (VALUE_TOO_LONG), valores fuera de los tres ENUM (CONTAINS_NULL_VALUES) y un origen inexistente (INVALID_FOREIGN_KEY). Al omitir estado aplicó pendiente. Las observaciones están en recursos/17_campos/pruebas-esquema.json.
+
+Directus 12.3.1 reconoce los ENUM nativos como unknown en su modelo. Se verificó en esta versión el guardado y consulta REST, así como las interfaces administrativas configuradas de desplegable y radio; no se afirma soporte de edición nativa del ENUM desde su diseñador. El manual indica el SQL necesario. En Ionic se creó y volvió a consultar el registro 8, mostrando Aplicación Ionic (app_ionic). Se actualizaron los JSON, las capturas afectadas y el flujo; se añadió una captura de la relación en Directus. El registro mínimo 4 se volvió a consultar con la relación expandida. La compilación de desarrollo fue correcta.

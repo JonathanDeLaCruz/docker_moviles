@@ -17,7 +17,11 @@
   "fecha_evento": null,
   "hora_evento": null,
   "estado": "pendiente",
-  "origen": "app_ionic",
   "fecha_envio": "2026-10-17T06:15:46.000Z",
-  "fecha_creacion": "2026-10-17T06:15:46.000Z"
+  "fecha_creacion": "2026-10-17T06:15:46.000Z",
+  "origen": {
+    "id": 1,
+    "codigo": "app_ionic",
+    "nombre": "Aplicación Ionic"
+  }
 }

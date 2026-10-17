@@ -95,7 +95,7 @@ Las capturas y los diagramas se incluyen como imágenes centradas con pie de fig
 
 - **09–11, 13 y 14:** pruebas realizadas con la aplicación y la API del entorno del curso.
 - **12:** acceso y validaciones comprobados; registro completo pendiente de habilitar el registro y configurar el correo de verificación.
-- **17:** controles de formulario, valores automáticos, guardado y consulta comprobados en Ionic y Directus.
+- **17:** controles de formulario, ENUM, catálogo con llave foránea, valores automáticos, guardado y consulta comprobados en Ionic y Directus.
 - **15:** subida, asociación y recuperación de imágenes comprobadas con una cuenta de práctica y archivos compartidos.
 
 Consulta el [registro de validación](docs/VALIDACION.md) para conocer el alcance de cada comprobación.

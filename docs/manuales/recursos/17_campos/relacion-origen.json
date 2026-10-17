@@ -1,0 +1,15 @@
+{
+  "collection": "ejemplos_campos",
+  "field": "origen",
+  "related_collection": "origenes_ejemplo",
+  "schema": {
+    "on_delete": "RESTRICT",
+    "on_update": "CASCADE"
+  },
+  "meta": {
+    "many_collection": "ejemplos_campos",
+    "many_field": "origen",
+    "one_collection": "origenes_ejemplo",
+    "one_field": null
+  }
+}

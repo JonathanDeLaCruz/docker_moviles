@@ -3,7 +3,7 @@
   "correo": "alumno@example.com",
   "telefono": "+52 5551234567",
   "sitio_web": "https://ionicframework.com",
-  "descripcion": "Ejemplo con controles y valores automáticos.",
+  "descripcion": "Ejemplo con ENUM y origen relacionado.",
   "edad": 21,
   "monto": 450.5,
   "tipo": "taller",
@@ -22,6 +22,6 @@
   "fecha_evento": "2026-11-20",
   "hora_evento": "10:30:00",
   "estado": "pendiente",
-  "origen": "app_ionic",
-  "fecha_envio": "2026-10-17T06:11:06.239Z"
+  "origen": 1,
+  "fecha_envio": "2026-10-17T06:35:40.053Z"
 }
