@@ -3176,5 +3176,233 @@
       "productos",
       "pedidos"
     ]
+  },
+  {
+    "nombre": "19-pedidos",
+    "titulo": "Pedidos con varios productos",
+    "imagen": "flujo-19-pedidos-ramas.png",
+    "nodos": [
+      {
+        "id": "lista",
+        "texto": "App móvil: abrir Pedidos con tabs visibles"
+      },
+      {
+        "id": "accion",
+        "texto": "Crear con + o editar con lápiz"
+      },
+      {
+        "id": "catalogos",
+        "texto": "Consultar clientes, productos y pedido existente"
+      },
+      {
+        "id": "form",
+        "texto": "FormArray: elegir productos y cantidades; mostrar subtotales"
+      },
+      {
+        "id": "validar",
+        "texto": "¿Cliente, renglones y cantidades válidos, sin duplicados?",
+        "tipo": "decision"
+      },
+      {
+        "id": "corregir",
+        "texto": "Mostrar mensaje y conservar el formulario"
+      },
+      {
+        "id": "tipo",
+        "texto": "¿Tiene ID de pedido?",
+        "tipo": "decision"
+      },
+      {
+        "id": "post",
+        "texto": "POST: cabecera y arreglo de detalles nuevos"
+      },
+      {
+        "id": "patch",
+        "texto": "PATCH: cabecera y detalles create, update y delete"
+      },
+      {
+        "id": "api",
+        "texto": "Directus procesa una petición anidada"
+      },
+      {
+        "id": "db",
+        "texto": "MariaDB: pedidos y pedidos_detalle con llaves y restricciones"
+      },
+      {
+        "id": "resultado",
+        "texto": "¿Todos los cambios son válidos?",
+        "tipo": "decision"
+      },
+      {
+        "id": "rollback",
+        "texto": "Revertir la operación y mostrar error"
+      },
+      {
+        "id": "respuesta",
+        "texto": "Guardar y responder con el ID del pedido"
+      },
+      {
+        "id": "detalle",
+        "texto": "GET expandido: cliente, productos y precios guardados"
+      },
+      {
+        "id": "total",
+        "texto": "App: sumar subtotales en centavos y mostrar total"
+      },
+      {
+        "id": "eliminar",
+        "texto": "Eliminar: confirmar pedido y sus renglones"
+      },
+      {
+        "id": "borrar",
+        "texto": "DELETE: borrar pedido y renglones por CASCADE"
+      }
+    ],
+    "aristas": [
+      {
+        "de": "lista",
+        "a": "accion"
+      },
+      {
+        "de": "accion",
+        "a": "catalogos"
+      },
+      {
+        "de": "catalogos",
+        "a": "form"
+      },
+      {
+        "de": "form",
+        "a": "validar"
+      },
+      {
+        "de": "validar",
+        "a": "corregir",
+        "texto": "No",
+        "tipo": "alternativa"
+      },
+      {
+        "de": "corregir",
+        "a": "form",
+        "tipo": "retorno",
+        "influye": false
+      },
+      {
+        "de": "validar",
+        "a": "tipo",
+        "texto": "Sí"
+      },
+      {
+        "de": "tipo",
+        "a": "post",
+        "texto": "No"
+      },
+      {
+        "de": "tipo",
+        "a": "patch",
+        "texto": "Sí"
+      },
+      {
+        "de": "post",
+        "a": "api"
+      },
+      {
+        "de": "patch",
+        "a": "api"
+      },
+      {
+        "de": "api",
+        "a": "db"
+      },
+      {
+        "de": "db",
+        "a": "resultado"
+      },
+      {
+        "de": "resultado",
+        "a": "rollback",
+        "texto": "No",
+        "tipo": "error"
+      },
+      {
+        "de": "rollback",
+        "a": "form",
+        "tipo": "retorno",
+        "influye": false
+      },
+      {
+        "de": "resultado",
+        "a": "respuesta",
+        "texto": "Sí"
+      },
+      {
+        "de": "respuesta",
+        "a": "detalle"
+      },
+      {
+        "de": "detalle",
+        "a": "total"
+      },
+      {
+        "de": "total",
+        "a": "lista",
+        "texto": "Volver",
+        "tipo": "retorno",
+        "influye": false
+      },
+      {
+        "de": "lista",
+        "a": "eliminar",
+        "texto": "Basura"
+      },
+      {
+        "de": "eliminar",
+        "a": "lista",
+        "texto": "Cancelar",
+        "tipo": "retorno",
+        "influye": false
+      },
+      {
+        "de": "eliminar",
+        "a": "borrar",
+        "texto": "Confirmar"
+      },
+      {
+        "de": "borrar",
+        "a": "lista",
+        "texto": "Recargar",
+        "tipo": "retorno",
+        "influye": false
+      }
+    ],
+    "filas": [
+      [
+        "post",
+        "patch"
+      ],
+      [
+        "validar",
+        "corregir"
+      ],
+      [
+        "resultado",
+        "rollback"
+      ]
+    ],
+    "principal": [
+      "lista",
+      "accion",
+      "catalogos",
+      "form",
+      "validar",
+      "tipo",
+      "patch",
+      "api",
+      "db",
+      "resultado",
+      "respuesta",
+      "detalle",
+      "total"
+    ]
   }
 ]

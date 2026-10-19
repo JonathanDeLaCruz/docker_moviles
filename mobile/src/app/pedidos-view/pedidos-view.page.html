@@ -1,0 +1,6 @@
+<ion-header><ion-toolbar color="personalizado"><ion-buttons slot="start"><ion-back-button defaultHref="/tabs/pedidos"></ion-back-button></ion-buttons><ion-title>Detalle del pedido</ion-title><ion-buttons slot="end"><ion-button *ngIf="pedido" fill="solid" [routerLink]="['/tabs/pedidos/formulario', pedido.id]" aria-label="Editar pedido"><ion-icon slot="icon-only" name="pencil"></ion-icon></ion-button></ion-buttons></ion-toolbar></ion-header>
+<ion-content class="ion-padding"><p *ngIf="mensaje" role="status">{{ mensaje }}</p><ng-container *ngIf="pedido as p">
+  <h1>Pedido #{{ p.id }}</h1><p>Cliente: {{ p.cliente.nombre }}</p><p>Estado: {{ p.estado }}</p><p>{{ p.observaciones }}</p><p>Creación: {{ p.fecha_creacion | date:'yyyy-MM-dd HH:mm':'UTC' }} UTC</p>
+  <ion-card *ngFor="let l of p.detalles"><ion-card-header><ion-card-title>{{ l.producto.nombre }}</ion-card-title></ion-card-header><ion-card-content><p>Cantidad: {{ l.cantidad }}</p><p>Precio unitario: ${{ l.precio_unitario }}</p><p>Subtotal: ${{ dinero(importe([l])) }}</p></ion-card-content></ion-card>
+  <h2>Total: ${{ dinero(importe(p.detalles)) }}</h2>
+</ng-container></ion-content>

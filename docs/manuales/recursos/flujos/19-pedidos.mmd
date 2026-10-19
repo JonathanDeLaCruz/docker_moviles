@@ -1,0 +1,42 @@
+flowchart TD
+  lista["App móvil: abrir Pedidos con tabs visibles"]
+  accion["Crear con + o editar con lápiz"]
+  catalogos["Consultar clientes, productos y pedido existente"]
+  form["FormArray: elegir productos y cantidades; mostrar subtotales"]
+  validar{"¿Cliente, renglones y cantidades válidos, sin duplicados?"}
+  corregir["Mostrar mensaje y conservar el formulario"]
+  tipo{"¿Tiene ID de pedido?"}
+  post["POST: cabecera y arreglo de detalles nuevos"]
+  patch["PATCH: cabecera y detalles create, update y delete"]
+  api["Directus procesa una petición anidada"]
+  db["MariaDB: pedidos y pedidos_detalle con llaves y restricciones"]
+  resultado{"¿Todos los cambios son válidos?"}
+  rollback["Revertir la operación y mostrar error"]
+  respuesta["Guardar y responder con el ID del pedido"]
+  detalle["GET expandido: cliente, productos y precios guardados"]
+  total["App: sumar subtotales en centavos y mostrar total"]
+  eliminar["Eliminar: confirmar pedido y sus renglones"]
+  borrar["DELETE: borrar pedido y renglones por CASCADE"]
+  lista --> accion
+  accion --> catalogos
+  catalogos --> form
+  form --> validar
+  validar -->|"No"| corregir
+  corregir -.-> form
+  validar -->|"Sí"| tipo
+  tipo -->|"No"| post
+  tipo -->|"Sí"| patch
+  post --> api
+  patch --> api
+  api --> db
+  db --> resultado
+  resultado -.->|"No"| rollback
+  rollback -.-> form
+  resultado -->|"Sí"| respuesta
+  respuesta --> detalle
+  detalle --> total
+  total -.->|"Volver"| lista
+  lista -->|"Basura"| eliminar
+  eliminar -.->|"Cancelar"| lista
+  eliminar -->|"Confirmar"| borrar
+  borrar -.->|"Recargar"| lista

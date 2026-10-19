@@ -87,12 +87,15 @@ Cada manual conserva la implementación en el **punto 3**. El punto 2 presenta l
 | 16 | [Imagen en el formulario y el detalle](docs/manuales/16_imagen_formulario_detalle.md) |
 | 17 | [Campos de formulario y valores agregados al guardar](docs/manuales/17_campos_formularios.md) |
 | 18 | [Colecciones de productos y navegación con tabs](docs/manuales/18_tabs_colecciones.md) |
+| 19 | [Pedidos con varios productos, subtotales y total](docs/manuales/19_pedidos_detalle.md) |
 
 Al generar una página o componente, agrega manualmente `standalone: false` en `@Component` para declararlo en su NgModule. Cada práctica especifica los módulos que utiliza.
 
 Las capturas y los diagramas se incluyen como imágenes centradas con pie de figura en Markdown. Los flujos muestran el recorrido principal hacia abajo, con ramificaciones, decisiones y retornos. Se incluyen como PNG para que su visualización no dependa de que el visor ejecute Mermaid. En GitHub puedes abrir cada diagrama para ampliarlo. Los recursos de ejemplo se encuentran en `docs/manuales/recursos/`. El [registro de validación](docs/VALIDACION.md) detalla las comprobaciones ejecutadas y sus límites.
 
 ### Estado de las pruebas
+
+- **19:** pedido con varios productos creado y actualizado en Ionic; precios guardados, cálculos con centavos, migración del pedido existente, guardado anidado y reversión de operaciones inválidas comprobados.
 
 - **09–11, 13 y 14:** pruebas realizadas con la aplicación y la API del entorno del curso.
 - **12:** acceso y validaciones comprobados; registro completo pendiente de habilitar el registro y configurar el correo de verificación.

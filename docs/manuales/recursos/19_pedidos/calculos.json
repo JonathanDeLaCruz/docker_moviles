@@ -1,0 +1,29 @@
+{
+  "funcionesRealesDelServicio": true,
+  "casos": [
+    {
+      "caso": "0.10 por 3 más 0.20 produce 0.50",
+      "correcto": true
+    },
+    {
+      "caso": "Dos productos de la captura producen 937.02",
+      "correcto": true
+    },
+    {
+      "caso": "Precio cero admitido",
+      "correcto": true
+    },
+    {
+      "caso": "Rechaza precio -1.00",
+      "correcto": true
+    },
+    {
+      "caso": "Rechaza precio 1.234",
+      "correcto": true
+    },
+    {
+      "caso": "Rechaza precio abc",
+      "correcto": true
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+<ion-header><ion-toolbar color="personalizado"><ion-buttons slot="start"><ion-back-button defaultHref="/tabs/pedidos"></ion-back-button></ion-buttons><ion-title>{{ id === undefined ? 'Crear pedido' : 'Editar pedido' }}</ion-title></ion-toolbar></ion-header>
+<ion-content class="ion-padding">
+  <p *ngIf="cargando">Cargando...</p><p *ngIf="mensaje" role="status">{{ mensaje }}</p>
+  <form *ngIf="!cargando" [formGroup]="form" (ngSubmit)="guardar()">
+    <ion-select label="Cliente" labelPlacement="stacked" formControlName="cliente" interface="alert"><ion-select-option *ngFor="let c of clientes" [value]="c.id">{{ c.nombre }}</ion-select-option></ion-select>
+    <ion-select label="Estado" labelPlacement="stacked" formControlName="estado" interface="popover"><ion-select-option *ngFor="let e of estados" [value]="e">{{ e }}</ion-select-option></ion-select>
+    <ion-textarea label="Observaciones" labelPlacement="stacked" formControlName="observaciones"></ion-textarea>
+    <h2>Productos del pedido</h2>
+    <div formArrayName="detalles"><ion-card *ngFor="let fila of filas.controls; let i = index" [formGroupName]="i">
+      <ion-card-header><ion-card-title>Renglón {{ i + 1 }}</ion-card-title></ion-card-header><ion-card-content>
+        <ion-select [label]="'Producto ' + (i + 1)" labelPlacement="stacked" formControlName="producto" interface="alert" (ionChange)="seleccionar(i, $event.detail.value)"><ion-select-option *ngFor="let p of productos" [value]="p.id">{{ p.nombre }}</ion-select-option></ion-select>
+        <ion-input [label]="'Cantidad ' + (i + 1)" labelPlacement="stacked" type="number" min="1" max="9999" step="1" formControlName="cantidad"></ion-input>
+        <ion-input [label]="'Precio unitario ' + (i + 1)" labelPlacement="stacked" formControlName="precio_unitario" readonly></ion-input>
+        <p>Subtotal: ${{ subtotal(i) }}</p>
+        <ion-button fill="solid" color="danger" type="button" [attr.aria-label]="'Quitar renglón ' + (i + 1)" (click)="quitar(i)"><ion-icon slot="icon-only" name="trash"></ion-icon></ion-button>
+      </ion-card-content></ion-card></div>
+    <ion-button fill="solid" type="button" aria-label="Agregar producto" (click)="agregar()"><ion-icon slot="icon-only" name="add"></ion-icon></ion-button>
+    <h2>Total: ${{ total }}</h2><p>El precio seleccionado se conserva en este pedido.</p>
+    <ion-button fill="solid" expand="block" type="submit" [disabled]="guardando">{{ guardando ? 'Guardando...' : id === undefined ? 'Guardar' : 'Actualizar' }}</ion-button>
+  </form>
+</ion-content>

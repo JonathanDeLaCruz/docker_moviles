@@ -1,0 +1,116 @@
+{
+  "collection": {
+    "collection": "pedidos_detalle",
+    "schema": {},
+    "meta": {
+      "icon": "receipt_long"
+    },
+    "fields": [
+      {
+        "field": "id",
+        "type": "integer",
+        "schema": {
+          "is_primary_key": true,
+          "has_auto_increment": true,
+          "is_nullable": false
+        },
+        "meta": {
+          "hidden": true,
+          "readonly": true
+        }
+      },
+      {
+        "field": "pedido",
+        "type": "integer",
+        "schema": {
+          "is_nullable": false
+        },
+        "meta": {
+          "interface": "select-dropdown-m2o",
+          "special": [
+            "m2o"
+          ]
+        }
+      },
+      {
+        "field": "producto",
+        "type": "integer",
+        "schema": {
+          "is_nullable": false
+        },
+        "meta": {
+          "interface": "select-dropdown-m2o",
+          "special": [
+            "m2o"
+          ]
+        }
+      },
+      {
+        "field": "cantidad",
+        "type": "integer",
+        "schema": {
+          "is_nullable": false,
+          "default_value": 1
+        },
+        "meta": {
+          "interface": "input"
+        }
+      },
+      {
+        "field": "precio_unitario",
+        "type": "decimal",
+        "schema": {
+          "is_nullable": false,
+          "numeric_precision": 10,
+          "numeric_scale": 2
+        },
+        "meta": {
+          "interface": "input"
+        }
+      }
+    ]
+  },
+  "alias": {
+    "field": "detalles",
+    "type": "alias",
+    "meta": {
+      "interface": "list-o2m",
+      "special": [
+        "o2m"
+      ]
+    }
+  },
+  "relations": [
+    {
+      "collection": "pedidos_detalle",
+      "field": "pedido",
+      "related_collection": "pedidos",
+      "schema": {
+        "on_delete": "CASCADE",
+        "on_update": "CASCADE"
+      },
+      "meta": {
+        "many_collection": "pedidos_detalle",
+        "many_field": "pedido",
+        "one_collection": "pedidos",
+        "one_field": "detalles",
+        "one_deselect_action": "delete"
+      }
+    },
+    {
+      "collection": "pedidos_detalle",
+      "field": "producto",
+      "related_collection": "productos",
+      "schema": {
+        "on_delete": "RESTRICT",
+        "on_update": "CASCADE"
+      },
+      "meta": {
+        "many_collection": "pedidos_detalle",
+        "many_field": "producto",
+        "one_collection": "productos",
+        "one_field": null
+      }
+    }
+  ]
+}

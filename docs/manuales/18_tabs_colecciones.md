@@ -1,5 +1,7 @@
 # Integrar colecciones de productos y navegación con tabs
 
+Continuación: el [manual 19](19_pedidos_detalle.md) amplía Pedidos para guardar varios productos y sustituye sus pantallas por las de esa práctica. Aplica la migración cuando llegues a ese manual.
+
 La aplicación tendrá tres tabs: **Productos, Pedidos y Resumen**. El menú lateral dará acceso directo a los catálogos, que conservan visibles los tres tabs. Agregarás marcas, proveedores, clientes y pedidos a la base del curso, y usarás las páginas de listado, detalle y formulario para administrarlos. Productos conservará imagen y categorías, e incorporará marca y proveedor.
 
 ## 1. Antes de comenzar

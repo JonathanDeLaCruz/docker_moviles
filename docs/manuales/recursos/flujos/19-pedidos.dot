@@ -1,0 +1,49 @@
+digraph Flujo {
+  graph [rankdir=TB, bgcolor="#181818", pad="0.24", nodesep="0.42", ranksep="0.55", splines=spline, outputorder=edgesfirst];
+  node [shape=box, style="rounded,filled", fillcolor="#0e2a4d", color="#304b67", fontcolor="#b5d3f6", fontname="Arial", fontsize=17, penwidth=1.15, margin="0.22,0.20"];
+  edge [color="#89929c", fontcolor="#b5d3f6", fontname="Arial", fontsize=13, arrowsize=0.65, penwidth=1.15];
+  lista [label="App móvil: abrir Pedidos\ncon tabs visibles", group=main];
+  accion [label="Crear con + o editar con\nlápiz", group=main];
+  catalogos [label="Consultar clientes,\nproductos y pedido\nexistente", group=main];
+  form [label="FormArray: elegir productos\ny cantidades; mostrar\nsubtotales", group=main];
+  validar [label="¿Cliente, renglones\ny cantidades\nválidos, sin\nduplicados?", group=main, shape=diamond, style=filled, margin="0.12,0.08"];
+  corregir [label="Mostrar mensaje y conservar\nel formulario"];
+  tipo [label="¿Tiene ID de pedido?", group=main, shape=diamond, style=filled, margin="0.12,0.08"];
+  post [label="POST: cabecera y arreglo de\ndetalles nuevos"];
+  patch [label="PATCH: cabecera y detalles\ncreate, update y delete", group=main];
+  api [label="Directus procesa una\npetición anidada", group=main];
+  db [label="MariaDB: pedidos y\npedidos_detalle con llaves\ny restricciones", group=main];
+  resultado [label="¿Todos los cambios\nson válidos?", group=main, shape=diamond, style=filled, margin="0.12,0.08"];
+  rollback [label="Revertir la operación y\nmostrar error"];
+  respuesta [label="Guardar y responder con el\nID del pedido", group=main];
+  detalle [label="GET expandido: cliente,\nproductos y precios\nguardados", group=main];
+  total [label="App: sumar subtotales en\ncentavos y mostrar total", group=main];
+  eliminar [label="Eliminar: confirmar pedido\ny sus renglones"];
+  borrar [label="DELETE: borrar pedido y\nrenglones por CASCADE"];
+  subgraph cluster_row0 { style=invis; margin=8; {rank=same; post; patch;} }
+  subgraph cluster_row1 { style=invis; margin=8; {rank=same; validar; corregir;} }
+  subgraph cluster_row2 { style=invis; margin=8; {rank=same; resultado; rollback;} }
+  lista -> accion [weight=12];
+  accion -> catalogos [weight=12];
+  catalogos -> form [weight=12];
+  form -> validar [weight=12];
+  validar -> corregir [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>No</TD></TR></TABLE>>, style=dashed];
+  corregir -> form [constraint=false, style=dashed, color="#80a6c9"];
+  validar -> tipo [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Sí</TD></TR></TABLE>>];
+  tipo -> post [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>No</TD></TR></TABLE>>];
+  tipo -> patch [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Sí</TD></TR></TABLE>>];
+  post -> api;
+  patch -> api [weight=12];
+  api -> db [weight=12];
+  db -> resultado [weight=12];
+  resultado -> rollback [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>No</TD></TR></TABLE>>, style=dashed];
+  rollback -> form [constraint=false, style=dashed, color="#80a6c9"];
+  resultado -> respuesta [weight=12, label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Sí</TD></TR></TABLE>>];
+  respuesta -> detalle [weight=12];
+  detalle -> total [weight=12];
+  total -> lista [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Volver</TD></TR></TABLE>>, constraint=false, style=dashed, color="#80a6c9"];
+  lista -> eliminar [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Basura</TD></TR></TABLE>>];
+  eliminar -> lista [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Cancelar</TD></TR></TABLE>>, constraint=false, style=dashed, color="#80a6c9"];
+  eliminar -> borrar [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Confirmar</TD></TR></TABLE>>];
+  borrar -> lista [label=<<TABLE BORDER="0" CELLBORDER="0" COLOR="#304b67" BGCOLOR="#101820" CELLPADDING="4" CELLSPACING="0" ><TR><TD>Recargar</TD></TR></TABLE>>, constraint=false, style=dashed, color="#80a6c9"];
+}

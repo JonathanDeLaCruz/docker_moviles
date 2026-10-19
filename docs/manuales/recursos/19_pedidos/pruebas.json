@@ -1,0 +1,32 @@
+{
+  "fecha": "2026-10-19",
+  "api": [
+    "Pedido 2 conservado: 2 unidades a 450.00",
+    "Creación anidada con dos renglones",
+    "Precio histórico conservado al cambiar el precio del catálogo",
+    "POST inválido con cantidad cero revierte encabezado y detalles",
+    "PATCH inválido con cantidad cero revierte encabezado y detalles",
+    "PATCH con create, update y delete conserva el ID del detalle mantenido",
+    "Restricción de producto duplicado comprobada",
+    "Restricción de precio negativo comprobada",
+    "DELETE del pedido temporal elimina sus detalles y conserva sus productos"
+  ],
+  "ionic": [
+    "Formulario vacío y cantidad cero rechazados",
+    "Pedido 5 creado con producto 16: 2 por 450.00; producto 3: 3 por 12.34; total 937.02",
+    "Edición carga productos, cantidades y precios guardados",
+    "Pedido 5 actualizado: producto 16 a 3 unidades, producto 3 retirado, producto 8 agregado a 1 unidad; total 1800.00",
+    "Producto repetido rechazado antes de enviar",
+    "Todos los renglones retirados: guardado rechazado; volver conserva los datos persistidos",
+    "Eliminación cancelada: pedido 5 conservado",
+    "Resumen consultado: 2 pedidos, 1 pendiente y 1 entregado, stock sin cambios",
+    "Botón + de barra y botón flotante abren Crear pedido; se eligió la barra como configuración final"
+  ],
+  "calculos": "calculos.json: seis comprobaciones sobre las funciones reales del servicio",
+  "limites": [
+    "Pruebas en navegador con Ionic; no instalación Android",
+    "Algunas restricciones de MariaDB devuelven HTTP 500 genérico en Directus; se comprobó la reversión de las operaciones inválidas",
+    "La condición de al menos un renglón se valida en la aplicación",
+    "La migración de pedidos existentes toma el precio actual del catálogo"
+  ]
+}

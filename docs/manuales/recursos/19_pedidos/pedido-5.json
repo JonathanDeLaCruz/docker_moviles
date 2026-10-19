@@ -1,0 +1,32 @@
+{
+  "data": {
+    "id": 5,
+    "estado": "pendiente",
+    "observaciones": "Pedido de práctica del manual 19",
+    "fecha_creacion": "2026-10-19T19:00:56.000Z",
+    "cliente": {
+      "id": 3,
+      "nombre": "Cliente del manual 18"
+    },
+    "detalles": [
+      {
+        "id": 6,
+        "cantidad": 3,
+        "precio_unitario": "450.00",
+        "producto": {
+          "id": 16,
+          "nombre": "Producto del manual 18"
+        }
+      },
+      {
+        "id": 8,
+        "cantidad": 1,
+        "precio_unitario": "450.00",
+        "producto": {
+          "id": 8,
+          "nombre": "Mouse"
+        }
+      }
+    ]
+  }
+}
