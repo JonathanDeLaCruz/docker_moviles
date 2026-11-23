@@ -2,6 +2,15 @@
 
 Utilizarás un FormArray para seleccionar categorías al crear y editar productos. El detalle mostrará sus nombres y Directus conservará los enlaces en productos_categorias.
 
+Un producto puede pertenecer a varias categorías y una categoría puede aparecer en varios productos. Es el mismo caso que inscribir a un alumno en varias materias o asignar varias etiquetas a un artículo. El usuario elige opciones del catálogo desde el formulario principal. Al guardar, Directus registra una fila por asociación en la tabla intermedia.
+
+Por ejemplo, si al guardar un artículo recibe el ID 25 y seleccionaste las etiquetas 2 y 3, la tabla intermedia queda así. Los identificadores son ilustrativos.
+
+| fkarticulo | fketiqueta |
+| --- | --- |
+| 25 | 2 |
+| 25 | 3 |
+
 ## 1. Antes de comenzar
 
 Continúa con los servicios, la sesión y los formularios mediante página de los manuales 11–13. Conserva el listado y sus accesos de creación, edición y detalle. Las rutas src/... corresponden a mobile/src/... en este repositorio. Al generar páginas o componentes, agrega manualmente `standalone: false` en @Component.
@@ -32,33 +41,9 @@ En la política de la cuenta autenticada, configura estas acciones con All Acces
 
 Delete elimina el enlace del producto con una categoría; no elimina la categoría del catálogo. Conserva Admin Access desactivado.
 
-### Paso 2. Consultar opciones y relaciones
+### Paso 2. Preparar los servicios
 
-Crea services/categorias.ts con el código del punto 4. En ProductosService.detalle() agrega fields para consultar el producto, el ID de cada enlace y el ID y nombre de cada categoría. Actualiza las interfaces del servicio con la estructura de respuesta y las dos formas de envío de categorias.
-
-### Paso 3. Mostrar categorías en creación y edición
-
-El bloque de categorías del formulario debe estar visible en ambos modos. Al cargar el producto para editar, guarda sus enlaces en enlacesCategorias, vacía categoriasFA con clear() y agrega un FormControl por cada categoría existente. Los botones + y papelera modifican las filas; cada fila agregada debe tener una selección para poder guardar.
-
-### Paso 4. Guardar altas y cambios
-
-Al crear, envía categorias como un arreglo de objetos categorias_id. Al actualizar, compara los IDs seleccionados con los enlaces originales y envía un objeto con create y delete. Por ejemplo, si conservas la categoría 1, agregas la 3 y retiras el enlace 9:
-
-```json
-{ "categorias": { "create": [{ "categorias_id": 3 }], "delete": [9] } }
-```
-
-9 es el ID del enlace en productos_categorias, no el ID de una categoría. El código completo calcula estos valores: utiliza los IDs reales de tu base. Guardar sin cambios envía ambos arreglos vacíos y conserva los enlaces existentes. Quitar todas las filas elimina los enlaces del producto.
-
-### Paso 5. Mostrar las categorías en el detalle
-
-Usa la misma respuesta expandida del servicio. Recorre detalle.categorias y muestra enlace.categorias_id.nombre. Si el arreglo está vacío, muestra Sin categorías asignadas. ionViewWillEnter() vuelve a consultar cada vez que entras al detalle para mostrar los cambios guardados.
-
-## 4. Código completo de referencia
-
-Conserva los NgModules, las rutas y AuthService de las prácticas anteriores. Sustituye estos seis archivos por su contenido completo:
-
-### `mobile/src/app/services/categorias.ts`
+Crea `mobile/src/app/services/categorias.ts`. Este archivo nuevo consulta las opciones que aparecerán en el selector.
 
 ```typescript
 import { Injectable } from '@angular/core';
@@ -76,350 +61,116 @@ export class CategoriasService {
 }
 ```
 
-### `mobile/src/app/services/productos.ts`
+En `mobile/src/app/services/productos.ts`, dentro de `export interface Producto`, agrega el campo que recibirás al consultar el detalle.
 
 ```typescript
-import { Injectable } from '@angular/core';
-import { defer, map, Observable } from 'rxjs';
-import { AuthService } from './auth';
-import { environment } from '../../environments/environment';
-
-export interface Producto {
   categorias?: { id: number; categorias_id: { id: number; nombre: string } }[];
-  id: number;
-  nombre: string;
-  descripcion: string;
-  precio: string;
-  stock: number;
-  fecha_registro: string;
-}
-export interface ProductoGuardar {
+```
+
+Dentro de `export interface ProductoGuardar`, agrega el campo que enviarás al guardar.
+
+```typescript
   categorias?: { categorias_id: number }[] | { create: { categorias_id: number }[]; delete: number[] };
-  nombre: string;
-  descripcion: string;
-  precio: number;
-  stock: number;
-}
+```
 
-@Injectable({ providedIn: 'root' })
-export class ProductosService {
-  constructor(private auth: AuthService) {}
-  private url = environment.apiUrl + '/items/productos';
+En `ProductosService`, sustituye únicamente el método `detalle()` por este. La consulta pide el ID de la fila intermedia y los datos de la categoría.
 
-  private filtro(busqueda: string): Record<string, string> {
-    const texto = busqueda.trim();
-    return texto ? { filter: JSON.stringify({ _or: [
-      { nombre: { _icontains: texto } },
-      { descripcion: { _icontains: texto } }
-    ] }) } : {};
-  }
-
-  listado(pagina = 1, porPagina = 3, busqueda = ''): Observable<Producto[]> {
-    return defer(() => this.auth.cliente.get<{ data: Producto[] }>(this.url, {
-      params: { page: pagina, limit: porPagina, sort: 'id', ...this.filtro(busqueda) }
-    })).pipe(map(response => response.data.data));
-  }
-
+```typescript
   detalle(id: number): Observable<Producto> {
     return defer(() => this.auth.cliente.get<{ data: Producto }>(this.url + '/' + id, { params: { fields: '*,categorias.id,categorias.categorias_id.id,categorias.categorias_id.nombre' } }))
       .pipe(map(response => response.data.data));
   }
-
-  crear(producto: ProductoGuardar): Observable<Producto> {
-    return defer(() => this.auth.cliente.post<{ data: Producto }>(this.url, producto))
-      .pipe(map(response => response.data.data));
-  }
-
-  actualizar(id: number, producto: ProductoGuardar): Observable<Producto> {
-    return defer(() => this.auth.cliente.patch<{ data: Producto }>(this.url + '/' + id, producto))
-      .pipe(map(response => response.data.data));
-  }
-
-  eliminar(id: number): Observable<void> {
-    return defer(() => this.auth.cliente.delete(this.url + '/' + id)).pipe(map(() => undefined));
-  }
-
-  total(busqueda = ''): Observable<number> {
-    return defer(() => this.auth.cliente.get<{ data: { count: string | number }[] }>(this.url, {
-      params: { 'aggregate[count]': '*', ...this.filtro(busqueda) }
-    })).pipe(map(response => Number(response.data.data[0]?.count ?? 0)));
-  }
-}
 ```
 
-### `mobile/src/app/productos-form/productos-form.page.ts`
+### Paso 3. Agregar el selector al formulario de alta y edición
+
+Los apartados 3.1 a 3.7 se hacen en `mobile/src/app/productos-form/productos-form.page.ts`. Abre el formulario **de página** que ya usas para crear y editar productos.
+
+#### 3.1. Completa las importaciones
+
+Arriba del archivo, agrega `FormArray` y `FormControl` entre las llaves del import existente de `@angular/forms`. En el import de `../services/productos` agrega `ProductoGuardar` junto a `ProductosService`. Si conservas la declaración local `interface ProductoGuardar` de la práctica 11, elimina esa declaración para usar el tipo actualizado del paso 2. Debajo de los imports agrega esta línea.
 
 ```typescript
 import { Categoria, CategoriasService } from '../services/categorias';
-import { Component, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { AlertController } from '@ionic/angular';
-import { firstValueFrom } from 'rxjs';
-import { ProductoGuardar, ProductosService } from '../services/productos';
+```
 
+#### 3.2. Declara qué datos conservará la página
 
-@Component({
-  selector: 'app-productos-form',
-  templateUrl: './productos-form.page.html',
-  styleUrls: ['./productos-form.page.scss'],
-  standalone: false,
-})
-export class ProductosFormPage implements OnInit {
+Dentro de `ProductosFormPage`, justo antes de `productoForm!: FormGroup;`, agrega estas propiedades. `categorias` contiene las opciones del catálogo. `enlacesCategorias` recuerda qué asociaciones tenía este producto al abrir la edición.
+
+```typescript
   categorias: Categoria[] = [];
   enlacesCategorias: { id: number; categoriaId: number }[] = [];
   mensajeCategorias = '';
-  productoForm!: FormGroup;
-  idProducto?: number;
-  cargando: boolean = false;
-  guardando: boolean = false;
+```
 
-  mensajesValidacion: Record<string, Record<string, string>> = {
-    nombre: {
-      required: 'El nombre es obligatorio.',
-      maxlength: 'El nombre no debe superar 150 caracteres.'
-    },
-    precio: {
-      required: 'El precio es obligatorio.',
-      min: 'El precio debe ser igual o mayor que cero.'
-    },
-    stock: {
-      required: 'El stock es obligatorio.',
-      min: 'El stock debe ser igual o mayor que cero.',
-      pattern: 'El stock debe contener únicamente números enteros.'
-    }
-  };
+#### 3.3. Conecta el servicio del catálogo
 
-  constructor(
-    private formBuilder: FormBuilder,
-    private alertController: AlertController,
-    private activatedRoute: ActivatedRoute,
-    private productosService: ProductosService,
+Dentro de los paréntesis del `constructor`, justo antes de `private router: Router`, agrega este parámetro con su coma final.
+
+```typescript
     private categoriasService: CategoriasService,
-    private router: Router
-  ) {}
+```
 
-  get esEdicion(): boolean {
-    return this.idProducto !== undefined;
-  }
+#### 3.4. Crea el espacio para las selecciones
 
-  async ngOnInit(): Promise<void> {
-    this.crearFormulario();
-    await this.cargarCategorias();
+En `crearFormulario()`, ubica el `});` que cierra `this.formBuilder.group(...)`. En la línea siguiente, todavía dentro del método, agrega esta instrucción. El arreglo comienza vacío para que el usuario pueda decidir cuántas categorías asignar.
 
-    const id = this.activatedRoute.snapshot.paramMap.get('id');
-
-    if (id !== null) {
-      const idConvertido = Number(id);
-
-      if (!Number.isNaN(idConvertido)) {
-        this.idProducto = idConvertido;
-        await this.cargarProducto();
-      }
-    }
-  }
-
-  private crearFormulario(): void {
-    this.productoForm = this.formBuilder.group({
-      nombre: ['', [
-        Validators.required,
-        Validators.maxLength(150)
-      ]],
-      descripcion: [''],
-      precio: ['', [
-        Validators.required,
-        Validators.min(0)
-      ]],
-      stock: ['', [
-        Validators.required,
-        Validators.min(0),
-        Validators.pattern('^[0-9]+$')
-      ]]
-    });
+```typescript
     this.productoForm.addControl('categorias', this.formBuilder.array([]));
+```
+
+#### 3.5. Agrega las operaciones del selector
+
+Justo antes de `getError(...)`, coloca estos miembros dentro de la clase. Cada pulsación de **+** crea una fila y cada papelera quita la fila elegida del formulario.
+
+```typescript
+  get categoriasFA(): FormArray {
+    return this.productoForm.get('categorias') as FormArray;
   }
 
-  getError(controlName: string): string {
-    const control = this.productoForm.get(controlName);
-
-    if (
-      !control ||
-      !control.errors ||
-      !(control.touched || control.dirty)
-    ) {
-      return '';
-    }
-
-    const tipoError = Object.keys(control.errors)[0];
-
-    return this.mensajesValidacion[controlName]?.[tipoError]
-      ?? 'El valor ingresado no es válido.';
+  agregarCategoria(): void {
+    this.categoriasFA.push(new FormControl(null, Validators.required));
   }
 
-  private async cargarProducto(): Promise<void> {
-    if (this.idProducto === undefined) {
-      return;
-    }
+  eliminarCategoria(indice: number): void {
+    this.categoriasFA.removeAt(indice);
+  }
 
-    this.cargando = true;
-
+  private async cargarCategorias(): Promise<void> {
     try {
-      const producto = await firstValueFrom(this.productosService.detalle(this.idProducto));
+      this.categorias = await firstValueFrom(this.categoriasService.listado());
+    } catch {
+      this.mensajeCategorias = 'No fue posible cargar el catálogo de categorías.';
+    }
+  }
+```
 
+#### 3.6. Carga las opciones al abrir el formulario
+
+Dentro del `async ngOnInit()` existente, inmediatamente después de `this.crearFormulario();` y antes de leer el ID de la ruta, agrega esta línea. Así el catálogo queda disponible tanto al crear como al editar.
+
+```typescript
+    await this.cargarCategorias();
+```
+
+#### 3.7. Recupera las selecciones al editar
+
+Dentro del `try` de `cargarProducto()`, ubica la línea que obtiene `const producto = await ...`. Después de esa línea y antes de `this.productoForm.patchValue(...)`, agrega este bloque. Por cada asociación guardada aparecerá una fila con la categoría correspondiente seleccionada.
+
+```typescript
       this.enlacesCategorias = (producto.categorias ?? []).map(enlace => ({ id: enlace.id, categoriaId: enlace.categorias_id.id }));
       this.categoriasFA.clear();
       for (const enlace of this.enlacesCategorias) {
         this.categoriasFA.push(new FormControl(enlace.categoriaId, Validators.required));
       }
-      this.productoForm.patchValue({
-        nombre: producto.nombre,
-        descripcion: producto.descripcion,
-        precio: producto.precio,
-        stock: producto.stock
-      });
-    } catch (error) {
-      console.error('Error al cargar el producto:', error);
-
-      const alerta = await this.alertController.create({
-        header: 'Error',
-        message: 'No fue posible cargar los datos del producto. Revisa la conexión, el identificador y los permisos de lectura en Directus.',
-        buttons: ['Aceptar']
-      });
-
-      await alerta.present();
-    } finally {
-      this.cargando = false;
-    }
-  }
-
-  async guardarProducto(): Promise<void> {
-    if (this.guardando) return;
-    if (this.productoForm.invalid) {
-      this.productoForm.markAllAsTouched();
-      return;
-    }
-
-    this.guardando = true;
-
-    const valores = this.productoForm.value;
-
-    const producto: ProductoGuardar = {
-      nombre: valores.nombre.trim(),
-      descripcion: valores.descripcion?.trim() ?? '',
-      precio: Number(valores.precio),
-      stock: Number(valores.stock)
-    };
-
-    const ids = [...new Set(this.categoriasFA.value.map(Number))] as number[];
-    if (this.esEdicion) {
-      const anteriores = new Set(this.enlacesCategorias.map(enlace => enlace.categoriaId));
-      producto.categorias = {
-        create: ids.filter(id => !anteriores.has(id)).map(id => ({ categorias_id: id })),
-        delete: this.enlacesCategorias.filter(enlace => !ids.includes(enlace.categoriaId)).map(enlace => enlace.id)
-      };
-    } else {
-      producto.categorias = ids.map(id => ({ categorias_id: id }));
-    }
-
-    try {
-      if (this.esEdicion && this.idProducto !== undefined) {
-        await firstValueFrom(this.productosService.actualizar(this.idProducto, producto));
-      } else {
-        await firstValueFrom(this.productosService.crear(producto));
-      }
-
-      const alerta = await this.alertController.create({
-        header: this.esEdicion ? 'Producto actualizado' : 'Producto guardado',
-        message: this.esEdicion
-          ? 'El producto fue actualizado correctamente.'
-          : 'El producto fue registrado correctamente.',
-        buttons: ['Aceptar']
-      });
-
-      await alerta.present();
-      await alerta.onDidDismiss();
-
-      await this.router.navigate(['/productos-list']);
-    } catch (error) {
-      console.error(
-        this.esEdicion
-          ? 'Error al actualizar el producto:'
-          : 'Error al guardar el producto:',
-        error
-      );
-
-      const alerta = await this.alertController.create({
-        header: 'Error',
-        message: this.esEdicion
-          ? 'No fue posible actualizar el producto. Revisa los datos, la conexión y los permisos de actualización en Directus.'
-          : 'No fue posible guardar el producto. Revisa los datos, la conexión y los permisos de creación en Directus.',
-        buttons: ['Aceptar']
-      });
-
-      await alerta.present();
-    } finally {
-      this.guardando = false;
-    }
-  }
-  get categoriasFA(): FormArray { return this.productoForm.get('categorias') as FormArray; }
-  agregarCategoria(): void { this.categoriasFA.push(new FormControl(null, Validators.required)); }
-  eliminarCategoria(indice: number): void { this.categoriasFA.removeAt(indice); }
-  private async cargarCategorias(): Promise<void> {
-    try { this.categorias = await firstValueFrom(this.categoriasService.listado()); }
-    catch { this.mensajeCategorias = 'No fue posible consultar las categorías. Revisa su configuración y permisos.'; }
-  }
-}
 ```
 
-### `mobile/src/app/productos-form/productos-form.page.html`
+#### 3.8. Coloca el selector en la pantalla
+
+Abre `mobile/src/app/productos-form/productos-form.page.html`. Dentro del `<form>`, busca el `</ion-list>` que cierra los campos del producto. Pega este bloque justo después y antes del botón de guardar con `type="submit"`.
 
 ```html
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/productos-list"></ion-back-button>
-    </ion-buttons>
-
-    <ion-title>
-      {{ esEdicion ? 'Editar producto' : 'Nuevo producto' }}
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content class="ion-padding">
-  <div *ngIf="cargando" class="ion-text-center ion-padding">
-    <ion-spinner></ion-spinner>
-    <p>Cargando producto...</p>
-  </div>
-
-  <form *ngIf="productoForm && !cargando" [formGroup]="productoForm" (ngSubmit)="guardarProducto()">
-    <ion-list>
-      <ion-item>
-        <ion-input label="Nombre" labelPlacement="stacked" type="text" formControlName="nombre" maxlength="150"></ion-input>
-      </ion-item>
-      <ion-note color="danger" *ngIf="getError('nombre') as error">
-        {{ error }}
-      </ion-note>
-
-      <ion-item>
-        <ion-textarea label="Descripción" labelPlacement="stacked" formControlName="descripcion" autoGrow="true"></ion-textarea>
-      </ion-item>
-
-      <ion-item>
-        <ion-input label="Precio" labelPlacement="stacked" type="number" formControlName="precio" min="0"></ion-input>
-      </ion-item>
-      <ion-note color="danger" *ngIf="getError('precio') as error">
-        {{ error }}
-      </ion-note>
-
-      <ion-item>
-        <ion-input label="Stock" labelPlacement="stacked" type="number" formControlName="stock" min="0"></ion-input>
-      </ion-item>
-      <ion-note color="danger" *ngIf="getError('stock') as error">
-        {{ error }}
-      </ion-note>
-    </ion-list>
-
     <section>
       <h2>Categorías</h2>
       <p *ngIf="mensajeCategorias" role="status">{{ mensajeCategorias }}</p>
@@ -433,160 +184,44 @@ export class ProductosFormPage implements OnInit {
         </ion-item>
       </div>
     </section>
-
-    <ion-button fill="solid" expand="block" type="submit" class="ion-margin-top" [disabled]="guardando || cargando">
-      {{ guardando ? 'Guardando...' : (esEdicion ? 'Actualizar' : 'Guardar') }}
-    </ion-button>
-  </form>
-</ion-content>
 ```
 
-### `mobile/src/app/productos-view/productos-view.page.ts`
+**Comprueba el paso 3.** Abre Nuevo producto, pulsa **+** dos veces y selecciona una categoría en cada fila. Al pulsar la papelera debe desaparecer solo esa fila. El paso 4 conecta estas selecciones con el botón Guardar.
+
+### Paso 4. Guardar las asociaciones
+
+Regresa a `productos-form.page.ts`. Dentro de `guardarProducto()`, ubica la construcción de `const producto: ProductoGuardar = { ... };`. Inmediatamente después de su `};` y antes del `try` que llama al servicio, agrega este bloque.
 
 ```typescript
-import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { LoadingController } from '@ionic/angular';
-import { firstValueFrom } from 'rxjs';
-import { Producto, ProductosService } from '../services/productos';
-import { environment } from '../../environments/environment';
-
-@Component({
-  selector: 'app-productos-view',
-  templateUrl: './productos-view.page.html',
-  styleUrls: ['./productos-view.page.scss'],
-  standalone: false
-})
-export class ProductosViewPage {
-
-  producto: Producto | null = null;
-  mensajeError: string = '';
-
-  constructor(
-    private route: ActivatedRoute,
-    private productosService: ProductosService,
-    private loading: LoadingController
-  ) { }
-
-  ionViewWillEnter() {
-    this.cargarProducto();
-  }
-
-  async cargarProducto(): Promise<void> {
-    const id = this.route.snapshot.paramMap.get('id');
-
-    this.producto = null;
-    this.mensajeError = '';
-
-    if (!id) {
-      this.mensajeError = 'No se recibió el ID del producto.';
-      return;
+    const ids = [...new Set(this.categoriasFA.value.map(Number))] as number[];
+    if (this.esEdicion) {
+      const anteriores = new Set(this.enlacesCategorias.map(enlace => enlace.categoriaId));
+      producto.categorias = {
+        create: ids.filter(id => !anteriores.has(id)).map(id => ({ categorias_id: id })),
+        delete: this.enlacesCategorias.filter(enlace => !ids.includes(enlace.categoriaId)).map(enlace => enlace.id)
+      };
+    } else {
+      producto.categorias = ids.map(id => ({ categorias_id: id }));
     }
-
-    const loading = await this.loading.create({
-      message: 'Cargando producto...',
-      spinner: 'bubbles',
-    });
-
-    await loading.present();
-
-    try {
-      this.producto = await firstValueFrom(this.productosService.detalle(Number(id)));
-
-    } catch (error) {
-      console.error('Error al cargar el producto:', error);
-      this.mensajeError = 'No se pudo cargar el producto. Revisa el ID, la conexión y los permisos de lectura.';
-    } finally {
-      await loading.dismiss();
-    }
-  }
-
-  abrirPagina(): void {
-    if (!this.producto) {
-      return;
-    }
-
-    const url = `${environment.apiUrl}/items/productos/${this.producto.id}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
-  }
-
-}
 ```
 
-### `mobile/src/app/productos-view/productos-view.page.html`
+En el alta, Directus recibe un `categorias_id` por selección y completa `productos_id` con el ID del producto nuevo. En edición, `create` contiene las categorías agregadas y `delete` contiene los IDs de las filas intermedias retiradas. Los cambios se aplican al pulsar **Actualizar**.
+
+### Paso 5. Mostrar las categorías en el detalle
+
+En `mobile/src/app/productos-view/productos-view.page.ts`, importa `Producto` junto a `ProductosService` desde `../services/productos`. Si el archivo declara su propia `interface Producto`, elimina esa declaración. Cambia el nombre del método `ngOnInit()` a `ionViewWillEnter()` conservando su llamada a `this.cargarProducto()`. Si la clase declara `implements OnInit`, quita esa cláusula y retira `OnInit` del import de Angular. Así la página vuelve a consultar las selecciones al regresar de la edición.
+
+En `mobile/src/app/productos-view/productos-view.page.html`, dentro de la tarjeta con `*ngIf="producto as detalle"`, pega este bloque inmediatamente después de `<ion-card-content>`.
 
 ```html
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/productos-list"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Detalle del producto</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content>
-  <ion-text color="danger" *ngIf="mensajeError">
-    <p class="ion-padding">{{ mensajeError }}</p>
-  </ion-text>
-
-  <ion-card *ngIf="producto as detalle">
-    <ion-card-header>
-      <ion-card-title>{{ detalle.nombre }}</ion-card-title>
-      <ion-card-subtitle>Producto #{{ detalle.id }}</ion-card-subtitle>
-    </ion-card-header>
-
-    <ion-card-content>
       <h2>Categorías</h2>
       <ul *ngIf="detalle.categorias?.length; else sinCategorias">
         <li *ngFor="let enlace of detalle.categorias">{{ enlace.categorias_id.nombre }}</li>
       </ul>
       <ng-template #sinCategorias><p>Sin categorías asignadas.</p></ng-template>
-      <ion-list>
-        <ion-item>
-          <ion-label class="ion-text-wrap">
-            <p>Descripción</p>
-            <h2>{{ detalle.descripcion }}</h2>
-          </ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>
-            <p>Precio</p>
-            <h2>${{ detalle.precio }}</h2>
-          </ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>
-            <p>Stock</p>
-            <h2>{{ detalle.stock }}</h2>
-          </ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>
-            <p>Fecha de registro</p>
-            <h2 *ngIf="detalle.fecha_registro; else sinFecha">
-              {{ detalle.fecha_registro | date:'yyyy-MM-dd' }}
-            </h2>
-            <ng-template #sinFecha>
-              <h2>Sin fecha de registro</h2>
-            </ng-template>
-          </ion-label>
-        </ion-item>
-      </ion-list>
-    </ion-card-content>
-  </ion-card>
-</ion-content>
-
-<ion-footer *ngIf="producto">
-  <ion-toolbar>
-    <ion-button fill="solid" expand="block" (click)="abrirPagina()">
-      Ver respuesta de la API
-    </ion-button>
-  </ion-toolbar>
-</ion-footer>
 ```
 
-## 5. Comprobar el resultado
+## 4. Comprobar el resultado
 
 1. Entra a Ionic con la cuenta de práctica. Crea un producto, agrega dos filas y elige Periféricos y Accesorios. Guarda y acepta la confirmación.
 2. Abre el detalle: debe mostrar ambos nombres, como en la figura 1.
@@ -607,7 +242,7 @@ export class ProductosViewPage {
 5. Guarda otra vez sin cambiar las filas: no deben aparecer enlaces duplicados. Finalmente, quita todas las filas, actualiza y verifica Sin categorías asignadas. Reasigna las categorías si deseas conservar el ejemplo.
 6. Prueba una fila vacía: el formulario debe impedir el envío hasta seleccionar una categoría o quitar esa fila.
 
-## 6. Explicación detallada del flujo
+## 5. Explicación detallada del flujo
 
 La figura 3 muestra los caminos de creación, edición y consulta de categorías.
 
