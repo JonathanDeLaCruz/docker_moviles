@@ -27,23 +27,9 @@ Las rutas pertenecen al proyecto Ionic en `mobile/`. Ejecuta los comandos Docker
 
 ### Paso 1. Crear la guardia
 
-Crea `mobile/src/app/guard/auth.guard.ts` con el código de la sección 4. La guardia utiliza el servicio de autenticación del manual 12.
+Crea `mobile/src/app/guard/auth.guard.ts` con el código de este paso. La guardia utiliza el servicio de autenticación del manual 12.
 
-### Paso 2. Proteger las rutas
-
-Importa `authGuard` en `app-routing.module.ts` y agrega `canActivate: [authGuard]` a las rutas de listado, detalle y formulario. Conserva `/login` y `/registro` accesibles. La sección 4 muestra el arreglo completo.
-
-### Paso 3. Regresar a la ruta solicitada
-
-El formulario de acceso del manual 12 lee `returnUrl` y navega a esa ruta después de autenticar. Conserva esa lógica.
-
-### Paso 4. Agregar el cierre de sesión
-
-Inyecta `AuthService` y `Router` en el listado. Agrega el método `cerrarSesion()` de la sección 4 y el botón sólido con icono `log-out` dentro de los botones de la barra. Al cerrar, el servicio invalida la sesión y la página navega a `/login`.
-
-## 4. Código completo de referencia
-
-### `mobile/src/app/guard/auth.guard.ts`
+**`mobile/src/app/guard/auth.guard.ts`**. Crea este archivo con el siguiente contenido o sustituye la plantilla inicial del generador.
 
 ```typescript
 import { inject } from '@angular/core';
@@ -58,182 +44,36 @@ export const authGuard: CanActivateFn = async (_route, state) => {
 };
 ```
 
-### `mobile/src/app/app-routing.module.ts`
+### Paso 2. Proteger las rutas
 
-```typescript
-import { authGuard } from './guard/auth.guard';
-import { NgModule } from '@angular/core';
-import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+Al inicio de `mobile/src/app/app-routing.module.ts`, agrega `import { authGuard } from './guard/auth.guard';` y agrega `canActivate: [authGuard]` a las rutas de listado, detalle y formulario. Conserva `/login` y `/registro` accesibles. Dentro de cada objeto de ruta protegida, coloca `canActivate: [authGuard],` entre `path` y `loadChildren`.
 
-const routes: Routes = [
-  {
-    path: '',
-    loadChildren: () => import('./tabs/tabs.module').then(m => m.TabsPageModule)
-  },
-  {
-    path: 'productos-list',
-    canActivate: [authGuard],
-    loadChildren: () => import('./productos-list/productos-list.module').then( m => m.ProductosListPageModule)
-  },
-  {
-    path: 'productos-view/:id',
-    canActivate: [authGuard],
-    loadChildren: () => import('./productos-view/productos-view.module').then( m => m.ProductosViewPageModule)
-  },
-  {
-    path: 'productos-form',
-    canActivate: [authGuard],
-    loadChildren: () => import('./productos-form/productos-form.module').then( m => m.ProductosFormPageModule)
-  },
-  {
-    path: 'login',
-    loadChildren: () => import('./login/login.module').then( m => m.LoginPageModule)
-  },
-  {
-    path: 'registro',
-    loadChildren: () => import('./registro/registro.module').then( m => m.RegistroPageModule)
-  }
-];
-@NgModule({
-  imports: [
-    RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })
-  ],
-  exports: [RouterModule]
-})
-export class AppRoutingModule {}
-```
+### Paso 3. Regresar a la ruta solicitada
 
-### `mobile/src/app/productos-list/productos-list.page.ts`
+El formulario de acceso del manual 12 lee `returnUrl` y navega a esa ruta después de autenticar. En `mobile/src/app/login/login.page.ts`, localiza la lectura de `returnUrl` y la navegación tras `ingresar()`. Para comprobarla, cierra sesión, abre directamente el detalle de un producto e inicia sesión. Debe abrirse ese mismo detalle.
+
+### Paso 4. Agregar el cierre de sesión
+
+Inyecta `AuthService` y `Router` en el listado. Agrega el método `cerrarSesion()` de este paso y el botón sólido con icono `log-out` dentro de los botones de la barra. Al cerrar, el servicio invalida la sesión y la página navega a `/login`.
+
+**`mobile/src/app/productos-list/productos-list.page.ts`**. Aplica estos cambios en el orden indicado.
+
+Inserta el fragmento al inicio del archivo y antes de `import { Component } from '@angular/core';`.
 
 ```typescript
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth';
-import { Component } from '@angular/core';
-import { AlertController } from '@ionic/angular';
-import { firstValueFrom } from 'rxjs';
-import { ProductosService } from '../services/productos';
+```
 
-interface Producto {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  precio: string;
-  stock: number;
-  fecha_registro: string;
-}
+Sustituye la línea `constructor(private alertController: AlertController, private productosService: ProductosService) {}` después de `porPagina: number = 3;` / `titulo: string = 'Productos';` y antes de `productos: Producto[] = [];`.
 
-@Component({
-  selector: 'app-productos-list',
-  templateUrl: './productos-list.page.html',
-  styleUrls: ['./productos-list.page.scss'],
-  standalone: false,
-})
-export class ProductosListPage {
-  busqueda: string = '';
-
-  total: number = 0;
-  paginaActual: number = 1;
-  porPagina: number = 3;
-
-  titulo: string = 'Productos';
-
+```typescript
   constructor(private alertController: AlertController, private productosService: ProductosService, private auth: AuthService, private router: Router) {}
+```
 
-  productos: Producto[] = [];
+Sustituye la línea `}` después de `await this.cargarDatos();` / `}`.
 
-  ionViewWillEnter(): void {
-    void this.cargarDatos();
-  }
-
-async cargarProductos(): Promise<void> {
-  try {
-    this.productos = await firstValueFrom(this.productosService.listado(this.paginaActual, this.porPagina, this.busqueda));
-  } catch (error) { console.error('Error al cargar productos:', error); }
-}
-
-
-async confirmarEliminar(id: number, nombre: string): Promise<void> {
-  const alerta = await this.alertController.create({
-    header: 'Eliminar producto',
-    message: `¿Estás seguro de eliminar el producto "${nombre}"?`,
-    buttons: [
-      {
-        text: 'Cancelar',
-        role: 'cancel'
-      },
-      {
-        text: 'Eliminar',
-        role: 'destructive',
-        handler: () => {
-          void this.eliminarProducto(id);
-        }
-      }
-    ]
-  });
-
-  await alerta.present();
-}
-async eliminarProducto(id: number): Promise<void> {
-  try {
-    await firstValueFrom(this.productosService.eliminar(id));
-
-    const alerta = await this.alertController.create({
-      header: 'Producto eliminado',
-      message: 'El producto fue eliminado correctamente.',
-      buttons: ['Aceptar']
-    });
-
-    await alerta.present();
-    await alerta.onDidDismiss();
-
-    await this.cargarDatos();
-  } catch (error) {
-    console.error('Error al eliminar el producto:', error);
-
-    const alerta = await this.alertController.create({
-      header: 'Error',
-      message: 'No fue posible eliminar el producto. Revisa la conexión, los permisos de eliminación en Directus y las relaciones del registro.',
-      buttons: ['Aceptar']
-    });
-
-    await alerta.present();
-  }
-}
-async cargarTotal(): Promise<void> {
-  try { this.total = await firstValueFrom(this.productosService.total(this.busqueda)); }
-  catch (error) { this.total = 0; console.error('Error al contar productos:', error); }
-}
-private ajustarPaginaActual(): void {
-  const totalPaginas = Math.ceil(
-    this.total / this.porPagina
-  );
-
-  if (totalPaginas === 0) {
-    this.paginaActual = 1;
-    return;
-  }
-
-  if (this.paginaActual > totalPaginas) {
-    this.paginaActual = totalPaginas;
-  }
-}
-async cargarDatos(): Promise<void> {
-  await this.cargarTotal();
-  this.ajustarPaginaActual();
-  await this.cargarProductos();
-}
-async cambiarPagina(
-  pagina: number
-): Promise<void> {
-  this.paginaActual = pagina;
-  await this.cargarProductos();
-}
-
-  async handleInput(event: CustomEvent<{ value?: string | null }>): Promise<void> {
-    this.busqueda = event.detail.value ?? '';
-    this.paginaActual = 1;
-    await this.cargarDatos();
-  }
+```typescript
   async cerrarSesion(): Promise<void> {
     try { await this.auth.cerrarSesion(); }
     finally { await this.router.navigateByUrl('/login', { replaceUrl: true }); }
@@ -241,46 +81,15 @@ async cambiarPagina(
 }
 ```
 
-### `mobile/src/app/productos-list/productos-list.page.html`
+**`mobile/src/app/productos-list/productos-list.page.html`**. Aplica estos cambios en el orden indicado.
+
+Inserta el fragmento después de `<ion-icon slot="icon-only" name="add"></ion-icon>` / `</ion-button>` y antes de `</ion-buttons>`.
 
 ```html
-<app-toolbar [nombre]="titulo" color="personalizado">
-  <ion-buttons slot="end">
-    <ion-button fill="solid" [routerLink]="['/productos-form']" aria-label="Nuevo producto">
-      <ion-icon slot="icon-only" name="add"></ion-icon>
-    </ion-button>
     <ion-button fill="solid" (click)="cerrarSesion()" aria-label="Cerrar sesión"><ion-icon slot="icon-only" name="log-out"></ion-icon></ion-button>
-  </ion-buttons>
-</app-toolbar>
-
-<ion-content>
-  <ion-searchbar [value]="busqueda" [debounce]="300" (ionInput)="handleInput($event)" placeholder="Buscar productos" aria-label="Buscar productos"></ion-searchbar>
-  <p class="ion-padding" *ngIf="total === 0">No se encontraron productos.</p>
-  <ion-list>
-    <ion-item *ngFor="let producto of productos">
-      <ion-label class="ion-text-wrap">
-        <h2>{{ producto.nombre }}</h2>
-        <p>{{ producto.descripcion }}</p>
-        <p>Precio: ${{ producto.precio }}</p>
-        <p>Stock: {{ producto.stock }}</p>
-        <p>Registro: {{ producto.fecha_registro | date:'yyyy-MM-dd' }}</p>
-      </ion-label>
-      <ion-button fill="solid" slot="end" [routerLink]="['/productos-view', producto.id]" aria-label="Ver detalle">
-        <ion-icon slot="icon-only" name="eye"></ion-icon>
-      </ion-button>
-      <ion-button fill="solid" color="warning" [routerLink]="['/productos-form', producto.id]">
-        <ion-icon slot="icon-only" name="pencil"></ion-icon>
-      </ion-button>
-      <ion-button fill="solid" color="danger" (click)="confirmarEliminar(producto.id, producto.nombre)" aria-label="Eliminar producto">
-        <ion-icon slot="icon-only" name="trash"></ion-icon>
-      </ion-button>
-    </ion-item>
-  </ion-list>
-  <app-paginacion [total]="total" [porPagina]="porPagina" [paginaActual]="paginaActual" [maxPaginasVisibles]="5" (paginaCambio)="cambiarPagina($event)"></app-paginacion>
-</ion-content>
 ```
 
-## 5. Comprobar el resultado
+## 4. Comprobar el resultado
 
 1. Recarga la aplicación y abre directamente `/productos-view/1`: debe redirigir a `/login` con `returnUrl`, como en la figura 1.
 2. Inicia sesión con una cuenta activa: debe abrir el detalle solicitado.
@@ -290,7 +99,7 @@ async cambiarPagina(
 
 La figura 1 muestra el resultado obtenido con el código de esta práctica. Las fechas, los productos y el tema visual dependen de tu entorno.
 
-## 6. Explicación detallada del flujo
+## 5. Explicación detallada del flujo
 
 La figura 2 muestra el recorrido de arriba hacia abajo.
 

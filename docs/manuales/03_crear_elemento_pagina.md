@@ -42,7 +42,7 @@ Esta es la variante **mediante página**: se navega a `/productos-form` y se reg
 
 ## 3. Implementación paso a paso
 
-Sigue los pasos en orden. La sección 4 reúne el código completo del listado, el módulo del formulario, su TypeScript y su HTML.
+Sigue los pasos en orden.
 
 ### Paso 1. Permitir la creación en Directus
 
@@ -93,7 +93,7 @@ Abre `mobile/src/app/productos-form/productos-form.module.ts`. **Reemplaza la im
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 ```
 
-Después agrega `ReactiveFormsModule` al arreglo `imports`, conservando `CommonModule`, `FormsModule`, `IonicModule` y `ProductosFormPageRoutingModule`. La página debe seguir declarada en `declarations`. El módulo completo está en la sección 4.
+Después agrega `ReactiveFormsModule` al arreglo `imports`, conservando `CommonModule`, `FormsModule`, `IonicModule` y `ProductosFormPageRoutingModule`. La página debe seguir declarada en `declarations`.
 
 ### Paso 4. Preparar el listado para abrir el formulario y recargarse
 
@@ -137,7 +137,7 @@ En `mobile/src/app/productos-list/productos-list.page.html`, **dentro de `ion-to
 </ion-fab>
 ```
 
-La figura 5 muestra esta alternativa. **Elige una sola opción**: ambas abren la misma página y utilizan el mismo formulario. Conserva las filas y los botones con icono de **ojo** del manual 02. El código completo de la sección 4 utiliza la opción A. Los botones `ion-button` llevan `fill="solid"`; `ion-fab-button` ya es sólido.
+La figura 5 muestra esta alternativa. **Elige una sola opción**: ambas abren la misma página y utilizan el mismo formulario. Conserva las filas y los botones con icono de **ojo** del manual 02. Los botones `ion-button` llevan `fill="solid"`; `ion-fab-button` ya es sólido.
 
 ### Paso 5. Crear el formulario y sus mensajes en TypeScript
 
@@ -356,314 +356,7 @@ Abre `mobile/src/app/productos-form/productos-form.page.html` y **reemplaza su c
 
 Los campos se conectan mediante `formControlName`. El HTML llama a `getError()` y muestra el mensaje devuelto desde TypeScript. El botón envía el formulario con `(ngSubmit)` y se deshabilita mientras `guardando` sea `true`.
 
-## 4. Así debe quedar el código completo
-
-Los siguientes archivos corresponden a la variante mediante página, conservando el listado y el acceso al detalle de las prácticas anteriores. Compáralos con lo que acabas de escribir.
-
-### `mobile/src/app/productos-list/productos-list.page.ts`
-
-```typescript
-import { Component } from '@angular/core';
-import axios from 'axios';
-import { environment } from '../../environments/environment';
-
-interface Producto {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  precio: string;
-  stock: number;
-  fecha_registro: string;
-}
-
-@Component({
-  selector: 'app-productos-list',
-  templateUrl: './productos-list.page.html',
-  styleUrls: ['./productos-list.page.scss'],
-  standalone: false,
-})
-export class ProductosListPage {
-  productos: Producto[] = [];
-
-  constructor() {}
-
-  ionViewWillEnter(): void {
-    this.cargarProductos();
-  }
-
-  async cargarProductos(): Promise<void> {
-    try {
-      const response = await axios.get<{ data: Producto[] }>(
-        `${environment.apiUrl}/items/productos`
-      );
-
-      this.productos = response.data.data;
-    } catch (error) {
-      console.error('Error al cargar los productos:', error);
-    }
-  }
-}
-```
-
-### `mobile/src/app/productos-list/productos-list.page.html`
-
-```html
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Productos</ion-title>
-    <ion-buttons slot="end">
-      <ion-button fill="solid" [routerLink]="['/productos-form']" aria-label="Nuevo producto">
-        <ion-icon slot="icon-only" name="add"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content>
-  <ion-list>
-    <ion-item *ngFor="let producto of productos">
-      <ion-label class="ion-text-wrap">
-        <h2>{{ producto.nombre }}</h2>
-        <p>{{ producto.descripcion }}</p>
-        <p>Precio: ${{ producto.precio }}</p>
-        <p>Stock: {{ producto.stock }}</p>
-        <p>Registro: {{ producto.fecha_registro | date:'yyyy-MM-dd' }}</p>
-      </ion-label>
-      <ion-button fill="solid" slot="end" [routerLink]="['/productos-view', producto.id]" aria-label="Ver detalle">
-        <ion-icon slot="icon-only" name="eye"></ion-icon>
-      </ion-button>
-    </ion-item>
-  </ion-list>
-</ion-content>
-```
-
-### `mobile/src/app/productos-form/productos-form.module.ts`
-
-```typescript
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
-import { IonicModule } from '@ionic/angular';
-
-import { ProductosFormPageRoutingModule } from './productos-form-routing.module';
-
-import { ProductosFormPage } from './productos-form.page';
-
-@NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    IonicModule,
-    ProductosFormPageRoutingModule
-  ],
-  declarations: [ProductosFormPage]
-})
-export class ProductosFormPageModule {}
-```
-
-### `mobile/src/app/productos-form/productos-form.page.ts`
-
-```typescript
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AlertController } from '@ionic/angular';
-import { Router } from '@angular/router';
-import axios from 'axios';
-import { environment } from '../../environments/environment';
-
-interface ProductoCrear {
-  nombre: string;
-  descripcion: string;
-  precio: number;
-  stock: number;
-}
-
-@Component({
-  selector: 'app-productos-form',
-  templateUrl: './productos-form.page.html',
-  styleUrls: ['./productos-form.page.scss'],
-  standalone: false,
-})
-export class ProductosFormPage implements OnInit {
-
-  productoForm!: FormGroup;
-  guardando: boolean = false;
-
-  mensajesValidacion: Record<string, Record<string, string>> = {
-    nombre: {
-      required: 'El nombre es obligatorio.',
-      maxlength: 'El nombre no debe superar 150 caracteres.'
-    },
-    precio: {
-      required: 'El precio es obligatorio.',
-      min: 'El precio debe ser igual o mayor que cero.'
-    },
-    stock: {
-      required: 'El stock es obligatorio.',
-      min: 'El stock debe ser igual o mayor que cero.',
-      pattern: 'El stock debe contener únicamente números enteros.'
-    }
-  };
-
-  constructor(
-    private formBuilder: FormBuilder,
-    private alertController: AlertController,
-    private router: Router
-  ) {}
-
-  ngOnInit(): void {
-    this.crearFormulario();
-  }
-
-  private crearFormulario(): void {
-    this.productoForm = this.formBuilder.group({
-      nombre: ['', [
-        Validators.required,
-        Validators.maxLength(150)
-      ]],
-      descripcion: [''],
-      precio: ['', [
-        Validators.required,
-        Validators.min(0)
-      ]],
-      stock: ['', [
-        Validators.required,
-        Validators.min(0),
-        Validators.pattern('^[0-9]+$')
-      ]]
-    });
-  }
-
-  getError(controlName: string): string {
-    const control = this.productoForm.get(controlName);
-
-    if (
-      !control ||
-      !control.errors ||
-      !(control.touched || control.dirty)
-    ) {
-      return '';
-    }
-
-    const tipoError = Object.keys(control.errors)[0];
-
-    return this.mensajesValidacion[controlName]?.[tipoError]
-      ?? 'El valor ingresado no es válido.';
-  }
-
-  async guardarProducto(): Promise<void> {
-    if (this.productoForm.invalid) {
-      this.productoForm.markAllAsTouched();
-      return;
-    }
-
-    this.guardando = true;
-
-    const valores = this.productoForm.value;
-
-    const producto: ProductoCrear = {
-      nombre: valores.nombre.trim(),
-      descripcion: valores.descripcion?.trim() ?? '',
-      precio: Number(valores.precio),
-      stock: Number(valores.stock)
-    };
-
-    try {
-      await axios.post(
-        `${environment.apiUrl}/items/productos`,
-        producto,
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      const alerta = await this.alertController.create({
-        header: 'Producto guardado',
-        message: 'El producto fue registrado correctamente.',
-        buttons: [
-          {
-            text: 'Aceptar',
-            handler: () => {
-              this.router.navigateByUrl('/productos-list');
-            }
-          }
-        ]
-      });
-
-      await alerta.present();
-    } catch (error) {
-      console.error('Error al guardar el producto:', error);
-
-      const alerta = await this.alertController.create({
-        header: 'Error',
-        message: 'No fue posible guardar el producto. Revisa los datos, la conexión y los permisos de creación en Directus.',
-        buttons: ['Aceptar']
-      });
-
-      await alerta.present();
-    } finally {
-      this.guardando = false;
-    }
-  }
-}
-```
-
-### `mobile/src/app/productos-form/productos-form.page.html`
-
-```html
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/productos-list"></ion-back-button>
-    </ion-buttons>
-
-    <ion-title>Nuevo producto</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content class="ion-padding">
-  <form *ngIf="productoForm" [formGroup]="productoForm" (ngSubmit)="guardarProducto()">
-    <ion-list>
-      <ion-item>
-        <ion-input label="Nombre" labelPlacement="stacked" type="text" formControlName="nombre" maxlength="150"></ion-input>
-      </ion-item>
-      <ion-note color="danger" *ngIf="getError('nombre') as error">
-        {{ error }}
-      </ion-note>
-
-      <ion-item>
-        <ion-textarea label="Descripción" labelPlacement="stacked" formControlName="descripcion" autoGrow="true"></ion-textarea>
-      </ion-item>
-
-      <ion-item>
-        <ion-input label="Precio" labelPlacement="stacked" type="number" formControlName="precio" min="0"></ion-input>
-      </ion-item>
-      <ion-note color="danger" *ngIf="getError('precio') as error">
-        {{ error }}
-      </ion-note>
-
-      <ion-item>
-        <ion-input label="Stock" labelPlacement="stacked" type="number" formControlName="stock" min="0"></ion-input>
-      </ion-item>
-      <ion-note color="danger" *ngIf="getError('stock') as error">
-        {{ error }}
-      </ion-note>
-    </ion-list>
-
-    <ion-button fill="solid" expand="block" type="submit" class="ion-margin-top" [disabled]="guardando">
-      {{ guardando ? 'Guardando...' : 'Guardar' }}
-    </ion-button>
-  </form>
-</ion-content>
-```
-
-En `app-routing.module.ts`, aplica únicamente la entrada del paso 2 y conserva las demás rutas. El módulo de rutas del formulario mantiene su configuración generada. Los archivos SCSS no requieren cambios.
-
-## 5. Comprobar que funciona
+## 4. Comprobar que funciona
 
 1. Guarda los archivos y espera a que Ionic termine de compilar.
 2. Abre `http://localhost:8100/productos-list` y presiona **Nuevo**. Debe abrirse `/productos-form`.
@@ -707,7 +400,7 @@ Con la opción A, el icono **+** aparece en la barra (figura 4). Con la opción 
   <em>Figura 5. Opción B: botón flotante + que abre la misma página.</em>
 </p>
 
-## 6. Explicación detallada del flujo
+## 5. Explicación detallada del flujo
 
 ### Del formulario al listado actualizado
 

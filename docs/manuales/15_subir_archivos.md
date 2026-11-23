@@ -48,15 +48,11 @@ Agrega manualmente `standalone: false`. En la ruta principal generada cambia el 
 
 ### Paso 3. Preparar la selección y el envío
 
-Coloca el TypeScript, el HTML y el SCSS de la sección 4. `onFileSelected()` conserva el `File`; `subir()` crea `FormData`, envía `/files`, guarda el ID en el producto y solicita el contenido para mostrarlo. Axios prepara el encabezado multipart correspondiente al formulario.
+Coloca el TypeScript, el HTML y el SCSS de este paso. `onFileSelected()` conserva el `File`; `subir()` crea `FormData`, envía `/files`, guarda el ID en el producto y solicita el contenido para mostrarlo. Axios prepara el encabezado multipart correspondiente al formulario.
 
-### Paso 4. Abrir desde el listado
+**`mobile/src/app/producto-imagen/producto-imagen.page.ts`**
 
-Agrega el botón de imagen de la sección 4 dentro de la fila de cada producto. Su ruta incluye el ID del registro elegido. Para probar, el repositorio contiene `docs/manuales/recursos/producto-ejemplo.svg`.
-
-## 4. Código completo de referencia
-
-### `mobile/src/app/producto-imagen/producto-imagen.page.ts`
+1. En el archivo nuevo coloca los imports, las declaraciones y la estructura inicial que se muestran abajo. Si el generador creó una clase de ejemplo, sustituye esa plantilla una sola vez.
 
 ```typescript
 import { Component, OnDestroy, OnInit } from '@angular/core';
@@ -70,6 +66,14 @@ export class ProductoImagenPage implements OnInit, OnDestroy {
   mensaje = '';
   enviando = false;
   constructor(private route: ActivatedRoute, private auth: AuthService) {}
+}
+```
+
+2. Dentro de `ProductoImagenPage`, inserta los siguientes métodos en orden, justo antes de la última llave de la clase.
+
+**`ngOnInit()`**
+
+```typescript
   async ngOnInit(): Promise<void> {
     this.idProducto = Number(this.route.snapshot.paramMap.get('id'));
     if (!Number.isInteger(this.idProducto) || this.idProducto < 1) {
@@ -80,15 +84,30 @@ export class ProductoImagenPage implements OnInit, OnDestroy {
       if (response.data.data.imagen) await this.mostrar(response.data.data.imagen);
     } catch { this.mensaje = 'No fue posible cargar la imagen del producto.'; }
   }
+```
+
+**`onFileSelected()`**
+
+```typescript
   onFileSelected(event: Event): void {
     this.archivo = (event.target as HTMLInputElement).files?.[0] ?? null;
     this.mensaje = '';
   }
+```
+
+**`mostrar()`**
+
+```typescript
   private async mostrar(id: string): Promise<void> {
     const response = await this.auth.cliente.get<Blob>('/assets/' + id, { responseType: 'blob' });
     if (this.imagenUrl) URL.revokeObjectURL(this.imagenUrl);
     this.imagenUrl = URL.createObjectURL(response.data);
   }
+```
+
+**`subir()`**
+
+```typescript
   async subir(): Promise<void> {
     if (!this.archivo || this.idProducto < 1) return;
     this.enviando = true;
@@ -104,11 +123,15 @@ export class ProductoImagenPage implements OnInit, OnDestroy {
     } catch { this.mensaje = 'No fue posible guardar la imagen. Revisa el archivo y los permisos configurados.'; }
     finally { this.enviando = false; }
   }
-  ngOnDestroy(): void { if (this.imagenUrl) URL.revokeObjectURL(this.imagenUrl); }
-}
 ```
 
-### `mobile/src/app/producto-imagen/producto-imagen.page.html`
+**`ngOnDestroy()`**
+
+```typescript
+  ngOnDestroy(): void { if (this.imagenUrl) URL.revokeObjectURL(this.imagenUrl); }
+```
+
+**`mobile/src/app/producto-imagen/producto-imagen.page.html`**. Coloca esta plantilla en la vista de la práctica. Si Ionic generó contenido de ejemplo, sustitúyelo.
 
 ```html
 <ion-header><ion-toolbar><ion-buttons slot="start"><ion-back-button defaultHref="/productos-list"></ion-back-button></ion-buttons><ion-title>Imagen del producto</ion-title></ion-toolbar></ion-header>
@@ -122,150 +145,23 @@ export class ProductoImagenPage implements OnInit, OnDestroy {
 </ion-content>
 ```
 
-### `mobile/src/app/producto-imagen/producto-imagen.page.scss`
+**`mobile/src/app/producto-imagen/producto-imagen.page.scss`**. Agrega estas reglas al final de la hoja de estilos.
 
 ```scss
 .preview { display: block; width: 280px; max-width: 100%; margin: 1rem auto; }
 ```
 
-### `mobile/src/app/producto-imagen/producto-imagen.module.ts`
+### Paso 4. Abrir desde el listado
 
-```typescript
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+Agrega el botón de imagen de este paso dentro de la fila de cada producto. Su ruta incluye el ID del registro elegido. Para probar, el repositorio contiene `docs/manuales/recursos/producto-ejemplo.svg`.
 
-import { IonicModule } from '@ionic/angular';
-
-import { ProductoImagenPageRoutingModule } from './producto-imagen-routing.module';
-
-import { ProductoImagenPage } from './producto-imagen.page';
-
-@NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    ProductoImagenPageRoutingModule
-  ],
-  declarations: [ProductoImagenPage]
-})
-export class ProductoImagenPageModule {}
-```
-
-### `mobile/src/app/producto-imagen/producto-imagen-routing.module.ts`
-
-```typescript
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-
-import { ProductoImagenPage } from './producto-imagen.page';
-
-const routes: Routes = [
-  {
-    path: '',
-    component: ProductoImagenPage
-  }
-];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
-})
-export class ProductoImagenPageRoutingModule {}
-```
-
-### `mobile/src/app/app-routing.module.ts`
-
-```typescript
-import { authGuard } from './guard/auth.guard';
-import { NgModule } from '@angular/core';
-import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
-
-const routes: Routes = [
-  {
-    path: '',
-    loadChildren: () => import('./tabs/tabs.module').then(m => m.TabsPageModule)
-  },
-  {
-    path: 'productos-list',
-    canActivate: [authGuard],
-    loadChildren: () => import('./productos-list/productos-list.module').then( m => m.ProductosListPageModule)
-  },
-  {
-    path: 'productos-view/:id',
-    canActivate: [authGuard],
-    loadChildren: () => import('./productos-view/productos-view.module').then( m => m.ProductosViewPageModule)
-  },
-  {
-    path: 'productos-form',
-    canActivate: [authGuard],
-    loadChildren: () => import('./productos-form/productos-form.module').then( m => m.ProductosFormPageModule)
-  },
-  {
-    path: 'login',
-    loadChildren: () => import('./login/login.module').then( m => m.LoginPageModule)
-  },
-  {
-    path: 'registro',
-    loadChildren: () => import('./registro/registro.module').then( m => m.RegistroPageModule)
-  },
-  {
-    path: 'producto-imagen/:id',
-    canActivate: [authGuard],
-    loadChildren: () => import('./producto-imagen/producto-imagen.module').then( m => m.ProductoImagenPageModule)
-  }
-];
-@NgModule({
-  imports: [
-    RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })
-  ],
-  exports: [RouterModule]
-})
-export class AppRoutingModule {}
-```
-
-### `mobile/src/app/productos-list/productos-list.page.html`
+**`mobile/src/app/productos-list/productos-list.page.html`**. Dentro del `ion-item` que recorre los productos, agrega este botón junto al de edición.
 
 ```html
-<app-toolbar [nombre]="titulo" color="personalizado">
-  <ion-buttons slot="end">
-    <ion-button fill="solid" [routerLink]="['/productos-form']" aria-label="Nuevo producto">
-      <ion-icon slot="icon-only" name="add"></ion-icon>
-    </ion-button>
-    <ion-button fill="solid" (click)="cerrarSesion()" aria-label="Cerrar sesión"><ion-icon slot="icon-only" name="log-out"></ion-icon></ion-button>
-  </ion-buttons>
-</app-toolbar>
-
-<ion-content>
-  <ion-searchbar [value]="busqueda" [debounce]="300" (ionInput)="handleInput($event)" placeholder="Buscar productos" aria-label="Buscar productos"></ion-searchbar>
-  <p class="ion-padding" *ngIf="total === 0">No se encontraron productos.</p>
-  <ion-list>
-    <ion-item *ngFor="let producto of productos">
-      <ion-label class="ion-text-wrap">
-        <h2>{{ producto.nombre }}</h2>
-        <p>{{ producto.descripcion }}</p>
-        <p>Precio: ${{ producto.precio }}</p>
-        <p>Stock: {{ producto.stock }}</p>
-        <p>Registro: {{ producto.fecha_registro | date:'yyyy-MM-dd' }}</p>
-      </ion-label>
-      <ion-button fill="solid" slot="end" [routerLink]="['/productos-view', producto.id]" aria-label="Ver detalle">
-        <ion-icon slot="icon-only" name="eye"></ion-icon>
-      </ion-button>
-      <ion-button fill="solid" color="warning" [routerLink]="['/productos-form', producto.id]">
-        <ion-icon slot="icon-only" name="pencil"></ion-icon>
-      </ion-button>
-      <ion-button fill="solid" color="danger" (click)="confirmarEliminar(producto.id, producto.nombre)" aria-label="Eliminar producto">
-        <ion-icon slot="icon-only" name="trash"></ion-icon>
-      </ion-button>
       <ion-button fill="solid" [routerLink]="['/producto-imagen', producto.id]" aria-label="Imagen del producto"><ion-icon slot="icon-only" name="image"></ion-icon></ion-button>
-    </ion-item>
-  </ion-list>
-  <app-paginacion [total]="total" [porPagina]="porPagina" [paginaActual]="paginaActual" [maxPaginasVisibles]="5" (paginaCambio)="cambiarPagina($event)"></app-paginacion>
-</ion-content>
 ```
 
-## 5. Comprobar el resultado
+## 4. Comprobar el resultado
 
 La figura 1 muestra la carga y asociación completadas en Ionic con una cuenta de práctica sin acceso administrativo.
 
@@ -287,7 +183,7 @@ La figura 2 muestra la imagen recuperada al volver a abrir la página. El select
   <em>Figura 2. Recuperación autenticada de la imagen asociada.</em>
 </p>
 
-## 6. Explicación detallada del flujo
+## 5. Explicación detallada del flujo
 
 La figura 3 muestra el recorrido de arriba hacia abajo.
 

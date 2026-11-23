@@ -31,31 +31,15 @@ Las rutas pertenecen al proyecto Ionic en `mobile/`. Ejecuta los comandos Docker
 docker compose exec mobile ionic g service services/productos
 ```
 
-El generador utilizado en este proyecto crea `src/app/services/productos.ts`. Coloca allí la clase `ProductosService` de la sección 4.
+El generador utilizado en este proyecto crea `src/app/services/productos.ts`. En el paso 2 encontrarás la implementación del servicio.
 
 ### Paso 2. Definir las operaciones
 
 El servicio incluye `listado`, `detalle`, `crear`, `actualizar`, `eliminar` y `total`. Su filtro se utiliza tanto en el listado como en el conteo. Las interfaces describen los datos recibidos y los enviados.
 
-### Paso 3. Inyectarlo en las páginas
+**`mobile/src/app/services/productos.ts`**
 
-Importa `ProductosService` desde `../services/productos` y `firstValueFrom` desde `rxjs`. Agrega el servicio al constructor de listado, formulario y detalle.
-
-### Paso 4. Utilizar los métodos
-
-El listado espera el resultado con:
-
-```typescript
-this.productos = await firstValueFrom(
-  this.productosService.listado(this.paginaActual, this.porPagina, this.busqueda)
-);
-```
-
-En el formulario, `detalle(id)` carga sus valores, `crear(producto)` envía el registro nuevo y `actualizar(id, producto)` guarda la edición. La eliminación espera `eliminar(id)` y después actualiza el listado. La sección 4 reúne los archivos completos modificados. Sus plantillas HTML se conservan.
-
-## 4. Código completo de referencia
-
-### `mobile/src/app/services/productos.ts`
+1. En el archivo nuevo coloca los imports, las declaraciones y la estructura inicial que se muestran abajo. Si el generador creó una clase de ejemplo, sustituye esa plantilla una sola vez.
 
 ```typescript
 import { Injectable } from '@angular/core';
@@ -81,7 +65,14 @@ export interface ProductoGuardar {
 @Injectable({ providedIn: 'root' })
 export class ProductosService {
   private url = environment.apiUrl + '/items/productos';
+}
+```
 
+2. Dentro de `ProductosService`, inserta los siguientes métodos en orden, justo antes de la última llave de la clase.
+
+**`filtro()`**
+
+```typescript
   private filtro(busqueda: string): Record<string, string> {
     const texto = busqueda.trim();
     return texto ? { filter: JSON.stringify({ _or: [
@@ -89,462 +80,159 @@ export class ProductosService {
       { descripcion: { _icontains: texto } }
     ] }) } : {};
   }
+```
 
+**`listado()`**
+
+```typescript
   listado(pagina = 1, porPagina = 3, busqueda = ''): Observable<Producto[]> {
     return defer(() => axios.get<{ data: Producto[] }>(this.url, {
       params: { page: pagina, limit: porPagina, sort: 'id', ...this.filtro(busqueda) }
     })).pipe(map(response => response.data.data));
   }
+```
 
+**`detalle()`**
+
+```typescript
   detalle(id: number): Observable<Producto> {
     return defer(() => axios.get<{ data: Producto }>(this.url + '/' + id))
       .pipe(map(response => response.data.data));
   }
+```
 
+**`crear()`**
+
+```typescript
   crear(producto: ProductoGuardar): Observable<Producto> {
     return defer(() => axios.post<{ data: Producto }>(this.url, producto))
       .pipe(map(response => response.data.data));
   }
+```
 
+**`actualizar()`**
+
+```typescript
   actualizar(id: number, producto: ProductoGuardar): Observable<Producto> {
     return defer(() => axios.patch<{ data: Producto }>(this.url + '/' + id, producto))
       .pipe(map(response => response.data.data));
   }
+```
 
+**`eliminar()`**
+
+```typescript
   eliminar(id: number): Observable<void> {
     return defer(() => axios.delete(this.url + '/' + id)).pipe(map(() => undefined));
   }
+```
 
+**`total()`**
+
+```typescript
   total(busqueda = ''): Observable<number> {
     return defer(() => axios.get<{ data: { count: string | number }[] }>(this.url, {
       params: { 'aggregate[count]': '*', ...this.filtro(busqueda) }
     })).pipe(map(response => Number(response.data.data[0]?.count ?? 0)));
   }
-}
 ```
 
-### `mobile/src/app/productos-list/productos-list.page.ts`
+### Paso 3. Inyectarlo en las páginas
+
+Abre los tres archivos de página en `mobile/src/app`: `productos-list/productos-list.page.ts`, `productos-form/productos-form.page.ts` y `productos-view/productos-view.page.ts`. En cada uno localiza los imports de Axios y el constructor de la clase. El paso 4 indica qué cambiar en cada archivo para inyectar `ProductosService` y esperar los resultados con `firstValueFrom`.
+
+### Paso 4. Utilizar los métodos
+
+En el formulario, `detalle(id)` carga sus valores, `crear(producto)` envía el registro nuevo y `actualizar(id, producto)` guarda la edición. La eliminación espera `eliminar(id)` y después actualiza el listado. Sus plantillas HTML se conservan.
+
+**`mobile/src/app/productos-list/productos-list.page.ts`**. Aplica estos cambios en el orden indicado.
+
+Sustituye el bloque desde `import axios from 'axios';` hasta `import { environment } from '../../environments/environment';` después de `import { Component } from '@angular/core';` / `import { AlertController } from '@ionic/angular';` y antes de `interface Producto {`.
 
 ```typescript
-import { Component } from '@angular/core';
-import { AlertController } from '@ionic/angular';
 import { firstValueFrom } from 'rxjs';
 import { ProductosService } from '../services/productos';
+```
 
-interface Producto {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  precio: string;
-  stock: number;
-  fecha_registro: string;
-}
+Sustituye la línea `constructor(private alertController: AlertController) {}` después de `porPagina: number = 3;` / `titulo: string = 'Productos';` y antes de `productos: Producto[] = [];`.
 
-@Component({
-  selector: 'app-productos-list',
-  templateUrl: './productos-list.page.html',
-  styleUrls: ['./productos-list.page.scss'],
-  standalone: false,
-})
-export class ProductosListPage {
-  busqueda: string = '';
-
-  total: number = 0;
-  paginaActual: number = 1;
-  porPagina: number = 3;
-
-  titulo: string = 'Productos';
-
+```typescript
   constructor(private alertController: AlertController, private productosService: ProductosService) {}
+```
 
-  productos: Producto[] = [];
+Sustituye el bloque desde `const response = await axios.get<{ data: Producto[] }>(` hasta `}` después de `async cargarProductos(): Promise<void> {` / `try {` y antes de `}`.
 
-  ionViewWillEnter(): void {
-    void this.cargarDatos();
-  }
-
-async cargarProductos(): Promise<void> {
-  try {
+```typescript
     this.productos = await firstValueFrom(this.productosService.listado(this.paginaActual, this.porPagina, this.busqueda));
   } catch (error) { console.error('Error al cargar productos:', error); }
-}
-
-
-async confirmarEliminar(id: number, nombre: string): Promise<void> {
-  const alerta = await this.alertController.create({
-    header: 'Eliminar producto',
-    message: `¿Estás seguro de eliminar el producto "${nombre}"?`,
-    buttons: [
-      {
-        text: 'Cancelar',
-        role: 'cancel'
-      },
-      {
-        text: 'Eliminar',
-        role: 'destructive',
-        handler: () => {
-          void this.eliminarProducto(id);
-        }
-      }
-    ]
-  });
-
-  await alerta.present();
-}
-async eliminarProducto(id: number): Promise<void> {
-  try {
-    await firstValueFrom(this.productosService.eliminar(id));
-
-    const alerta = await this.alertController.create({
-      header: 'Producto eliminado',
-      message: 'El producto fue eliminado correctamente.',
-      buttons: ['Aceptar']
-    });
-
-    await alerta.present();
-    await alerta.onDidDismiss();
-
-    await this.cargarDatos();
-  } catch (error) {
-    console.error('Error al eliminar el producto:', error);
-
-    const alerta = await this.alertController.create({
-      header: 'Error',
-      message: 'No fue posible eliminar el producto. Revisa la conexión, los permisos de eliminación en Directus y las relaciones del registro.',
-      buttons: ['Aceptar']
-    });
-
-    await alerta.present();
-  }
-}
-async cargarTotal(): Promise<void> {
-  try { this.total = await firstValueFrom(this.productosService.total(this.busqueda)); }
-  catch (error) { this.total = 0; console.error('Error al contar productos:', error); }
-}
-private ajustarPaginaActual(): void {
-  const totalPaginas = Math.ceil(
-    this.total / this.porPagina
-  );
-
-  if (totalPaginas === 0) {
-    this.paginaActual = 1;
-    return;
-  }
-
-  if (this.paginaActual > totalPaginas) {
-    this.paginaActual = totalPaginas;
-  }
-}
-async cargarDatos(): Promise<void> {
-  await this.cargarTotal();
-  this.ajustarPaginaActual();
-  await this.cargarProductos();
-}
-async cambiarPagina(
-  pagina: number
-): Promise<void> {
-  this.paginaActual = pagina;
-  await this.cargarProductos();
-}
-
-  async handleInput(event: CustomEvent<{ value?: string | null }>): Promise<void> {
-    this.busqueda = event.detail.value ?? '';
-    this.paginaActual = 1;
-    await this.cargarDatos();
-  }
-}
 ```
 
-### `mobile/src/app/productos-form/productos-form.page.ts`
+Sustituye el bloque desde `await axios.delete(` hasta `);` después de `async eliminarProducto(id: number): Promise<void> {` / `try {` y antes de `const alerta = await this.alertController.create({`.
 
 ```typescript
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { AlertController } from '@ionic/angular';
+    await firstValueFrom(this.productosService.eliminar(id));
+```
+
+Sustituye el bloque desde `try {` hasta `}` después de `}` / `async cargarTotal(): Promise<void> {` y antes de `}`.
+
+```typescript
+  try { this.total = await firstValueFrom(this.productosService.total(this.busqueda)); }
+  catch (error) { this.total = 0; console.error('Error al contar productos:', error); }
+```
+
+Retira el bloque desde `private parametrosBusqueda(): Record<string, string> {` hasta `}` después de `await this.cargarProductos();` / `}` y antes de `async handleInput(event: CustomEvent<{ value?: string | null }>): Promise<void> {`.
+
+**`mobile/src/app/productos-form/productos-form.page.ts`**. Aplica estos cambios en el orden indicado.
+
+Sustituye el bloque desde `import axios from 'axios';` hasta `import { environment } from '../../environments/environment';` después de `import { ActivatedRoute, Router } from '@angular/router';` / `import { AlertController } from '@ionic/angular';` y antes de `interface ProductoGuardar {`.
+
+```typescript
 import { firstValueFrom } from 'rxjs';
 import { ProductosService } from '../services/productos';
+```
 
-interface ProductoGuardar {
-  nombre: string;
-  descripcion: string;
-  precio: number;
-  stock: number;
-}
+Inserta el fragmento después de `private alertController: AlertController,` / `private activatedRoute: ActivatedRoute,` y antes de `private router: Router`.
 
-interface ProductoDetalle {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  precio: string | number;
-  stock: number;
-  fecha_registro: string;
-}
-
-@Component({
-  selector: 'app-productos-form',
-  templateUrl: './productos-form.page.html',
-  styleUrls: ['./productos-form.page.scss'],
-  standalone: false,
-})
-export class ProductosFormPage implements OnInit {
-
-  productoForm!: FormGroup;
-  idProducto?: number;
-  cargando: boolean = false;
-  guardando: boolean = false;
-
-  mensajesValidacion: Record<string, Record<string, string>> = {
-    nombre: {
-      required: 'El nombre es obligatorio.',
-      maxlength: 'El nombre no debe superar 150 caracteres.'
-    },
-    precio: {
-      required: 'El precio es obligatorio.',
-      min: 'El precio debe ser igual o mayor que cero.'
-    },
-    stock: {
-      required: 'El stock es obligatorio.',
-      min: 'El stock debe ser igual o mayor que cero.',
-      pattern: 'El stock debe contener únicamente números enteros.'
-    }
-  };
-
-  constructor(
-    private formBuilder: FormBuilder,
-    private alertController: AlertController,
-    private activatedRoute: ActivatedRoute,
+```typescript
     private productosService: ProductosService,
-    private router: Router
-  ) {}
+```
 
-  get esEdicion(): boolean {
-    return this.idProducto !== undefined;
-  }
+Sustituye el bloque desde `const response = await axios.get<{ data: ProductoDetalle }>(` hasta `const producto = response.data.data;` después de `this.cargando = true;` / `try {` y antes de `this.productoForm.patchValue({`.
 
-  async ngOnInit(): Promise<void> {
-    this.crearFormulario();
-
-    const id = this.activatedRoute.snapshot.paramMap.get('id');
-
-    if (id !== null) {
-      const idConvertido = Number(id);
-
-      if (!Number.isNaN(idConvertido)) {
-        this.idProducto = idConvertido;
-        await this.cargarProducto();
-      }
-    }
-  }
-
-  private crearFormulario(): void {
-    this.productoForm = this.formBuilder.group({
-      nombre: ['', [
-        Validators.required,
-        Validators.maxLength(150)
-      ]],
-      descripcion: [''],
-      precio: ['', [
-        Validators.required,
-        Validators.min(0)
-      ]],
-      stock: ['', [
-        Validators.required,
-        Validators.min(0),
-        Validators.pattern('^[0-9]+$')
-      ]]
-    });
-  }
-
-  getError(controlName: string): string {
-    const control = this.productoForm.get(controlName);
-
-    if (
-      !control ||
-      !control.errors ||
-      !(control.touched || control.dirty)
-    ) {
-      return '';
-    }
-
-    const tipoError = Object.keys(control.errors)[0];
-
-    return this.mensajesValidacion[controlName]?.[tipoError]
-      ?? 'El valor ingresado no es válido.';
-  }
-
-  private async cargarProducto(): Promise<void> {
-    if (this.idProducto === undefined) {
-      return;
-    }
-
-    this.cargando = true;
-
-    try {
+```typescript
       const producto = await firstValueFrom(this.productosService.detalle(this.idProducto));
+```
 
-      this.productoForm.patchValue({
-        nombre: producto.nombre,
-        descripcion: producto.descripcion,
-        precio: producto.precio,
-        stock: producto.stock
-      });
-    } catch (error) {
-      console.error('Error al cargar el producto:', error);
+Sustituye el bloque desde `await axios.patch(` hasta `);` después de `try {` / `if (this.esEdicion && this.idProducto !== undefined) {` y antes de `}`.
 
-      const alerta = await this.alertController.create({
-        header: 'Error',
-        message: 'No fue posible cargar los datos del producto. Revisa la conexión, el identificador y los permisos de lectura en Directus.',
-        buttons: ['Aceptar']
-      });
-
-      await alerta.present();
-    } finally {
-      this.cargando = false;
-    }
-  }
-
-  async guardarProducto(): Promise<void> {
-    if (this.productoForm.invalid) {
-      this.productoForm.markAllAsTouched();
-      return;
-    }
-
-    this.guardando = true;
-
-    const valores = this.productoForm.value;
-
-    const producto: ProductoGuardar = {
-      nombre: valores.nombre.trim(),
-      descripcion: valores.descripcion?.trim() ?? '',
-      precio: Number(valores.precio),
-      stock: Number(valores.stock)
-    };
-
-    try {
-      if (this.esEdicion && this.idProducto !== undefined) {
+```typescript
         await firstValueFrom(this.productosService.actualizar(this.idProducto, producto));
       } else {
         await firstValueFrom(this.productosService.crear(producto));
-      }
-
-      const alerta = await this.alertController.create({
-        header: this.esEdicion ? 'Producto actualizado' : 'Producto guardado',
-        message: this.esEdicion
-          ? 'El producto fue actualizado correctamente.'
-          : 'El producto fue registrado correctamente.',
-        buttons: ['Aceptar']
-      });
-
-      await alerta.present();
-      await alerta.onDidDismiss();
-
-      await this.router.navigate(['/productos-list']);
-    } catch (error) {
-      console.error(
-        this.esEdicion
-          ? 'Error al actualizar el producto:'
-          : 'Error al guardar el producto:',
-        error
-      );
-
-      const alerta = await this.alertController.create({
-        header: 'Error',
-        message: this.esEdicion
-          ? 'No fue posible actualizar el producto. Revisa los datos, la conexión y los permisos de actualización en Directus.'
-          : 'No fue posible guardar el producto. Revisa los datos, la conexión y los permisos de creación en Directus.',
-        buttons: ['Aceptar']
-      });
-
-      await alerta.present();
-    } finally {
-      this.guardando = false;
-    }
-  }
-}
 ```
 
-### `mobile/src/app/productos-view/productos-view.page.ts`
+**`mobile/src/app/productos-view/productos-view.page.ts`**. Aplica estos cambios en el orden indicado.
+
+Sustituye la línea `import axios from 'axios';` después de `import { ActivatedRoute } from '@angular/router';` / `import { LoadingController } from '@ionic/angular';` y antes de `import { environment } from '../../environments/environment';`.
 
 ```typescript
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { LoadingController } from '@ionic/angular';
 import { firstValueFrom } from 'rxjs';
 import { ProductosService } from '../services/productos';
-import { environment } from '../../environments/environment';
-
-interface Producto {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  precio: string;
-  stock: number;
-  fecha_registro: string;
-}
-
-@Component({
-  selector: 'app-productos-view',
-  templateUrl: './productos-view.page.html',
-  styleUrls: ['./productos-view.page.scss'],
-  standalone: false
-})
-export class ProductosViewPage implements OnInit {
-
-  producto: Producto | null = null;
-  mensajeError: string = '';
-
-  constructor(
-    private route: ActivatedRoute,
-    private productosService: ProductosService,
-    private loading: LoadingController
-  ) { }
-
-  ngOnInit() {
-    this.cargarProducto();
-  }
-
-  async cargarProducto(): Promise<void> {
-    const id = this.route.snapshot.paramMap.get('id');
-
-    this.producto = null;
-    this.mensajeError = '';
-
-    if (!id) {
-      this.mensajeError = 'No se recibió el ID del producto.';
-      return;
-    }
-
-    const loading = await this.loading.create({
-      message: 'Cargando producto...',
-      spinner: 'bubbles',
-    });
-
-    await loading.present();
-
-    try {
-      this.producto = await firstValueFrom(this.productosService.detalle(Number(id)));
-    } catch (error) {
-      console.error('Error al cargar el producto:', error);
-      this.mensajeError = 'No se pudo cargar el producto. Revisa el ID, la conexión y los permisos de lectura.';
-    } finally {
-      await loading.dismiss();
-    }
-  }
-
-  abrirPagina(): void {
-    if (!this.producto) {
-      return;
-    }
-
-    const url = `${environment.apiUrl}/items/productos/${this.producto.id}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
-  }
-
-}
 ```
 
-## 5. Comprobar el resultado
+En los parámetros del constructor de `ProductosViewPage`, justo antes de `private loading: LoadingController`, agrega esta dependencia.
+
+```typescript
+    private productosService: ProductosService,
+```
+
+Sustituye el bloque desde `const response = await axios.get<{ data: Producto }>(` hasta `this.producto = response.data.data;` después de `await loading.present();` / `try {` y antes de `} catch (error) {`.
+
+```typescript
+      this.producto = await firstValueFrom(this.productosService.detalle(Number(id)));
+```
+
+## 4. Comprobar el resultado
 
 1. Abre el listado y busca **Mouse**: deben conservarse los resultados y el conteo.
 2. Abre el ojo de un producto: debe mostrarse su detalle, como en la figura 1.
@@ -554,7 +242,7 @@ export class ProductosViewPage implements OnInit {
 
 La figura 1 muestra el resultado obtenido con el código de esta práctica. Las fechas, los productos y el tema visual dependen de tu entorno.
 
-## 6. Explicación detallada del flujo
+## 5. Explicación detallada del flujo
 
 La figura 2 muestra el recorrido de arriba hacia abajo.
 

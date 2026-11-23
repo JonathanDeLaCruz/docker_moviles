@@ -54,19 +54,15 @@ Completa esos valores según tu proveedor. `SMTP_SECURE` corresponde a su modo T
 
 ### Paso 2. Configurar formularios y rutas
 
-Agrega `ReactiveFormsModule` a los dos módulos. Conserva las rutas `/login` y `/registro` que genera Ionic. La referencia completa de la sección 4 incluye sus archivos y las rutas principales.
+Agrega `ReactiveFormsModule` a los dos módulos. Conserva las rutas `/login` y `/registro` que genera Ionic. En `login.module.ts` y `registro.module.ts`, añade `ReactiveFormsModule` tanto al import de `@angular/forms` como al arreglo `imports` de `@NgModule`.
 
 ### Paso 3. Implementar la sesión
 
-Completa `AuthService` con el código de la sección 4. `ingresar()` obtiene los tokens, `renovar()` actualiza su vigencia y `cerrarSesion()` termina la sesión. El cliente Axios del servicio agrega el encabezado al enviar cada petición.
+Completa `AuthService` con el código de este paso. `ingresar()` obtiene los tokens, `renovar()` actualiza su vigencia y `cerrarSesion()` termina la sesión. El cliente Axios del servicio agrega el encabezado al enviar cada petición.
 
-### Paso 4. Conectar las páginas y el servicio de productos
+**`mobile/src/app/services/auth.ts`**
 
-Coloca las clases y plantillas completas de la sección 4. Inyecta `AuthService` en `ProductosService` y utiliza `this.auth.cliente` en sus operaciones. El formulario de acceso navega al listado después de autenticar; el de registro informa el resultado y solicita revisar el correo cuando corresponda.
-
-## 4. Código completo de referencia
-
-### `mobile/src/app/services/auth.ts`
+1. En el archivo nuevo coloca los imports, las declaraciones y la estructura inicial que se muestran abajo. Si el generador creó una clase de ejemplo, sustituye esa plantilla una sola vez.
 
 ```typescript
 import { Injectable } from '@angular/core';
@@ -90,37 +86,64 @@ export class AuthService {
       return config;
     });
   }
+}
+```
 
+2. Dentro de `AuthService`, inserta los siguientes métodos en orden, justo antes de la última llave de la clase.
+
+**`guardar()`**
+
+```typescript
   private guardar(datos: SesionDirectus): void {
     this.token = datos.access_token;
     this.refreshToken = datos.refresh_token;
     this.expira = Date.now() + Number(datos.expires);
   }
+```
 
+**`ingresar()`**
+
+```typescript
   async ingresar(email: string, password: string): Promise<void> {
     const response = await axios.post<{ data: SesionDirectus }>(environment.apiUrl + '/auth/login', {
       email: email.trim(), password, mode: 'json'
     });
     this.guardar(response.data.data);
   }
+```
 
+**`registrar()`**
+
+```typescript
   async registrar(email: string, password: string, nombre: string): Promise<void> {
     await axios.post(environment.apiUrl + '/users/register', {
       email: email.trim(), password, first_name: nombre.trim()
     });
   }
+```
 
+**`activa()`**
+
+```typescript
   activa(): boolean {
     return !!this.token && Date.now() < this.expira;
   }
+```
 
+**`renovar()`**
+
+```typescript
   async renovar(): Promise<void> {
     const response = await axios.post<{ data: SesionDirectus }>(environment.apiUrl + '/auth/refresh', {
       refresh_token: this.refreshToken, mode: 'json'
     });
     this.guardar(response.data.data);
   }
+```
 
+**`validarSesion()`**
+
+```typescript
   async validarSesion(): Promise<boolean> {
     try {
       if (!this.activa()) {
@@ -134,13 +157,21 @@ export class AuthService {
       return false;
     }
   }
+```
 
+**`limpiar()`**
+
+```typescript
   private limpiar(): void {
     this.token = '';
     this.refreshToken = '';
     this.expira = 0;
   }
+```
 
+**`cerrarSesion()`**
+
+```typescript
   async cerrarSesion(): Promise<void> {
     try {
       if (this.refreshToken) await axios.post(environment.apiUrl + '/auth/logout', {
@@ -148,10 +179,13 @@ export class AuthService {
       });
     } finally { this.limpiar(); }
   }
-}
 ```
 
-### `mobile/src/app/login/login.page.ts`
+### Paso 4. Conectar las páginas y el servicio de productos
+
+Coloca las clases y plantillas completas de este paso. Inyecta `AuthService` en `ProductosService` y utiliza `this.auth.cliente` en sus operaciones. El formulario de acceso navega al listado después de autenticar; el de registro informa el resultado y solicita revisar el correo cuando corresponda.
+
+**`mobile/src/app/login/login.page.ts`**. Crea este archivo con el siguiente contenido o sustituye la plantilla inicial del generador.
 
 ```typescript
 import { Component } from '@angular/core';
@@ -181,7 +215,7 @@ export class LoginPage {
 }
 ```
 
-### `mobile/src/app/login/login.page.html`
+**`mobile/src/app/login/login.page.html`**. Coloca esta plantilla en la vista de la práctica. Si Ionic generó contenido de ejemplo, sustitúyelo.
 
 ```html
 <ion-header><ion-toolbar><ion-title>Iniciar sesión</ion-title></ion-toolbar></ion-header>
@@ -197,55 +231,7 @@ export class LoginPage {
 </ion-content>
 ```
 
-### `mobile/src/app/login/login.module.ts`
-
-```typescript
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
-import { IonicModule } from '@ionic/angular';
-
-import { LoginPageRoutingModule } from './login-routing.module';
-
-import { LoginPage } from './login.page';
-
-@NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    IonicModule,
-    LoginPageRoutingModule
-  ],
-  declarations: [LoginPage]
-})
-export class LoginPageModule {}
-```
-
-### `mobile/src/app/login/login-routing.module.ts`
-
-```typescript
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-
-import { LoginPage } from './login.page';
-
-const routes: Routes = [
-  {
-    path: '',
-    component: LoginPage
-  }
-];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
-})
-export class LoginPageRoutingModule {}
-```
-
-### `mobile/src/app/registro/registro.page.ts`
+**`mobile/src/app/registro/registro.page.ts`**. Crea este archivo con el siguiente contenido o sustituye la plantilla inicial del generador.
 
 ```typescript
 import { Component } from '@angular/core';
@@ -273,7 +259,7 @@ export class RegistroPage {
 }
 ```
 
-### `mobile/src/app/registro/registro.page.html`
+**`mobile/src/app/registro/registro.page.html`**. Coloca esta plantilla en la vista de la práctica. Si Ionic generó contenido de ejemplo, sustitúyelo.
 
 ```html
 <ion-header><ion-toolbar><ion-buttons slot="start"><ion-back-button defaultHref="/login"></ion-back-button></ion-buttons><ion-title>Crear cuenta</ion-title></ion-toolbar></ion-header>
@@ -289,165 +275,57 @@ export class RegistroPage {
 </ion-content>
 ```
 
-### `mobile/src/app/registro/registro.module.ts`
+**`mobile/src/app/services/productos.ts`**. Aplica estos cambios en el orden indicado.
+
+Sustituye la línea `import axios from 'axios';` después de `import { Injectable } from '@angular/core';` / `import { defer, map, Observable } from 'rxjs';` y antes de `import { environment } from '../../environments/environment';`.
 
 ```typescript
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
-import { IonicModule } from '@ionic/angular';
-
-import { RegistroPageRoutingModule } from './registro-routing.module';
-
-import { RegistroPage } from './registro.page';
-
-@NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    IonicModule,
-    RegistroPageRoutingModule
-  ],
-  declarations: [RegistroPage]
-})
-export class RegistroPageModule {}
-```
-
-### `mobile/src/app/registro/registro-routing.module.ts`
-
-```typescript
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-
-import { RegistroPage } from './registro.page';
-
-const routes: Routes = [
-  {
-    path: '',
-    component: RegistroPage
-  }
-];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
-})
-export class RegistroPageRoutingModule {}
-```
-
-### `mobile/src/app/services/productos.ts`
-
-```typescript
-import { Injectable } from '@angular/core';
-import { defer, map, Observable } from 'rxjs';
 import { AuthService } from './auth';
-import { environment } from '../../environments/environment';
-
-export interface Producto {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  precio: string;
-  stock: number;
-  fecha_registro: string;
-}
-export interface ProductoGuardar {
-  nombre: string;
-  descripcion: string;
-  precio: number;
-  stock: number;
-}
-
-@Injectable({ providedIn: 'root' })
-export class ProductosService {
-  constructor(private auth: AuthService) {}
-  private url = environment.apiUrl + '/items/productos';
-
-  private filtro(busqueda: string): Record<string, string> {
-    const texto = busqueda.trim();
-    return texto ? { filter: JSON.stringify({ _or: [
-      { nombre: { _icontains: texto } },
-      { descripcion: { _icontains: texto } }
-    ] }) } : {};
-  }
-
-  listado(pagina = 1, porPagina = 3, busqueda = ''): Observable<Producto[]> {
-    return defer(() => this.auth.cliente.get<{ data: Producto[] }>(this.url, {
-      params: { page: pagina, limit: porPagina, sort: 'id', ...this.filtro(busqueda) }
-    })).pipe(map(response => response.data.data));
-  }
-
-  detalle(id: number): Observable<Producto> {
-    return defer(() => this.auth.cliente.get<{ data: Producto }>(this.url + '/' + id))
-      .pipe(map(response => response.data.data));
-  }
-
-  crear(producto: ProductoGuardar): Observable<Producto> {
-    return defer(() => this.auth.cliente.post<{ data: Producto }>(this.url, producto))
-      .pipe(map(response => response.data.data));
-  }
-
-  actualizar(id: number, producto: ProductoGuardar): Observable<Producto> {
-    return defer(() => this.auth.cliente.patch<{ data: Producto }>(this.url + '/' + id, producto))
-      .pipe(map(response => response.data.data));
-  }
-
-  eliminar(id: number): Observable<void> {
-    return defer(() => this.auth.cliente.delete(this.url + '/' + id)).pipe(map(() => undefined));
-  }
-
-  total(busqueda = ''): Observable<number> {
-    return defer(() => this.auth.cliente.get<{ data: { count: string | number }[] }>(this.url, {
-      params: { 'aggregate[count]': '*', ...this.filtro(busqueda) }
-    })).pipe(map(response => Number(response.data.data[0]?.count ?? 0)));
-  }
-}
 ```
 
-### `mobile/src/app/app-routing.module.ts`
+Inserta el fragmento después de `@Injectable({ providedIn: 'root' })` / `export class ProductosService {` y antes de `private url = environment.apiUrl + '/items/productos';`.
 
 ```typescript
-import { NgModule } from '@angular/core';
-import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
-
-const routes: Routes = [
-  {
-    path: '',
-    loadChildren: () => import('./tabs/tabs.module').then(m => m.TabsPageModule)
-  },
-  {
-    path: 'productos-list',
-    loadChildren: () => import('./productos-list/productos-list.module').then( m => m.ProductosListPageModule)
-  },
-  {
-    path: 'productos-view/:id',
-    loadChildren: () => import('./productos-view/productos-view.module').then( m => m.ProductosViewPageModule)
-  },
-  {
-    path: 'productos-form',
-    loadChildren: () => import('./productos-form/productos-form.module').then( m => m.ProductosFormPageModule)
-  },
-  {
-    path: 'login',
-    loadChildren: () => import('./login/login.module').then( m => m.LoginPageModule)
-  },
-  {
-    path: 'registro',
-    loadChildren: () => import('./registro/registro.module').then( m => m.RegistroPageModule)
-  }
-];
-@NgModule({
-  imports: [
-    RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })
-  ],
-  exports: [RouterModule]
-})
-export class AppRoutingModule {}
+  constructor(private auth: AuthService) {}
 ```
 
-## 5. Comprobar el resultado
+Sustituye la línea `return defer(() => axios.get<{ data: Producto[] }>(this.url, {` después de `}` / `listado(pagina = 1, porPagina = 3, busqueda = ''): Observable<Producto[]> {` y antes de `params: { page: pagina, limit: porPagina, sort: 'id', ...this.filtro(busqueda) }`.
+
+```typescript
+    return defer(() => this.auth.cliente.get<{ data: Producto[] }>(this.url, {
+```
+
+Sustituye la línea `return defer(() => axios.get<{ data: Producto }>(this.url + '/' + id))` después de `}` / `detalle(id: number): Observable<Producto> {` y antes de `.pipe(map(response => response.data.data));`.
+
+```typescript
+    return defer(() => this.auth.cliente.get<{ data: Producto }>(this.url + '/' + id))
+```
+
+Sustituye la línea `return defer(() => axios.post<{ data: Producto }>(this.url, producto))` después de `}` / `crear(producto: ProductoGuardar): Observable<Producto> {` y antes de `.pipe(map(response => response.data.data));`.
+
+```typescript
+    return defer(() => this.auth.cliente.post<{ data: Producto }>(this.url, producto))
+```
+
+Sustituye la línea `return defer(() => axios.patch<{ data: Producto }>(this.url + '/' + id, producto))` después de `}` / `actualizar(id: number, producto: ProductoGuardar): Observable<Producto> {` y antes de `.pipe(map(response => response.data.data));`.
+
+```typescript
+    return defer(() => this.auth.cliente.patch<{ data: Producto }>(this.url + '/' + id, producto))
+```
+
+Sustituye la línea `return defer(() => axios.delete(this.url + '/' + id)).pipe(map(() => undefined));` después de `}` / `eliminar(id: number): Observable<void> {` y antes de `}`.
+
+```typescript
+    return defer(() => this.auth.cliente.delete(this.url + '/' + id)).pipe(map(() => undefined));
+```
+
+Sustituye la línea `return defer(() => axios.get<{ data: { count: string | number }[] }>(this.url, {` después de `}` / `total(busqueda = ''): Observable<number> {` y antes de `params: { 'aggregate[count]': '*', ...this.filtro(busqueda) }`.
+
+```typescript
+    return defer(() => this.auth.cliente.get<{ data: { count: string | number }[] }>(this.url, {
+```
+
+## 4. Comprobar el resultado
 
 1. Abre `/login`: debe verse el formulario de la figura 1. Envíalo vacío para comprobar la validación.
 2. Escribe credenciales incorrectas: debe mostrarse el mensaje de acceso sin navegar.
@@ -465,7 +343,7 @@ La figura 2 muestra las validaciones del formulario de registro antes de enviar 
   <em>Figura 2. Validación de los campos requeridos para registrar una cuenta.</em>
 </p>
 
-## 6. Explicación detallada del flujo
+## 5. Explicación detallada del flujo
 
 La figura 3 muestra el recorrido de arriba hacia abajo.
 

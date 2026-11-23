@@ -32,35 +32,13 @@ Las rutas pertenecen al proyecto Ionic en `mobile/`. Ejecuta los comandos Docker
 docker compose exec mobile ionic g component components/toolbar
 ```
 
-Abre `toolbar.component.ts` y agrega manualmente `standalone: false` al decorador. Reemplaza su contenido por el de la sección 4.
+Abre `toolbar.component.ts` y agrega manualmente `standalone: false` al decorador. En el paso 2 configurarás las entradas del componente.
 
 ### Paso 2. Definir las entradas y la vista
 
-Agrega `@Input() nombre` y `@Input() color`. Utiliza el HTML completo de la sección 4: el título muestra `nombre`, la barra recibe `color` y `ng-content` conserva los botones proporcionados por la página.
+Agrega `@Input() nombre` y `@Input() color`. Utiliza el HTML completo de este paso: el título muestra `nombre`, la barra recibe `color` y `ng-content` conserva los botones proporcionados por la página.
 
-### Paso 3. Crear el módulo
-
-Crea `toolbar.module.ts` en la misma carpeta. Declara `ToolbarComponent`, importa `CommonModule` e `IonicModule` y expórtalo, como en la sección 4.
-
-### Paso 4. Importar y utilizar el componente
-
-Importa `ToolbarModule` en `productos-list.module.ts` y agrégalo a sus `imports`, conservando los módulos que ya utiliza. En `productos-list.page.ts`, dentro de la clase, agrega `titulo: string = 'Productos';`. Reemplaza el encabezado del listado por:
-
-```html
-<app-toolbar [nombre]="titulo" color="personalizado">
-  <ion-buttons slot="end">
-    <ion-button fill="solid" [routerLink]="['/productos-form']" aria-label="Nuevo producto">
-      <ion-icon slot="icon-only" name="add"></ion-icon>
-    </ion-button>
-  </ion-buttons>
-</app-toolbar>
-```
-
-Conserva el contenido del listado. Para usar la barra en otra página, importa `ToolbarModule` en su módulo y escribe el selector con sus valores, por ejemplo `<app-toolbar nombre="Categorías" color="secondary"></app-toolbar>`. El archivo SCSS del componente puede quedar vacío.
-
-## 4. Código completo de referencia
-
-### `mobile/src/app/components/toolbar/toolbar.component.ts`
+**`mobile/src/app/components/toolbar/toolbar.component.ts`**. En el componente recién generado, sustituye la definición inicial por esta versión con sus dos entradas.
 
 ```typescript
 import { Component, Input } from '@angular/core';
@@ -76,7 +54,7 @@ export class ToolbarComponent {
 }
 ```
 
-### `mobile/src/app/components/toolbar/toolbar.component.html`
+**`mobile/src/app/components/toolbar/toolbar.component.html`**. Coloca esta plantilla en la vista de la práctica. Si Ionic generó contenido de ejemplo, sustitúyelo.
 
 ```html
 <ion-header [translucent]="true">
@@ -87,7 +65,11 @@ export class ToolbarComponent {
 </ion-header>
 ```
 
-### `mobile/src/app/components/toolbar/toolbar.module.ts`
+### Paso 3. Crear el módulo
+
+Crea `toolbar.module.ts` en la misma carpeta. Declara `ToolbarComponent`, importa `CommonModule` e `IonicModule` y expórtalo, como se muestra a continuación.
+
+**`mobile/src/app/components/toolbar/toolbar.module.ts`**. Crea este archivo con el siguiente contenido o sustituye la plantilla inicial del generador.
 
 ```typescript
 import { NgModule } from '@angular/core';
@@ -102,34 +84,9 @@ import { ToolbarComponent } from './toolbar.component';
 export class ToolbarModule {}
 ```
 
-### `mobile/src/app/productos-list/productos-list.module.ts`
+### Paso 4. Importar y utilizar el componente
 
-```typescript
-import { ToolbarModule } from '../components/toolbar/toolbar.module';
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-
-import { IonicModule } from '@ionic/angular';
-
-import { ProductosListPageRoutingModule } from './productos-list-routing.module';
-
-import { ProductosListPage } from './productos-list.page';
-
-@NgModule({
-  imports: [
-    ToolbarModule,
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    ProductosListPageRoutingModule
-  ],
-  declarations: [ProductosListPage]
-})
-export class ProductosListPageModule {}
-```
-
-### `mobile/src/app/productos-list/productos-list.page.html`
+Agrega `import { ToolbarModule } from '../components/toolbar/toolbar.module';` al inicio de `productos-list.module.ts` y agrégalo a sus `imports`, conservando los módulos que ya utiliza. En `productos-list.page.ts`, dentro de la clase, agrega `titulo: string = 'Productos';`. Reemplaza el encabezado del listado por:
 
 ```html
 <app-toolbar [nombre]="titulo" color="personalizado">
@@ -139,130 +96,11 @@ export class ProductosListPageModule {}
     </ion-button>
   </ion-buttons>
 </app-toolbar>
-
-<ion-content>
-  <ion-list>
-    <ion-item *ngFor="let producto of productos">
-      <ion-label class="ion-text-wrap">
-        <h2>{{ producto.nombre }}</h2>
-        <p>{{ producto.descripcion }}</p>
-        <p>Precio: ${{ producto.precio }}</p>
-        <p>Stock: {{ producto.stock }}</p>
-        <p>Registro: {{ producto.fecha_registro | date:'yyyy-MM-dd' }}</p>
-      </ion-label>
-      <ion-button fill="solid" slot="end" [routerLink]="['/productos-view', producto.id]" aria-label="Ver detalle">
-        <ion-icon slot="icon-only" name="eye"></ion-icon>
-      </ion-button>
-      <ion-button fill="solid" color="warning" [routerLink]="['/productos-form', producto.id]">
-        <ion-icon slot="icon-only" name="pencil"></ion-icon>
-      </ion-button>
-      <ion-button fill="solid" color="danger" (click)="confirmarEliminar(producto.id, producto.nombre)" aria-label="Eliminar producto">
-        <ion-icon slot="icon-only" name="trash"></ion-icon>
-      </ion-button>
-    </ion-item>
-  </ion-list>
-</ion-content>
 ```
 
-### `mobile/src/app/productos-list/productos-list.page.ts`
+Conserva el contenido del listado. Para usar la barra en otra página, importa `ToolbarModule` en su módulo y escribe el selector con sus valores, por ejemplo `<app-toolbar nombre="Categorías" color="secondary"></app-toolbar>`. El archivo SCSS del componente puede quedar vacío.
 
-```typescript
-import { Component } from '@angular/core';
-import { AlertController } from '@ionic/angular';
-import axios from 'axios';
-import { environment } from '../../environments/environment';
-
-interface Producto {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  precio: string;
-  stock: number;
-  fecha_registro: string;
-}
-
-@Component({
-  selector: 'app-productos-list',
-  templateUrl: './productos-list.page.html',
-  styleUrls: ['./productos-list.page.scss'],
-  standalone: false,
-})
-export class ProductosListPage {
-  titulo: string = 'Productos';
-
-  constructor(private alertController: AlertController) {}
-
-  productos: Producto[] = [];
-
-  ionViewWillEnter(): void {
-    this.cargarProductos();
-  }
-
-  async cargarProductos(): Promise<void> {
-    try {
-      const response = await axios.get<{ data: Producto[] }>(
-        `${environment.apiUrl}/items/productos`
-      );
-
-      this.productos = response.data.data;
-    } catch (error) {
-      console.error('Error al cargar los productos:', error);
-    }
-  }
-
-async confirmarEliminar(id: number, nombre: string): Promise<void> {
-  const alerta = await this.alertController.create({
-    header: 'Eliminar producto',
-    message: `¿Estás seguro de eliminar el producto "${nombre}"?`,
-    buttons: [
-      {
-        text: 'Cancelar',
-        role: 'cancel'
-      },
-      {
-        text: 'Eliminar',
-        role: 'destructive',
-        handler: () => {
-          void this.eliminarProducto(id);
-        }
-      }
-    ]
-  });
-
-  await alerta.present();
-}
-async eliminarProducto(id: number): Promise<void> {
-  try {
-    await axios.delete(
-      `${environment.apiUrl}/items/productos/${id}`
-    );
-
-    const alerta = await this.alertController.create({
-      header: 'Producto eliminado',
-      message: 'El producto fue eliminado correctamente.',
-      buttons: ['Aceptar']
-    });
-
-    await alerta.present();
-    await alerta.onDidDismiss();
-
-    await this.cargarProductos();
-  } catch (error) {
-    console.error('Error al eliminar el producto:', error);
-
-    const alerta = await this.alertController.create({
-      header: 'Error',
-      message: 'No fue posible eliminar el producto. Revisa la conexión, los permisos de eliminación en Directus y las relaciones del registro.',
-      buttons: ['Aceptar']
-    });
-
-    await alerta.present();
-  }
-}
-}
-```
-
-## 5. Comprobar el resultado
+## 4. Comprobar el resultado
 
 1. Abre el listado: debe mostrar el encabezado de la figura 1 y conservar el icono **+**.
 2. Cambia el valor de `titulo` a **Listado de productos**: la barra debe mostrar ese texto. Restaura **Productos**.
@@ -271,7 +109,7 @@ async eliminarProducto(id: number): Promise<void> {
 
 La figura 1 muestra el resultado obtenido con el código de esta práctica. Las fechas, los productos y el tema visual dependen de tu entorno.
 
-## 6. Explicación detallada del flujo
+## 5. Explicación detallada del flujo
 
 La figura 2 muestra el recorrido de arriba hacia abajo.
 

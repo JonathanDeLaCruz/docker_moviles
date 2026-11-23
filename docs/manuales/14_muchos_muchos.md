@@ -4,7 +4,7 @@ Utilizarás un FormArray para seleccionar categorías al crear y editar producto
 
 Un producto puede pertenecer a varias categorías y una categoría puede aparecer en varios productos. Es el mismo caso que inscribir a un alumno en varias materias o asignar varias etiquetas a un artículo. El usuario elige opciones del catálogo desde el formulario principal. Al guardar, Directus registra una fila por asociación en la tabla intermedia.
 
-Por ejemplo, si al guardar un artículo recibe el ID 25 y seleccionaste las etiquetas 2 y 3, la tabla intermedia queda así. Los identificadores son ilustrativos.
+Por ejemplo, si seleccionas las etiquetas 2 y 3 y Directus asigna al artículo nuevo el ID 25, la tabla intermedia queda así. Los identificadores son ilustrativos.
 
 | fkarticulo | fketiqueta |
 | --- | --- |
@@ -224,7 +224,7 @@ En `mobile/src/app/productos-view/productos-view.page.html`, dentro de la tarjet
 ## 4. Comprobar el resultado
 
 1. Entra a Ionic con la cuenta de práctica. Crea un producto, agrega dos filas y elige Periféricos y Accesorios. Guarda y acepta la confirmación.
-2. Abre el detalle: debe mostrar ambos nombres, como en la figura 1.
+2. En Directus, abre `productos_categorias` y filtra por el `productos_id` que acabas de crear. Deben aparecer dos filas con el mismo `productos_id` y dos `categorias_id` distintos. Regresa a Ionic y abre el detalle: debe mostrar ambos nombres, como en la figura 1.
 
 <p align="center">
   <img src="imagenes/14-detalle-categorias.jpg" alt="Detalle de un producto con sus categorías" width="390"><br>

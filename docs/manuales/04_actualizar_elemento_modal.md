@@ -9,7 +9,7 @@ Abrirás el producto elegido sobre el listado, cargarás sus datos y guardarás 
 
 ## 1. Antes de comenzar
 
-Continúa con el [manual 03 mediante modal](03_crear_elemento_modal.md). Conserva la lectura, CORS y creación configurados. Si vienes de la variante mediante página, cambia los archivos por la referencia completa de esta práctica: el formulario recibe el ID mediante `@Input()`, no desde la ruta.
+Continúa con el [manual 03 mediante modal](03_crear_elemento_modal.md). Conserva la lectura, CORS y creación configurados. Si vienes de la variante mediante página, completa primero el manual 03 mediante modal: el formulario recibe el ID mediante `@Input()`, no desde la ruta.
 
 Las rutas pertenecen al proyecto Ionic en `mobile/`. Ejecuta los comandos Docker desde la carpeta que contiene `docker-compose.yml`. Al generar páginas o componentes, configura manualmente `standalone: false` en `@Component`; este curso utiliza NgModules.
 
@@ -42,7 +42,7 @@ Dentro de cada `ion-item` del listado, agrega junto al botón de ojo:
 
 ### Paso 3. Abrir el modal con su ID
 
-Conserva `nuevoProducto()` y agrega este método dentro de `ProductosListPage`:
+En `mobile/src/app/productos-list/productos-list.page.ts`, ubica el cierre de `nuevoProducto()`. En la línea siguiente, dentro de `ProductosListPage`, agrega el método que abre el formulario con el ID seleccionado.
 
 ```typescript
 async editarProducto(id: number): Promise<void> {
@@ -69,204 +69,25 @@ async editarProducto(id: number): Promise<void> {
 
 Importa `Input` desde Angular. Agrega `@Input() id?: number;`, `cargando = false` y el getter `esEdicion`, que devuelve `this.id !== undefined`. En `ngOnInit()`, construye primero el formulario y, si existe ID, espera `cargarProducto()`.
 
-`cargarProducto()` consulta `/items/productos/{id}` y usa `patchValue()` para llenar nombre, descripción, precio y stock. Reemplaza `guardarProducto()` por la versión completa de la sección 4: elige `PATCH` con ID o `POST` sin él. Conserva `getError()`, las validaciones y `cerrarModal()`.
+`cargarProducto()` consulta `/items/productos/{id}` y usa `patchValue()` para llenar nombre, descripción, precio y stock. Reemplaza `guardarProducto()` aplicando los cambios indicados abajo: elige `PATCH` con ID o `POST` sin él. Conserva `getError()`, las validaciones y `cerrarModal()`.
 
-### Paso 5. Adaptar la vista
+**`mobile/src/app/productos-form/productos-form.page.ts`**. Aplica estos cambios en el orden indicado.
 
-Utiliza el HTML completo de la sección 4. El título y el botón cambian entre crear y editar; `cargando` muestra un indicador mientras llegan los datos. `guardando || cargando` deshabilita el envío durante esas operaciones.
-
-## 4. Código completo de referencia
-
-### `mobile/src/app/productos-list/productos-list.module.ts`
-
-```typescript
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-
-import { IonicModule } from '@ionic/angular';
-
-import { ProductosListPageRoutingModule } from './productos-list-routing.module';
-
-import { ProductosFormPageModule } from '../productos-form/productos-form.module';
-
-import { ProductosListPage } from './productos-list.page';
-
-@NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    ProductosListPageRoutingModule,
-    ProductosFormPageModule
-  ],
-  declarations: [ProductosListPage]
-})
-export class ProductosListPageModule {}
-```
-
-### `mobile/src/app/productos-list/productos-list.page.ts`
-
-```typescript
-import { Component, OnInit } from '@angular/core';
-import { ModalController } from '@ionic/angular';
-import axios from 'axios';
-import { environment } from '../../environments/environment';
-import { ProductosFormPage } from '../productos-form/productos-form.page';
-
-interface Producto {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  precio: string;
-  stock: number;
-  fecha_registro: string;
-}
-
-@Component({
-  selector: 'app-productos-list',
-  templateUrl: './productos-list.page.html',
-  styleUrls: ['./productos-list.page.scss'],
-  standalone: false,
-})
-export class ProductosListPage implements OnInit {
-
-  productos: Producto[] = [];
-
-  constructor(
-    private modalController: ModalController
-  ) {}
-
-  ngOnInit(): void {
-    this.cargarProductos();
-  }
-
-  async cargarProductos(): Promise<void> {
-    try {
-      const response = await axios.get<{ data: Producto[] }>(
-        `${environment.apiUrl}/items/productos`
-      );
-
-      this.productos = response.data.data;
-    } catch (error) {
-      console.error('Error al cargar los productos:', error);
-    }
-  }
-
-  async nuevoProducto(): Promise<void> {
-    const modal = await this.modalController.create({
-      component: ProductosFormPage,
-      breakpoints: [0, 0.5, 0.95],
-      initialBreakpoint: 0.95
-    });
-
-    await modal.present();
-
-    const { data } = await modal.onDidDismiss();
-
-    if (data?.guardado) {
-      await this.cargarProductos();
-    }
-  }
-
-  async editarProducto(id: number): Promise<void> {
-    const modal = await this.modalController.create({
-      component: ProductosFormPage,
-      componentProps: {
-        id: id
-      },
-      breakpoints: [0, 0.5, 0.95],
-      initialBreakpoint: 0.95
-    });
-
-    await modal.present();
-
-    const { data } = await modal.onDidDismiss();
-
-    if (data?.guardado) {
-      await this.cargarProductos();
-    }
-  }
-}
-```
-
-### `mobile/src/app/productos-list/productos-list.page.html`
-
-```html
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Productos</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content>
-  <ion-list>
-    <ion-item *ngFor="let producto of productos">
-      <ion-label class="ion-text-wrap">
-        <h2>{{ producto.nombre }}</h2>
-        <p>{{ producto.descripcion }}</p>
-        <p>Precio: ${{ producto.precio }}</p>
-        <p>Stock: {{ producto.stock }}</p>
-        <p>Registro: {{ producto.fecha_registro | date:'yyyy-MM-dd' }}</p>
-      </ion-label>
-      <ion-button fill="solid" slot="end" [routerLink]="['/productos-view', producto.id]" aria-label="Ver detalle">
-        <ion-icon slot="icon-only" name="eye"></ion-icon>
-      </ion-button>
-      <ion-button fill="solid" color="warning" (click)="editarProducto(producto.id)" aria-label="Editar producto">
-        <ion-icon slot="icon-only" name="pencil"></ion-icon>
-      </ion-button>
-    </ion-item>
-  </ion-list>
-  <ion-fab slot="fixed" vertical="bottom" horizontal="center">
-      <ion-fab-button (click)="nuevoProducto()" aria-label="Nuevo producto">
-          <ion-icon name="add"></ion-icon>
-      </ion-fab-button>
-  </ion-fab>
-</ion-content>
-```
-
-### `mobile/src/app/productos-form/productos-form.module.ts`
-
-```typescript
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
-import { IonicModule } from '@ionic/angular';
-
-import { ProductosFormPageRoutingModule } from './productos-form-routing.module';
-
-import { ProductosFormPage } from './productos-form.page';
-
-@NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    IonicModule,
-    ProductosFormPageRoutingModule
-  ],
-  declarations: [ProductosFormPage]
-})
-export class ProductosFormPageModule {}
-```
-
-### `mobile/src/app/productos-form/productos-form.page.ts`
+Sustituye la línea `import { Component, OnInit } from '@angular/core';` al inicio del archivo y antes de `import { FormBuilder, FormGroup, Validators } from '@angular/forms';`.
 
 ```typescript
 import { Component, Input, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AlertController, ModalController } from '@ionic/angular';
-import axios from 'axios';
-import { environment } from '../../environments/environment';
+```
 
+Sustituye la línea `interface ProductoCrear {` después de `import axios from 'axios';` / `import { environment } from '../../environments/environment';` y antes de `nombre: string;`.
+
+```typescript
 interface ProductoGuardar {
-  nombre: string;
-  descripcion: string;
-  precio: number;
-  stock: number;
-}
+```
 
+Inserta el fragmento después de `stock: number;` / `}` y antes de `@Component({`.
+
+```typescript
 interface ProductoDetalle {
   id: number;
   nombre: string;
@@ -275,43 +96,20 @@ interface ProductoDetalle {
   stock: number;
   fecha_registro: string;
 }
+```
 
-@Component({
-  selector: 'app-productos-form',
-  templateUrl: './productos-form.page.html',
-  styleUrls: ['./productos-form.page.scss'],
-  standalone: false,
-})
-export class ProductosFormPage implements OnInit {
+Sustituye la línea `productoForm!: FormGroup;` después de `})` / `export class ProductosFormPage implements OnInit {` y antes de `guardando: boolean = false;`.
 
+```typescript
   @Input() id?: number;
 
   productoForm!: FormGroup;
   cargando: boolean = false;
-  guardando: boolean = false;
+```
 
-  mensajesValidacion: Record<string, Record<string, string>> = {
-    nombre: {
-      required: 'El nombre es obligatorio.',
-      maxlength: 'El nombre no debe superar 150 caracteres.'
-    },
-    precio: {
-      required: 'El precio es obligatorio.',
-      min: 'El precio debe ser igual o mayor que cero.'
-    },
-    stock: {
-      required: 'El stock es obligatorio.',
-      min: 'El stock debe ser igual o mayor que cero.',
-      pattern: 'El stock debe contener únicamente números enteros.'
-    }
-  };
+Sustituye el bloque desde `ngOnInit(): void {` hasta `}` después de `private modalController: ModalController` / `) {}` y antes de `private crearFormulario(): void {`.
 
-  constructor(
-    private formBuilder: FormBuilder,
-    private alertController: AlertController,
-    private modalController: ModalController
-  ) {}
-
+```typescript
   get esEdicion(): boolean {
     return this.id !== undefined;
   }
@@ -323,43 +121,11 @@ export class ProductosFormPage implements OnInit {
       await this.cargarProducto();
     }
   }
+```
 
-  private crearFormulario(): void {
-    this.productoForm = this.formBuilder.group({
-      nombre: ['', [
-        Validators.required,
-        Validators.maxLength(150)
-      ]],
-      descripcion: [''],
-      precio: ['', [
-        Validators.required,
-        Validators.min(0)
-      ]],
-      stock: ['', [
-        Validators.required,
-        Validators.min(0),
-        Validators.pattern('^[0-9]+$')
-      ]]
-    });
-  }
+Inserta el fragmento después de `?? 'El valor ingresado no es válido.';` / `}` y antes de `async cerrarModal(): Promise<void> {`.
 
-  getError(controlName: string): string {
-    const control = this.productoForm.get(controlName);
-
-    if (
-      !control ||
-      !control.errors ||
-      !(control.touched || control.dirty)
-    ) {
-      return '';
-    }
-
-    const tipoError = Object.keys(control.errors)[0];
-
-    return this.mensajesValidacion[controlName]?.[tipoError]
-      ?? 'El valor ingresado no es válido.';
-  }
-
+```typescript
   private async cargarProducto(): Promise<void> {
     if (this.id === undefined) {
       return;
@@ -394,31 +160,17 @@ export class ProductosFormPage implements OnInit {
       this.cargando = false;
     }
   }
+```
 
-  async cerrarModal(): Promise<void> {
-    await this.modalController.dismiss({
-      guardado: false
-    });
-  }
+Sustituye la línea `const producto: ProductoCrear = {` después de `this.guardando = true;` / `const valores = this.productoForm.value;` y antes de `nombre: valores.nombre.trim(),`.
 
-  async guardarProducto(): Promise<void> {
-    if (this.productoForm.invalid) {
-      this.productoForm.markAllAsTouched();
-      return;
-    }
-
-    this.guardando = true;
-
-    const valores = this.productoForm.value;
-
+```typescript
     const producto: ProductoGuardar = {
-      nombre: valores.nombre.trim(),
-      descripcion: valores.descripcion?.trim() ?? '',
-      precio: Number(valores.precio),
-      stock: Number(valores.stock)
-    };
+```
 
-    try {
+Inserta el fragmento después de `};` / `try {` y antes de `await axios.post(`.
+
+```typescript
       if (this.esEdicion && this.id !== undefined) {
         await axios.patch(
           `${environment.apiUrl}/items/productos/${this.id}`,
@@ -430,15 +182,11 @@ export class ProductosFormPage implements OnInit {
           }
         );
       } else {
-        await axios.post(
-          `${environment.apiUrl}/items/productos`,
-          producto,
-          {
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          }
-        );
+```
+
+Sustituye el bloque desde `const alerta = await this.alertController.create({` hasta `message: 'El producto fue registrado correctamente.',` después de `}` / `);` y antes de `buttons: ['Aceptar']`.
+
+```typescript
       }
 
       const alerta = await this.alertController.create({
@@ -446,109 +194,61 @@ export class ProductosFormPage implements OnInit {
         message: this.esEdicion
           ? 'El producto fue actualizado correctamente.'
           : 'El producto fue registrado correctamente.',
-        buttons: ['Aceptar']
-      });
+```
 
-      await alerta.present();
-      await alerta.onDidDismiss();
+Sustituye la línea `console.error('Error al guardar el producto:', error);` después de `});` / `} catch (error) {` y antes de `const alerta = await this.alertController.create({`.
 
-      await this.modalController.dismiss({
-        guardado: true
-      });
-    } catch (error) {
+```typescript
       console.error(
         this.esEdicion
           ? 'Error al actualizar el producto:'
           : 'Error al guardar el producto:',
         error
       );
+```
 
-      const alerta = await this.alertController.create({
-        header: 'Error',
+Sustituye la línea `message: 'No fue posible guardar el producto. Revisa los datos, la conexión y los permisos de creación en Directus.',` después de `const alerta = await this.alertController.create({` / `header: 'Error',` y antes de `buttons: ['Aceptar']`.
+
+```typescript
         message: this.esEdicion
           ? 'No fue posible actualizar el producto. Revisa los datos, la conexión y los permisos de actualización en Directus.'
           : 'No fue posible guardar el producto. Revisa los datos, la conexión y los permisos de creación en Directus.',
-        buttons: ['Aceptar']
-      });
-
-      await alerta.present();
-    } finally {
-      this.guardando = false;
-    }
-  }
-}
 ```
 
-### `mobile/src/app/productos-form/productos-form.page.html`
+### Paso 5. Adaptar la vista
+
+Aplica los cambios de la plantilla indicados abajo. El título y el botón cambian entre crear y editar; `cargando` muestra un indicador mientras llegan los datos. `guardando || cargando` deshabilita el envío durante esas operaciones.
+
+**`mobile/src/app/productos-form/productos-form.page.html`**. Aplica estos cambios en el orden indicado.
+
+Sustituye la línea `<ion-title>Nuevo producto</ion-title>` después de `</ion-button>` / `</ion-buttons>` y antes de `</ion-toolbar>`.
 
 ```html
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-button fill="solid" (click)="cerrarModal()">
-        Cancelar
-      </ion-button>
-    </ion-buttons>
 
     <ion-title>
       {{ esEdicion ? 'Editar producto' : 'Nuevo producto' }}
     </ion-title>
-  </ion-toolbar>
-</ion-header>
+```
 
-<ion-content class="ion-padding">
+Sustituye la línea `<form *ngIf="productoForm" [formGroup]="productoForm" (ngSubmit)="guardarProducto()">` después de `</ion-header>` / `<ion-content class="ion-padding">` y antes de `<ion-list>`.
+
+```html
   <div *ngIf="cargando" class="ion-text-center ion-padding">
     <ion-spinner></ion-spinner>
     <p>Cargando producto...</p>
   </div>
 
   <form *ngIf="productoForm && !cargando" [formGroup]="productoForm" (ngSubmit)="guardarProducto()">
-    <ion-list>
-      <ion-item>
-        <ion-input label="Nombre" labelPlacement="stacked" type="text" formControlName="nombre" maxlength="150"></ion-input>
-      </ion-item>
-      <ion-note color="danger" *ngIf="getError('nombre') as error">
-        {{ error }}
-      </ion-note>
+```
 
-      <ion-item>
-        <ion-textarea label="Descripción" labelPlacement="stacked" formControlName="descripcion" autoGrow="true"></ion-textarea>
-      </ion-item>
+Sustituye el bloque desde `<ion-button fill="solid" expand="block" type="submit" class="ion-margin-top" [disabled]="guardando">` hasta `{{ guardando ? 'Guardando...' : 'Guardar' }}` después de `</ion-note>` / `</ion-list>` y antes de `</ion-button>`.
 
-      <ion-item>
-        <ion-input label="Precio" labelPlacement="stacked" type="number" formControlName="precio" min="0"></ion-input>
-      </ion-item>
-      <ion-note color="danger" *ngIf="getError('precio') as error">
-        {{ error }}
-      </ion-note>
-
-      <ion-item>
-        <ion-input label="Stock" labelPlacement="stacked" type="number" formControlName="stock" min="0"></ion-input>
-      </ion-item>
-      <ion-note color="danger" *ngIf="getError('stock') as error">
-        {{ error }}
-      </ion-note>
-    </ion-list>
-
+```html
     <ion-button fill="solid" expand="block" type="submit" class="ion-margin-top" [disabled]="guardando || cargando">
       {{ guardando ? 'Guardando...' : (esEdicion ? 'Actualizar' : 'Guardar')}}
-    </ion-button>
-  </form>
-</ion-content>
 ```
 
-### `mobile/src/app/productos-form/productos-form-routing.module.ts`
-
-```typescript
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { ProductosFormPage } from './productos-form.page';
-const routes: Routes = [{ path: '', component: ProductosFormPage }];
-@NgModule({ imports: [RouterModule.forChild(routes)], exports: [RouterModule] })
-export class ProductosFormPageRoutingModule {}
-```
-
-## 5. Comprobar el resultado
+## 4. Comprobar el resultado
 
 1. Presiona el lápiz de **Mouse modal**. La URL debe seguir siendo `/productos-list` y el modal debe contener los datos existentes.
 2. Borra el nombre e intenta actualizar: debe aparecer su validación. Restaura el nombre.
@@ -559,7 +259,7 @@ export class ProductosFormPageRoutingModule {}
 
 La figura 1 muestra el resultado obtenido con el código de esta práctica. Las fechas, los productos y el tema visual dependen de tu entorno.
 
-## 6. Explicación detallada del flujo
+## 5. Explicación detallada del flujo
 
 La figura 2 muestra el recorrido de arriba hacia abajo.
 

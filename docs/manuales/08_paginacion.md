@@ -32,35 +32,11 @@ Las rutas pertenecen al proyecto Ionic en `mobile/`. Ejecuta los comandos Docker
 docker compose exec mobile ionic g component components/paginacion
 ```
 
-Agrega manualmente `standalone: false`. Crea `paginacion.module.ts` y completa los cuatro archivos del componente con el código de la sección 4. El módulo declara y exporta `PaginacionComponent`.
+Agrega manualmente `standalone: false`. Crea `paginacion.module.ts` y completa los cuatro archivos del componente con el código de este paso. El módulo declara y exporta `PaginacionComponent`.
 
-### Paso 2. Preparar el listado
+**`mobile/src/app/components/paginacion/paginacion.component.ts`**
 
-En `productos-list.page.ts`, agrega `total = 0`, `paginaActual = 1` y `porPagina = 3`. Cambia la carga de `ionViewWillEnter()` para llamar a `cargarDatos()`.
-
-`cargarTotal()` solicita el conteo; `ajustarPaginaActual()` verifica que la página exista y `cargarProductos()` solicita sus registros con `limit`, `page` y `sort`. Agrega los métodos de la referencia completa.
-
-### Paso 3. Importar el módulo y mostrar los botones
-
-Importa `PaginacionModule` en el módulo del listado y agrégalo a `imports`. Dentro de `ion-content`, después de la lista, coloca:
-
-```html
-<app-paginacion
-  [total]="total"
-  [porPagina]="porPagina"
-  [paginaActual]="paginaActual"
-  [maxPaginasVisibles]="5"
-  (paginaCambio)="cambiarPagina($event)">
-</app-paginacion>
-```
-
-### Paso 4. Actualizar el estado después de cambios
-
-En `eliminarProducto()`, después de aceptar el éxito, llama a `cargarDatos()`. Al regresar del formulario mediante página, `ionViewWillEnter()` ejecutará la misma carga. Si utilizas formularios mediante modal, llama a `cargarDatos()` cuando `data?.guardado` sea verdadero.
-
-## 4. Código completo de referencia
-
-### `mobile/src/app/components/paginacion/paginacion.component.ts`
+1. En el archivo nuevo coloca los imports, las declaraciones y la estructura inicial que se muestran abajo. Si el generador creó una clase de ejemplo, sustituye esa plantilla una sola vez.
 
 ```typescript
 import {
@@ -88,7 +64,14 @@ export class PaginacionComponent implements OnChanges {
 
   totalPaginas: number = 0;
   paginasVisibles: number[] = [];
+}
+```
 
+2. Dentro de `PaginacionComponent`, inserta los siguientes métodos en orden, justo antes de la última llave de la clase.
+
+**`ngOnChanges()`**
+
+```typescript
   ngOnChanges(): void {
     this.totalPaginas = Math.ceil(
       this.total / this.porPagina
@@ -96,7 +79,11 @@ export class PaginacionComponent implements OnChanges {
 
     this.calcularPaginasVisibles();
   }
+```
 
+**`calcularPaginasVisibles()`**
+
+```typescript
   private calcularPaginasVisibles(): void {
     if (this.totalPaginas === 0) {
       this.paginasVisibles = [];
@@ -128,7 +115,11 @@ export class PaginacionComponent implements OnChanges {
       this.paginasVisibles.push(pagina);
     }
   }
+```
 
+**`cambiarPagina()`**
+
+```typescript
   cambiarPagina(pagina: number): void {
     if (
       pagina < 1 ||
@@ -140,22 +131,29 @@ export class PaginacionComponent implements OnChanges {
 
     this.paginaCambio.emit(pagina);
   }
+```
 
+**`anterior()`**
+
+```typescript
   anterior(): void {
     this.cambiarPagina(
       this.paginaActual - 1
     );
   }
+```
 
+**`siguiente()`**
+
+```typescript
   siguiente(): void {
     this.cambiarPagina(
       this.paginaActual + 1
     );
   }
-}
 ```
 
-### `mobile/src/app/components/paginacion/paginacion.component.html`
+**`mobile/src/app/components/paginacion/paginacion.component.html`**. Coloca esta plantilla en la vista de la práctica. Si Ionic generó contenido de ejemplo, sustitúyelo.
 
 ```html
 <div class="paginacion" *ngIf="totalPaginas > 1">
@@ -179,7 +177,7 @@ export class PaginacionComponent implements OnChanges {
 </p>
 ```
 
-### `mobile/src/app/components/paginacion/paginacion.component.scss`
+**`mobile/src/app/components/paginacion/paginacion.component.scss`**. Agrega estas reglas al final de la hoja de estilos.
 
 ```scss
 .paginacion {
@@ -204,7 +202,7 @@ export class PaginacionComponent implements OnChanges {
 }
 ```
 
-### `mobile/src/app/components/paginacion/paginacion.module.ts`
+**`mobile/src/app/components/paginacion/paginacion.module.ts`**. Crea este archivo con el siguiente contenido o sustituye la plantilla inicial del generador.
 
 ```typescript
 import { NgModule } from '@angular/core';
@@ -228,76 +226,31 @@ import { PaginacionComponent } from './paginacion.component';
 export class PaginacionModule {}
 ```
 
-### `mobile/src/app/productos-list/productos-list.module.ts`
+### Paso 2. Preparar el listado
+
+En `productos-list.page.ts`, agrega `total = 0`, `paginaActual = 1` y `porPagina = 3`. Cambia la carga de `ionViewWillEnter()` para llamar a `cargarDatos()`.
+
+`cargarTotal()` solicita el conteo; `ajustarPaginaActual()` verifica que la página exista y `cargarProductos()` solicita sus registros con `limit`, `page` y `sort`. Aplica los cambios al listado indicados abajo.
+
+**`mobile/src/app/productos-list/productos-list.page.ts`**. Aplica estos cambios en el orden indicado.
+
+Inserta el fragmento después de `})` / `export class ProductosListPage {` y antes de `titulo: string = 'Productos';`.
 
 ```typescript
-import { PaginacionModule } from '../components/paginacion/paginacion.module';
-import { ToolbarModule } from '../components/toolbar/toolbar.module';
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-
-import { IonicModule } from '@ionic/angular';
-
-import { ProductosListPageRoutingModule } from './productos-list-routing.module';
-
-import { ProductosListPage } from './productos-list.page';
-
-@NgModule({
-  imports: [
-    PaginacionModule,
-    ToolbarModule,
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    ProductosListPageRoutingModule
-  ],
-  declarations: [ProductosListPage]
-})
-export class ProductosListPageModule {}
-```
-
-### `mobile/src/app/productos-list/productos-list.page.ts`
-
-```typescript
-import { Component } from '@angular/core';
-import { AlertController } from '@ionic/angular';
-import axios from 'axios';
-import { environment } from '../../environments/environment';
-
-interface Producto {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  precio: string;
-  stock: number;
-  fecha_registro: string;
-}
-
-@Component({
-  selector: 'app-productos-list',
-  templateUrl: './productos-list.page.html',
-  styleUrls: ['./productos-list.page.scss'],
-  standalone: false,
-})
-export class ProductosListPage {
   total: number = 0;
   paginaActual: number = 1;
   porPagina: number = 3;
+```
 
-  titulo: string = 'Productos';
+Sustituye la línea `this.cargarProductos();` después de `productos: Producto[] = [];` / `ionViewWillEnter(): void {` y antes de `}`.
 
-  constructor(private alertController: AlertController) {}
-
-  productos: Producto[] = [];
-
-  ionViewWillEnter(): void {
+```typescript
     void this.cargarDatos();
-  }
+```
 
-async cargarProductos(): Promise<void> {
-  try {
-    const response = await axios.get<{ data: Producto[] }>(
+Sustituye la línea la URL de la colección después de `try {` / `const response = await axios.get<{ data: Producto[] }>(` y antes de `);`.
+
+```typescript
       `${environment.apiUrl}/items/productos`,
       {
         params: {
@@ -306,65 +259,17 @@ async cargarProductos(): Promise<void> {
           sort: 'id'
         }
       }
-    );
+```
 
-    this.productos = response.data.data;
+Sustituye la línea `await this.cargarProductos();` después de `await alerta.present();` / `await alerta.onDidDismiss();` y antes de `} catch (error) {`.
 
-  } catch (error) {
-    console.error('Error al cargar los productos:', error);
-  }
-}
-
-
-async confirmarEliminar(id: number, nombre: string): Promise<void> {
-  const alerta = await this.alertController.create({
-    header: 'Eliminar producto',
-    message: `¿Estás seguro de eliminar el producto "${nombre}"?`,
-    buttons: [
-      {
-        text: 'Cancelar',
-        role: 'cancel'
-      },
-      {
-        text: 'Eliminar',
-        role: 'destructive',
-        handler: () => {
-          void this.eliminarProducto(id);
-        }
-      }
-    ]
-  });
-
-  await alerta.present();
-}
-async eliminarProducto(id: number): Promise<void> {
-  try {
-    await axios.delete(
-      `${environment.apiUrl}/items/productos/${id}`
-    );
-
-    const alerta = await this.alertController.create({
-      header: 'Producto eliminado',
-      message: 'El producto fue eliminado correctamente.',
-      buttons: ['Aceptar']
-    });
-
-    await alerta.present();
-    await alerta.onDidDismiss();
-
+```typescript
     await this.cargarDatos();
-  } catch (error) {
-    console.error('Error al eliminar el producto:', error);
+```
 
-    const alerta = await this.alertController.create({
-      header: 'Error',
-      message: 'No fue posible eliminar el producto. Revisa la conexión, los permisos de eliminación en Directus y las relaciones del registro.',
-      buttons: ['Aceptar']
-    });
+En `ProductosListPage`, agrega los métodos siguientes justo antes de la última llave de la clase.
 
-    await alerta.present();
-  }
-}
+```typescript
 async cargarTotal(): Promise<void> {
   try {
     const response = await axios.get<{ data: { count: number | string }[] }>(
@@ -409,46 +314,27 @@ async cambiarPagina(
   this.paginaActual = pagina;
   await this.cargarProductos();
 }
-}
 ```
 
-### `mobile/src/app/productos-list/productos-list.page.html`
+### Paso 3. Importar el módulo y mostrar los botones
+
+Agrega `import { PaginacionModule } from '../components/paginacion/paginacion.module';` al inicio de `mobile/src/app/productos-list/productos-list.module.ts` y agrégalo a `imports`. Dentro de `ion-content`, después de la lista, coloca:
 
 ```html
-<app-toolbar [nombre]="titulo" color="personalizado">
-  <ion-buttons slot="end">
-    <ion-button fill="solid" [routerLink]="['/productos-form']" aria-label="Nuevo producto">
-      <ion-icon slot="icon-only" name="add"></ion-icon>
-    </ion-button>
-  </ion-buttons>
-</app-toolbar>
-
-<ion-content>
-  <ion-list>
-    <ion-item *ngFor="let producto of productos">
-      <ion-label class="ion-text-wrap">
-        <h2>{{ producto.nombre }}</h2>
-        <p>{{ producto.descripcion }}</p>
-        <p>Precio: ${{ producto.precio }}</p>
-        <p>Stock: {{ producto.stock }}</p>
-        <p>Registro: {{ producto.fecha_registro | date:'yyyy-MM-dd' }}</p>
-      </ion-label>
-      <ion-button fill="solid" slot="end" [routerLink]="['/productos-view', producto.id]" aria-label="Ver detalle">
-        <ion-icon slot="icon-only" name="eye"></ion-icon>
-      </ion-button>
-      <ion-button fill="solid" color="warning" [routerLink]="['/productos-form', producto.id]">
-        <ion-icon slot="icon-only" name="pencil"></ion-icon>
-      </ion-button>
-      <ion-button fill="solid" color="danger" (click)="confirmarEliminar(producto.id, producto.nombre)" aria-label="Eliminar producto">
-        <ion-icon slot="icon-only" name="trash"></ion-icon>
-      </ion-button>
-    </ion-item>
-  </ion-list>
-  <app-paginacion [total]="total" [porPagina]="porPagina" [paginaActual]="paginaActual" [maxPaginasVisibles]="5" (paginaCambio)="cambiarPagina($event)"></app-paginacion>
-</ion-content>
+<app-paginacion
+  [total]="total"
+  [porPagina]="porPagina"
+  [paginaActual]="paginaActual"
+  [maxPaginasVisibles]="5"
+  (paginaCambio)="cambiarPagina($event)">
+</app-paginacion>
 ```
 
-## 5. Comprobar el resultado
+### Paso 4. Actualizar el estado después de cambios
+
+En `eliminarProducto()`, después de aceptar el éxito, llama a `cargarDatos()`. Al regresar del formulario mediante página, `ionViewWillEnter()` ejecutará la misma carga. Si utilizas formularios mediante modal, llama a `cargarDatos()` cuando `data?.guardado` sea verdadero.
+
+## 4. Comprobar el resultado
 
 1. Abre el listado: debe mostrar hasta tres productos y los controles de la figura 1. **Anterior** estará deshabilitado en la primera página.
 2. Presiona **Siguiente**: deben cambiar los registros y el color del botón de la página activa.
@@ -459,7 +345,7 @@ async cambiarPagina(
 
 La figura 1 muestra el resultado obtenido con el código de esta práctica. Las fechas, los productos y el tema visual dependen de tu entorno.
 
-## 6. Explicación detallada del flujo
+## 5. Explicación detallada del flujo
 
 La figura 2 muestra el recorrido de arriba hacia abajo.
 

@@ -20,7 +20,7 @@ Continúa con los manuales [01: listado](01_listado_elementos.md) y [02: detalle
 - Se utilizan **NgModules**. Después de generar una página o componente, agrega manualmente `standalone: false` dentro de su decorador `@Component`.
 - La política de las prácticas debe permitir crear productos, como se indica en el primer paso.
 
-Esta es una **alternativa** al [manual de creación mediante página](03_crear_elemento_pagina.md). Aquí se abre y cierra un modal con `ModalController`; el formulario no utiliza `Router` para regresar. Si ya probaste la otra variante, adapta sus archivos como se indica en los pasos y compara el resultado con la sección 4.
+Esta es una **alternativa** al [manual de creación mediante página](03_crear_elemento_pagina.md). Aquí se abre y cierra un modal con `ModalController`; el formulario no utiliza `Router` para regresar. Si ya probaste la otra variante, adapta sus archivos como se indica en los pasos.
 
 ## 2. Conceptos y métodos que utilizarás
 
@@ -41,7 +41,7 @@ El resultado del modal se utilizará así: `guardado: true` indica que se creó 
 
 ## 3. Implementación paso a paso
 
-Sigue los pasos en orden. La sección 4 contiene los seis archivos completos involucrados para comparar el resultado.
+Sigue los pasos en orden.
 
 ### Paso 1. Revisar el permiso de creación en Directus
 
@@ -84,7 +84,7 @@ Después abre `mobile/src/app/productos-list/productos-list.module.ts`. Agrega e
 import { ProductosFormPageModule } from '../productos-form/productos-form.module';
 ```
 
-Conserva `CommonModule`, `FormsModule`, `IonicModule`, `ProductosListPageRoutingModule` y la declaración de `ProductosListPage`. No agregues `ProductosFormPage` a las declaraciones del listado: ya pertenece a su propio módulo. Ambos módulos completos están en la sección 4.
+Conserva `CommonModule`, `FormsModule`, `IonicModule`, `ProductosListPageRoutingModule` y la declaración de `ProductosListPage`. No agregues `ProductosFormPage` a las declaraciones del listado: ya pertenece a su propio módulo.
 
 ### Paso 3. Elegir la ubicación del botón de creación
 
@@ -110,7 +110,7 @@ Este es el botón **+** para crear un producto. Al presionarlo se ejecutará `nu
 </ion-buttons>
 ```
 
-La figura 4 muestra el acceso flotante y la figura 5 el acceso en la barra. **Elige una sola opción**. Ambas llaman a `nuevoProducto()` y abren el mismo modal; aquí no utilices `routerLink` para crear productos. Si vienes de la variante mediante página, reemplaza su acceso de creación por la opción elegida. El código completo de la sección 4 utiliza la opción A. Los botones `ion-button` llevan `fill="solid"`; `ion-fab-button` ya es sólido.
+La figura 4 muestra el acceso flotante y la figura 5 el acceso en la barra. **Elige una sola opción**. Ambas llaman a `nuevoProducto()` y abren el mismo modal; aquí no utilices `routerLink` para crear productos. Si vienes de la variante mediante página, reemplaza su acceso de creación por la opción elegida. Los botones `ion-button` llevan `fill="solid"`; `ion-fab-button` ya es sólido.
 
 ### Paso 4. Abrir el modal y recibir el resultado
 
@@ -157,7 +157,7 @@ ngOnInit(): void {
 }
 ```
 
-En ese caso retira el `ionViewWillEnter()` que agregaste para aquella variante, vuelve a importar `OnInit` y deja `export class ProductosListPage implements OnInit`. Así el archivo coincidirá con el código completo de esta práctica.
+En ese caso retira el `ionViewWillEnter()` que agregaste para aquella variante, vuelve a importar `OnInit` y deja `export class ProductosListPage implements OnInit`.
 
 El refresco después de crear un producto lo realiza la condición `if (data?.guardado)` al cerrarse el modal.
 
@@ -384,367 +384,7 @@ El botón **Cancelar** ejecuta `cerrarModal()`. El formulario utiliza `[formGrou
 
 Si probaste antes la variante mediante página, este HTML sustituye su cabecera con `ion-back-button`. Los archivos SCSS no requieren cambios.
 
-## 4. Así debe quedar el código completo
-
-Estos archivos corresponden a la variante mediante modal. Conservan la consulta del listado y los botones de detalle de las prácticas anteriores.
-
-### `mobile/src/app/productos-list/productos-list.module.ts`
-
-```typescript
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-
-import { IonicModule } from '@ionic/angular';
-
-import { ProductosListPageRoutingModule } from './productos-list-routing.module';
-
-import { ProductosFormPageModule } from '../productos-form/productos-form.module';
-
-import { ProductosListPage } from './productos-list.page';
-
-@NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    ProductosListPageRoutingModule,
-    ProductosFormPageModule
-  ],
-  declarations: [ProductosListPage]
-})
-export class ProductosListPageModule {}
-```
-
-### `mobile/src/app/productos-list/productos-list.page.ts`
-
-```typescript
-import { Component, OnInit } from '@angular/core';
-import { ModalController } from '@ionic/angular';
-import axios from 'axios';
-import { environment } from '../../environments/environment';
-import { ProductosFormPage } from '../productos-form/productos-form.page';
-
-interface Producto {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  precio: string;
-  stock: number;
-  fecha_registro: string;
-}
-
-@Component({
-  selector: 'app-productos-list',
-  templateUrl: './productos-list.page.html',
-  styleUrls: ['./productos-list.page.scss'],
-  standalone: false,
-})
-export class ProductosListPage implements OnInit {
-
-  productos: Producto[] = [];
-
-  constructor(
-    private modalController: ModalController
-  ) {}
-
-  ngOnInit(): void {
-    this.cargarProductos();
-  }
-
-  async cargarProductos(): Promise<void> {
-    try {
-      const response = await axios.get<{ data: Producto[] }>(
-        `${environment.apiUrl}/items/productos`
-      );
-
-      this.productos = response.data.data;
-    } catch (error) {
-      console.error('Error al cargar los productos:', error);
-    }
-  }
-
-  async nuevoProducto(): Promise<void> {
-    const modal = await this.modalController.create({
-      component: ProductosFormPage,
-      breakpoints: [0, 0.5, 0.95],
-      initialBreakpoint: 0.95
-    });
-
-    await modal.present();
-
-    const { data } = await modal.onDidDismiss();
-
-    if (data?.guardado) {
-      await this.cargarProductos();
-    }
-  }
-}
-```
-
-### `mobile/src/app/productos-list/productos-list.page.html`
-
-```html
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Productos</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content>
-  <ion-list>
-    <ion-item *ngFor="let producto of productos">
-      <ion-label class="ion-text-wrap">
-        <h2>{{ producto.nombre }}</h2>
-        <p>{{ producto.descripcion }}</p>
-        <p>Precio: ${{ producto.precio }}</p>
-        <p>Stock: {{ producto.stock }}</p>
-        <p>Registro: {{ producto.fecha_registro | date:'yyyy-MM-dd' }}</p>
-      </ion-label>
-      <ion-button fill="solid" slot="end" [routerLink]="['/productos-view', producto.id]" aria-label="Ver detalle">
-        <ion-icon slot="icon-only" name="eye"></ion-icon>
-      </ion-button>
-    </ion-item>
-  </ion-list>
-  <ion-fab slot="fixed" vertical="bottom" horizontal="center">
-      <ion-fab-button (click)="nuevoProducto()" aria-label="Nuevo producto">
-          <ion-icon name="add"></ion-icon>
-      </ion-fab-button>
-  </ion-fab>
-</ion-content>
-```
-
-### `mobile/src/app/productos-form/productos-form.module.ts`
-
-```typescript
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
-import { IonicModule } from '@ionic/angular';
-
-import { ProductosFormPageRoutingModule } from './productos-form-routing.module';
-
-import { ProductosFormPage } from './productos-form.page';
-
-@NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    IonicModule,
-    ProductosFormPageRoutingModule
-  ],
-  declarations: [ProductosFormPage]
-})
-export class ProductosFormPageModule {}
-```
-
-### `mobile/src/app/productos-form/productos-form.page.ts`
-
-```typescript
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AlertController, ModalController } from '@ionic/angular';
-import axios from 'axios';
-import { environment } from '../../environments/environment';
-
-interface ProductoCrear {
-  nombre: string;
-  descripcion: string;
-  precio: number;
-  stock: number;
-}
-
-@Component({
-  selector: 'app-productos-form',
-  templateUrl: './productos-form.page.html',
-  styleUrls: ['./productos-form.page.scss'],
-  standalone: false,
-})
-export class ProductosFormPage implements OnInit {
-
-  productoForm!: FormGroup;
-  guardando: boolean = false;
-
-  mensajesValidacion: Record<string, Record<string, string>> = {
-    nombre: {
-      required: 'El nombre es obligatorio.',
-      maxlength: 'El nombre no debe superar 150 caracteres.'
-    },
-    precio: {
-      required: 'El precio es obligatorio.',
-      min: 'El precio debe ser igual o mayor que cero.'
-    },
-    stock: {
-      required: 'El stock es obligatorio.',
-      min: 'El stock debe ser igual o mayor que cero.',
-      pattern: 'El stock debe contener únicamente números enteros.'
-    }
-  };
-
-  constructor(
-    private formBuilder: FormBuilder,
-    private alertController: AlertController,
-    private modalController: ModalController
-  ) {}
-
-  ngOnInit(): void {
-    this.crearFormulario();
-  }
-
-  private crearFormulario(): void {
-    this.productoForm = this.formBuilder.group({
-      nombre: ['', [
-        Validators.required,
-        Validators.maxLength(150)
-      ]],
-      descripcion: [''],
-      precio: ['', [
-        Validators.required,
-        Validators.min(0)
-      ]],
-      stock: ['', [
-        Validators.required,
-        Validators.min(0),
-        Validators.pattern('^[0-9]+$')
-      ]]
-    });
-  }
-
-  getError(controlName: string): string {
-    const control = this.productoForm.get(controlName);
-
-    if (
-      !control ||
-      !control.errors ||
-      !(control.touched || control.dirty)
-    ) {
-      return '';
-    }
-
-    const tipoError = Object.keys(control.errors)[0];
-
-    return this.mensajesValidacion[controlName]?.[tipoError]
-      ?? 'El valor ingresado no es válido.';
-  }
-
-  async cerrarModal(): Promise<void> {
-    await this.modalController.dismiss({
-      guardado: false
-    });
-  }
-
-  async guardarProducto(): Promise<void> {
-    if (this.productoForm.invalid) {
-      this.productoForm.markAllAsTouched();
-      return;
-    }
-
-    this.guardando = true;
-
-    const valores = this.productoForm.value;
-
-    const producto: ProductoCrear = {
-      nombre: valores.nombre.trim(),
-      descripcion: valores.descripcion?.trim() ?? '',
-      precio: Number(valores.precio),
-      stock: Number(valores.stock)
-    };
-
-    try {
-      await axios.post(
-        `${environment.apiUrl}/items/productos`,
-        producto,
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      const alerta = await this.alertController.create({
-        header: 'Producto guardado',
-        message: 'El producto fue registrado correctamente.',
-        buttons: ['Aceptar']
-      });
-
-      await alerta.present();
-      await alerta.onDidDismiss();
-
-      await this.modalController.dismiss({
-        guardado: true
-      });
-    } catch (error) {
-      console.error('Error al guardar el producto:', error);
-
-      const alerta = await this.alertController.create({
-        header: 'Error',
-        message: 'No fue posible guardar el producto. Revisa los datos, la conexión y los permisos de creación en Directus.',
-        buttons: ['Aceptar']
-      });
-
-      await alerta.present();
-    } finally {
-      this.guardando = false;
-    }
-  }
-}
-```
-
-### `mobile/src/app/productos-form/productos-form.page.html`
-
-```html
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-button fill="solid" (click)="cerrarModal()">
-        Cancelar
-      </ion-button>
-    </ion-buttons>
-    <ion-title>Nuevo producto</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content class="ion-padding">
-  <form *ngIf="productoForm" [formGroup]="productoForm" (ngSubmit)="guardarProducto()">
-    <ion-list>
-      <ion-item>
-        <ion-input label="Nombre" labelPlacement="stacked" type="text" formControlName="nombre" maxlength="150"></ion-input>
-      </ion-item>
-      <ion-note color="danger" *ngIf="getError('nombre') as error">
-        {{ error }}
-      </ion-note>
-
-      <ion-item>
-        <ion-textarea label="Descripción" labelPlacement="stacked" formControlName="descripcion" autoGrow="true"></ion-textarea>
-      </ion-item>
-
-      <ion-item>
-        <ion-input label="Precio" labelPlacement="stacked" type="number" formControlName="precio" min="0"></ion-input>
-      </ion-item>
-      <ion-note color="danger" *ngIf="getError('precio') as error">
-        {{ error }}
-      </ion-note>
-
-      <ion-item>
-        <ion-input label="Stock" labelPlacement="stacked" type="number" formControlName="stock" min="0"></ion-input>
-      </ion-item>
-      <ion-note color="danger" *ngIf="getError('stock') as error">
-        {{ error }}
-      </ion-note>
-    </ion-list>
-
-    <ion-button fill="solid" expand="block" type="submit" class="ion-margin-top" [disabled]="guardando">
-      {{ guardando ? 'Guardando...' : 'Guardar' }}
-    </ion-button>
-  </form>
-</ion-content>
-```
-
-El formulario se abre desde el listado con `ModalController`. Para probar esta variante entra a `/productos-list` y presiona **+**; no abras `/productos-form` directamente como una página. Conserva las demás rutas del proyecto y los módulos de rutas generados.
-
-## 5. Comprobar que funciona
+## 4. Comprobar que funciona
 
 1. Guarda los archivos y espera a que Ionic termine de compilar.
 2. Abre `http://localhost:8100/productos-list` y presiona el botón flotante **+**. Debe aparecer el formulario como un modal, manteniendo la misma URL.
@@ -789,7 +429,7 @@ Prueba el icono **+** en la ubicación elegida. Debe abrir el formulario sin cam
   <em>Figura 5. Opción B: acceso al mismo modal desde la barra.</em>
 </p>
 
-## 6. Explicación detallada del flujo
+## 5. Explicación detallada del flujo
 
 ### Del modal al listado actualizado
 

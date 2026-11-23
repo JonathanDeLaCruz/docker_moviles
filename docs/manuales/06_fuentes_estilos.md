@@ -41,28 +41,9 @@ Conserva las importaciones de Ionic que ya contiene ese archivo.
 
 ### Paso 3. Registrar la fuente y el color
 
-Coloca el contenido completo de `app.component.scss` de la sección 4 en `mobile/src/app/app.component.scss`. La URL `/assets/font/...` corresponde al despliegue en la raíz utilizado por esta aplicación. `font-display: swap` permite mostrar texto mientras se descarga la fuente.
+Agrega las reglas de este paso al final de `mobile/src/app/app.component.scss`. La URL `/assets/font/...` corresponde al despliegue en la raíz utilizado por esta aplicación. `font-display: swap` permite mostrar texto mientras se descarga la fuente.
 
-### Paso 4. Utilizar el color
-
-En el encabezado del listado usa:
-
-```html
-<ion-toolbar color="personalizado">
-  <ion-title>Productos</ion-title>
-  <!-- Conserva aquí tus botones de la barra. -->
-</ion-toolbar>
-```
-
-Ionic también permite los colores `primary`, `secondary`, `tertiary`, `success`, `warning`, `danger`, `light`, `medium` y `dark`. El nuevo color se usa con la misma propiedad.
-
-### Paso 5. Agregar un estilo de página
-
-Coloca `.boton-producto` de la sección 4 en `productos-list.page.scss` y agrega `class="boton-producto"` a un botón del listado que quieras redondear. Sus estilos pertenecen a esa página. Para crear otra paleta puedes utilizar el [generador de colores de Ionic](https://ionicframework.com/docs/theming/color-generator).
-
-## 4. Código completo de referencia
-
-### `mobile/src/app/app.component.scss`
+**`mobile/src/app/app.component.scss`**. Agrega estas reglas al final de la hoja de estilos.
 
 ```scss
 @font-face {
@@ -93,7 +74,24 @@ Coloca `.boton-producto` de la sección 4 en `productos-list.page.scss` y agrega
 }
 ```
 
-### `mobile/src/app/productos-list/productos-list.page.scss`
+### Paso 4. Utilizar el color
+
+En el encabezado del listado usa:
+
+```html
+<ion-toolbar color="personalizado">
+  <ion-title>Productos</ion-title>
+  <!-- Conserva aquí tus botones de la barra. -->
+</ion-toolbar>
+```
+
+Ionic también permite los colores `primary`, `secondary`, `tertiary`, `success`, `warning`, `danger`, `light`, `medium` y `dark`. El nuevo color se usa con la misma propiedad.
+
+### Paso 5. Agregar un estilo de página
+
+Coloca `.boton-producto` de este paso en `productos-list.page.scss` y agrega `class="boton-producto"` a un botón del listado que quieras redondear. Sus estilos pertenecen a esa página. Para crear otra paleta puedes utilizar el [generador de colores de Ionic](https://ionicframework.com/docs/theming/color-generator).
+
+**`mobile/src/app/productos-list/productos-list.page.scss`**. Agrega estas reglas al final de la hoja de estilos.
 
 ```scss
 .boton-producto {
@@ -102,51 +100,7 @@ Coloca `.boton-producto` de la sección 4 en `productos-list.page.scss` y agrega
 }
 ```
 
-### `mobile/src/global.scss`
-
-```scss
-/*
- * App Global CSS
- * ----------------------------------------------------------------------------
- * Put style rules here that you want to apply globally. These styles are for
- * the entire app and not just one component. Additionally, this file can be
- * used as an entry point to import other CSS/Sass files to be included in the
- * output CSS.
- * For more information on global stylesheets, visit the documentation:
- * https://ionicframework.com/docs/layout/global-stylesheets
- */
-
-/* Core CSS required for Ionic components to work properly */
-@import "@ionic/angular/css/core.css";
-
-/* Basic CSS for apps built with Ionic */
-@import "@ionic/angular/css/normalize.css";
-@import "@ionic/angular/css/structure.css";
-@import "@ionic/angular/css/typography.css";
-@import "@ionic/angular/css/display.css";
-
-/* Optional CSS utils that can be commented out */
-@import "@ionic/angular/css/padding.css";
-@import "@ionic/angular/css/float-elements.css";
-@import "@ionic/angular/css/text-alignment.css";
-@import "@ionic/angular/css/text-transformation.css";
-@import "@ionic/angular/css/flex-utils.css";
-
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
- */
-
-/* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import "@ionic/angular/css/palettes/dark.system.css";
-
-@import "./app/app.component.scss";
-```
-
-## 5. Comprobar el resultado
+## 4. Comprobar el resultado
 
 1. Abre el listado: el encabezado debe verse con el color personalizado y los textos con Young Serif, como en la figura 1.
 2. Abre un formulario: la fuente debe continuar aplicada.
@@ -155,7 +109,7 @@ Coloca `.boton-producto` de la sección 4 en `productos-list.page.scss` y agrega
 
 La figura 1 muestra el resultado obtenido con el código de esta práctica. Las fechas, los productos y el tema visual dependen de tu entorno.
 
-## 6. Explicación detallada del flujo
+## 5. Explicación detallada del flujo
 
 La figura 2 muestra el recorrido de arriba hacia abajo.
 

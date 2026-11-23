@@ -27,7 +27,7 @@ Las rutas pertenecen al proyecto Ionic en `mobile/`. Ejecuta los comandos Docker
 
 ### Paso 1. Guardar el texto
 
-Dentro de `ProductosListPage`, agrega `busqueda: string = '';`.
+En `mobile/src/app/productos-list/productos-list.page.ts`, dentro de `ProductosListPage`, agrega `busqueda: string = '';`.
 
 ### Paso 2. Preparar el filtro y el evento
 
@@ -56,235 +56,23 @@ Agrega estos métodos dentro de la clase:
 
 ### Paso 3. Aplicar el filtro a las dos consultas
 
-En los parámetros de `cargarProductos()`, después de `sort`, agrega `...this.parametrosBusqueda()`. En el GET de `cargarTotal()`, agrega `{ params: this.parametrosBusqueda() }` como segundo argumento. La sección 4 contiene ambas consultas completas.
+En el mismo archivo realiza dos cambios.
+
+1. Dentro de `cargarProductos()`, localiza `sort: 'id'` en el objeto `params`. Agrega una coma al final de esa línea e inserta debajo `...this.parametrosBusqueda()`.
+2. Dentro de `cargarTotal()`, localiza el `axios.get` cuya URL contiene `aggregate[count]`. Después de la URL y antes de cerrar el paréntesis, añade `, { params: this.parametrosBusqueda() }`.
+
+ Comprueba que al buscar disminuyan tanto las filas visibles como el número de páginas.
 
 ### Paso 4. Agregar la barra
 
-Dentro de `ion-content`, antes de `ion-list`, agrega:
+En `mobile/src/app/productos-list/productos-list.page.html`, dentro de `ion-content`, antes de `ion-list`, agrega:
 
 ```html
 <ion-searchbar [value]="busqueda" [debounce]="300" (ionInput)="handleInput($event)" placeholder="Buscar productos" aria-label="Buscar productos"></ion-searchbar>
 <p class="ion-padding" *ngIf="total === 0">No se encontraron productos.</p>
 ```
 
-
-## 4. Código completo de referencia
-
-### `mobile/src/app/productos-list/productos-list.page.ts`
-
-```typescript
-import { Component } from '@angular/core';
-import { AlertController } from '@ionic/angular';
-import axios from 'axios';
-import { environment } from '../../environments/environment';
-
-interface Producto {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  precio: string;
-  stock: number;
-  fecha_registro: string;
-}
-
-@Component({
-  selector: 'app-productos-list',
-  templateUrl: './productos-list.page.html',
-  styleUrls: ['./productos-list.page.scss'],
-  standalone: false,
-})
-export class ProductosListPage {
-  busqueda: string = '';
-
-  total: number = 0;
-  paginaActual: number = 1;
-  porPagina: number = 3;
-
-  titulo: string = 'Productos';
-
-  constructor(private alertController: AlertController) {}
-
-  productos: Producto[] = [];
-
-  ionViewWillEnter(): void {
-    void this.cargarDatos();
-  }
-
-async cargarProductos(): Promise<void> {
-  try {
-    const response = await axios.get<{ data: Producto[] }>(
-      `${environment.apiUrl}/items/productos`,
-      {
-        params: {
-          limit: this.porPagina,
-          page: this.paginaActual,
-          sort: 'id',
-          ...this.parametrosBusqueda()
-        }
-      }
-    );
-
-    this.productos = response.data.data;
-
-  } catch (error) {
-    console.error('Error al cargar los productos:', error);
-  }
-}
-
-
-async confirmarEliminar(id: number, nombre: string): Promise<void> {
-  const alerta = await this.alertController.create({
-    header: 'Eliminar producto',
-    message: `¿Estás seguro de eliminar el producto "${nombre}"?`,
-    buttons: [
-      {
-        text: 'Cancelar',
-        role: 'cancel'
-      },
-      {
-        text: 'Eliminar',
-        role: 'destructive',
-        handler: () => {
-          void this.eliminarProducto(id);
-        }
-      }
-    ]
-  });
-
-  await alerta.present();
-}
-async eliminarProducto(id: number): Promise<void> {
-  try {
-    await axios.delete(
-      `${environment.apiUrl}/items/productos/${id}`
-    );
-
-    const alerta = await this.alertController.create({
-      header: 'Producto eliminado',
-      message: 'El producto fue eliminado correctamente.',
-      buttons: ['Aceptar']
-    });
-
-    await alerta.present();
-    await alerta.onDidDismiss();
-
-    await this.cargarDatos();
-  } catch (error) {
-    console.error('Error al eliminar el producto:', error);
-
-    const alerta = await this.alertController.create({
-      header: 'Error',
-      message: 'No fue posible eliminar el producto. Revisa la conexión, los permisos de eliminación en Directus y las relaciones del registro.',
-      buttons: ['Aceptar']
-    });
-
-    await alerta.present();
-  }
-}
-async cargarTotal(): Promise<void> {
-  try {
-    const response = await axios.get<{ data: { count: number | string }[] }>(
-      `${environment.apiUrl}/items/productos?aggregate[count]=*`,
-      { params: this.parametrosBusqueda() }
-    );
-
-    this.total = Number(
-      response.data.data[0]?.count ?? 0
-    );
-
-  } catch (error) {
-    console.error(
-      'Error al obtener el total de productos:',
-      error
-    );
-
-    this.total = 0;
-  }
-}
-private ajustarPaginaActual(): void {
-  const totalPaginas = Math.ceil(
-    this.total / this.porPagina
-  );
-
-  if (totalPaginas === 0) {
-    this.paginaActual = 1;
-    return;
-  }
-
-  if (this.paginaActual > totalPaginas) {
-    this.paginaActual = totalPaginas;
-  }
-}
-async cargarDatos(): Promise<void> {
-  await this.cargarTotal();
-  this.ajustarPaginaActual();
-  await this.cargarProductos();
-}
-async cambiarPagina(
-  pagina: number
-): Promise<void> {
-  this.paginaActual = pagina;
-  await this.cargarProductos();
-}
-  private parametrosBusqueda(): Record<string, string> {
-    const texto = this.busqueda.trim();
-    return texto ? {
-      filter: JSON.stringify({
-        _or: [
-          { nombre: { _icontains: texto } },
-          { descripcion: { _icontains: texto } }
-        ]
-      })
-    } : {};
-  }
-
-  async handleInput(event: CustomEvent<{ value?: string | null }>): Promise<void> {
-    this.busqueda = event.detail.value ?? '';
-    this.paginaActual = 1;
-    await this.cargarDatos();
-  }
-}
-```
-
-### `mobile/src/app/productos-list/productos-list.page.html`
-
-```html
-<app-toolbar [nombre]="titulo" color="personalizado">
-  <ion-buttons slot="end">
-    <ion-button fill="solid" [routerLink]="['/productos-form']" aria-label="Nuevo producto">
-      <ion-icon slot="icon-only" name="add"></ion-icon>
-    </ion-button>
-  </ion-buttons>
-</app-toolbar>
-
-<ion-content>
-  <ion-searchbar [value]="busqueda" [debounce]="300" (ionInput)="handleInput($event)" placeholder="Buscar productos" aria-label="Buscar productos"></ion-searchbar>
-  <p class="ion-padding" *ngIf="total === 0">No se encontraron productos.</p>
-  <ion-list>
-    <ion-item *ngFor="let producto of productos">
-      <ion-label class="ion-text-wrap">
-        <h2>{{ producto.nombre }}</h2>
-        <p>{{ producto.descripcion }}</p>
-        <p>Precio: ${{ producto.precio }}</p>
-        <p>Stock: {{ producto.stock }}</p>
-        <p>Registro: {{ producto.fecha_registro | date:'yyyy-MM-dd' }}</p>
-      </ion-label>
-      <ion-button fill="solid" slot="end" [routerLink]="['/productos-view', producto.id]" aria-label="Ver detalle">
-        <ion-icon slot="icon-only" name="eye"></ion-icon>
-      </ion-button>
-      <ion-button fill="solid" color="warning" [routerLink]="['/productos-form', producto.id]">
-        <ion-icon slot="icon-only" name="pencil"></ion-icon>
-      </ion-button>
-      <ion-button fill="solid" color="danger" (click)="confirmarEliminar(producto.id, producto.nombre)" aria-label="Eliminar producto">
-        <ion-icon slot="icon-only" name="trash"></ion-icon>
-      </ion-button>
-    </ion-item>
-  </ion-list>
-  <app-paginacion [total]="total" [porPagina]="porPagina" [paginaActual]="paginaActual" [maxPaginasVisibles]="5" (paginaCambio)="cambiarPagina($event)"></app-paginacion>
-</ion-content>
-```
-
-## 5. Comprobar el resultado
+## 4. Comprobar el resultado
 
 1. Escribe **Mouse**: deben aparecer únicamente productos cuyo nombre o descripción coincidan, como en la figura 1.
 2. Escribe **teclado** y comprueba las coincidencias sin depender de mayúsculas.
@@ -294,7 +82,7 @@ async cambiarPagina(
 
 La figura 1 muestra el resultado obtenido con el código de esta práctica. Las fechas, los productos y el tema visual dependen de tu entorno.
 
-## 6. Explicación detallada del flujo
+## 5. Explicación detallada del flujo
 
 La figura 2 muestra el recorrido de arriba hacia abajo.
 

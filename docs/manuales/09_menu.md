@@ -27,51 +27,24 @@ Las rutas pertenecen al proyecto Ionic en `mobile/`. Ejecuta los comandos Docker
 
 ### Paso 1. Definir las opciones
 
-Agrega el arreglo `enlaces` de la sección 4 a `AppComponent`. Cada objeto contiene `ruta` y `texto`. Conserva `standalone: false`.
+Agrega el arreglo `enlaces` de este paso a `AppComponent`. Cada objeto contiene `ruta` y `texto`. Conserva `standalone: false`.
 
-### Paso 2. Agregar el menú
-
-Reemplaza `app.component.html` por su contenido completo de la sección 4. El `contentId` del menú y el `id` del outlet deben ser **main**.
-
-### Paso 3. Agregar el acceso a la barra
-
-En `toolbar.component.html`, dentro de `ion-toolbar`, antes de `ion-title`, agrega:
-
-```html
-<ion-buttons slot="start">
-  <ion-menu-button menu="principal" aria-label="Abrir menú"></ion-menu-button>
-</ion-buttons>
-```
-
-Conserva el título y los botones de la página.
-
-### Paso 4. Ajustar el ancho
-
-Al final de `app.component.scss`, conserva la fuente y los colores y agrega `ion-menu { --width: 260px; }`.
-
-## 4. Código completo de referencia
-
-### `mobile/src/app/app.component.ts`
+**`mobile/src/app/app.component.ts`**. Dentro de `AppComponent`, antes del constructor, agrega la lista de destinos.
 
 ```typescript
-import { Component } from '@angular/core';
-@Component({
-  selector: 'app-root',
-  templateUrl: 'app.component.html',
-  styleUrls: ['app.component.scss'],
-  standalone: false
-})
-export class AppComponent {
   enlaces: { ruta: string; texto: string }[] = [
     { ruta: '/productos-list', texto: 'Productos' },
     { ruta: '/tabs/tab1', texto: 'Tab 1' },
     { ruta: '/tabs/tab2', texto: 'Tab 2' },
     { ruta: '/tabs/tab3', texto: 'Tab 3' }
   ];
-}
 ```
 
-### `mobile/src/app/app.component.html`
+### Paso 2. Agregar el menú
+
+Reemplaza `app.component.html` por su contenido completo de este paso. El `contentId` del menú y el `id` del outlet deben ser **main**.
+
+**`mobile/src/app/app.component.html`**. Coloca esta plantilla en la vista de la práctica. Si Ionic generó contenido de ejemplo, sustitúyelo.
 
 ```html
 <ion-app>
@@ -93,52 +66,23 @@ export class AppComponent {
 </ion-app>
 ```
 
-### `mobile/src/app/components/toolbar/toolbar.component.html`
+### Paso 3. Agregar el acceso a la barra
+
+En `mobile/src/app/components/toolbar/toolbar.component.html`, dentro de `ion-toolbar`, antes de `ion-title`, agrega:
 
 ```html
-<ion-header [translucent]="true">
-  <ion-toolbar [color]="color">
-    <ion-buttons slot="start"><ion-menu-button menu="principal" aria-label="Abrir menú"></ion-menu-button></ion-buttons>
-    <ion-title>{{ nombre }}</ion-title>
-    <ng-content></ng-content>
-  </ion-toolbar>
-</ion-header>
+<ion-buttons slot="start">
+  <ion-menu-button menu="principal" aria-label="Abrir menú"></ion-menu-button>
+</ion-buttons>
 ```
 
-### `mobile/src/app/app.component.scss`
+Conserva el título y los botones de la página.
 
-```scss
-@font-face {
-  font-family: 'Young Serif';
-  src: url('/assets/font/YoungSerif-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
+### Paso 4. Ajustar el ancho
 
-:root {
-  --ion-font-family: 'Young Serif', serif;
-  --ion-color-personalizado: #686090;
-  --ion-color-personalizado-rgb: 104, 96, 144;
-  --ion-color-personalizado-contrast: #ffffff;
-  --ion-color-personalizado-contrast-rgb: 255, 255, 255;
-  --ion-color-personalizado-shade: #5c547f;
-  --ion-color-personalizado-tint: #77709b;
-}
+Al final de `app.component.scss`, conserva la fuente y los colores y agrega `ion-menu { --width: 260px; }`.
 
-.ion-color-personalizado {
-  --ion-color-base: var(--ion-color-personalizado);
-  --ion-color-base-rgb: var(--ion-color-personalizado-rgb);
-  --ion-color-contrast: var(--ion-color-personalizado-contrast);
-  --ion-color-contrast-rgb: var(--ion-color-personalizado-contrast-rgb);
-  --ion-color-shade: var(--ion-color-personalizado-shade);
-  --ion-color-tint: var(--ion-color-personalizado-tint);
-}
-
-ion-menu { --width: 260px; }
-```
-
-## 5. Comprobar el resultado
+## 4. Comprobar el resultado
 
 1. Abre `/productos-list` y presiona el icono del menú. Debe abrirse la vista de la figura 1.
 2. Presiona **Tab 1**: debe navegar y cerrar el menú.
@@ -147,7 +91,7 @@ ion-menu { --width: 260px; }
 
 La figura 1 muestra el resultado obtenido con el código de esta práctica. Las fechas, los productos y el tema visual dependen de tu entorno.
 
-## 6. Explicación detallada del flujo
+## 5. Explicación detallada del flujo
 
 La figura 2 muestra el recorrido de arriba hacia abajo.
 

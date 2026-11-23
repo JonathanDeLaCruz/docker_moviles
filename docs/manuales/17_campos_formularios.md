@@ -125,82 +125,13 @@ En la política de la cuenta de práctica habilita **Create** y **Read** para `e
 
 ### Paso 2. Crear servicio, página y ruta
 
-Crea `src/app/services/ejemplos-campos.ts` y la carpeta `src/app/ejemplos-campos`. Copia los cuatro archivos de página y el servicio del punto 4. El módulo importa `ReactiveFormsModule` para conectar el formulario; la página lleva `standalone: false`.
+Crea `src/app/services/ejemplos-campos.ts` y la carpeta `src/app/ejemplos-campos`. Prepara el módulo y el servicio aquí. En el paso 3 conectarás la vista con su formulario. El módulo importa `ReactiveFormsModule` para conectar el formulario; la página lleva `standalone: false`.
 
 Agrega la ruta indicada al arreglo de rutas de `app-routing.module.ts`, antes de cualquier ruta comodín. Después de iniciar sesión, entra a [Ejemplos de campos en Ionic](http://localhost:8100/ejemplos-campos). Si utilizas el menú del manual 09, puedes añadir un enlace a esa misma ruta.
 
-### Paso 3. Conectar y validar los controles
+**`mobile/src/app/services/ejemplos-campos.ts`**
 
-Cada `formControlName` coincide con una clave del formulario. El grupo `canales` contiene dos casillas; `tecnologias` empieza como arreglo vacío. La casilla de términos usa `Validators.requiredTrue`: debe estar marcada para guardar. Nombre, correo, monto y tipo son obligatorios; edad, teléfono y sitio web se validan cuando contienen datos.
-
-La figura 1 muestra los datos básicos capturados en Ionic.
-
-<p align="center">
-  <img src="imagenes/17-datos-basicos.jpg" alt="Entradas de texto, correo, teléfono, dirección web y números en Ionic" width="390"><br>
-  <em>Figura 1. Entradas de texto, correo, teléfono, dirección web y números en Ionic.</em>
-</p>
-
-
-La figura 2 muestra las opciones seleccionadas. Selecciona Taller, En línea, Ionic y Directus, y marca los canales que quieras conservar.
-
-<p align="center">
-  <img src="imagenes/17-selecciones.jpg" alt="Selección simple, radio, selección múltiple y casillas marcadas" width="390"><br>
-  <em>Figura 2. Selección simple, radio, selección múltiple y casillas marcadas.</em>
-</p>
-
-
-### Paso 4. Construir los datos y guardar
-
-`guardar()` comprueba la validación antes de llamar a la API. Primero consulta el catálogo por codigo=app_ionic. Después construye el objeto: convierte números, transforma las casillas en arreglo, envía null en los campos opcionales vacíos y agrega `estado`, el ID de `origen` y `fecha_envio`. No envía `id` ni `fecha_creacion`.
-
-La figura 3 muestra el interruptor, el rango y los controles de fecha y hora. Pulsa **Guardar ejemplo** para ejecutar POST /items/ejemplos_campos. Mientras se procesa, el botón se desactiva; al guardar queda desactivado hasta pulsar + para otro ejemplo.
-
-<p align="center">
-  <img src="imagenes/17-fecha-hora.jpg" alt="Interruptor, prioridad, fecha y hora antes de consultar el registro guardado" width="390"><br>
-  <em>Figura 3. Interruptor, prioridad, fecha y hora antes de consultar el registro guardado.</em>
-</p>
-
-
-### Paso 5. Consultar y comprobar
-
-Pulsa **Consultar registro guardado**: se ejecuta un GET por ID. Abre los paneles **JSON enviado** y **Registro recuperado** para comprobar los datos. La figura 4 muestra el resultado real de esa consulta, incluido el estado y las dos fechas.
-
-<p align="center">
-  <img src="imagenes/17-registro-guardado.jpg" alt="Registro 8 recuperado desde Directus después de guardarlo en Ionic" width="390"><br>
-  <em>Figura 4. Registro 8 recuperado desde Directus después de guardarlo en Ionic.</em>
-</p>
-
-
-En Directus abre Contenido → Ejemplos Campos y selecciona ese registro. La figura 5 muestra las selecciones y los booleanos persistidos, vistos desde Directus.
-
-<p align="center">
-  <img src="imagenes/17-directus-selecciones.jpg" alt="Selecciones guardadas en la colección de Directus" width="900"><br>
-  <em>Figura 5. Selecciones guardadas en la colección de Directus.</em>
-</p>
-
-
-La figura 6 muestra el estado y la relación de origen en Directus: el nombre viene del catálogo, mientras ejemplos_campos almacena su llave.
-
-<p align="center">
-  <img src="imagenes/17-origen-relacionado.jpg" alt="Estado ENUM y origen relacionado en Directus" width="900"><br>
-  <em>Figura 6. Estado ENUM y origen relacionado en Directus.</em>
-</p>
-
-### Paso 6. Elegir la ubicación del icono +
-
-Elige **una opción** mediante `usarBotonFlotante`. Con false aparece en la barra, como en las figuras anteriores; con true aparece abajo a la derecha, como en la figura 7. El mismo método `nuevo()` reinicia el ejemplo. El HTML completo contiene ambas alternativas con condiciones que impiden mostrarlas juntas.
-
-<p align="center">
-  <img src="imagenes/17-boton-flotante.jpg" alt="Variante con icono + flotante para preparar otro ejemplo" width="390"><br>
-  <em>Figura 7. Variante con icono + flotante para preparar otro ejemplo.</em>
-</p>
-
-
-## 4. Código completo de referencia
-
-Crea estos archivos y conserva el servicio de autenticación del manual 12. Los nombres y rutas de los imports corresponden al proyecto del curso.
-
-### `mobile/src/app/services/ejemplos-campos.ts`
+1. En el archivo nuevo coloca los imports, las declaraciones y la estructura inicial que se muestran abajo. Si el generador creó una clase de ejemplo, sustituye esa plantilla una sola vez.
 
 ```typescript
 import { Injectable } from '@angular/core';
@@ -238,6 +169,14 @@ export interface EjemploGuardado extends Omit<EjemploCrear, 'monto' | 'origen'> 
 export class EjemplosCamposService {
   constructor(private auth: AuthService) {}
   private readonly campos = '*,origen.id,origen.codigo,origen.nombre';
+}
+```
+
+2. Dentro de `EjemplosCamposService`, inserta los siguientes métodos en orden, justo antes de la última llave de la clase.
+
+**`obtenerOrigenApp()`**
+
+```typescript
   async obtenerOrigenApp(): Promise<OrigenEjemplo> {
     const response = await this.auth.cliente.get<{ data: OrigenEjemplo[] }>('/items/origenes_ejemplo', {
       params: { 'filter[codigo][_eq]': 'app_ionic', limit: 1 }
@@ -246,18 +185,77 @@ export class EjemplosCamposService {
     if (!origen) throw new Error('No existe el origen app_ionic en el catálogo.');
     return origen;
   }
+```
+
+**`crear()`**
+
+```typescript
   async crear(datos: EjemploCrear): Promise<EjemploGuardado> {
     const response = await this.auth.cliente.post<{ data: EjemploGuardado }>('/items/ejemplos_campos', datos, { params: { fields: this.campos } });
     return response.data.data;
   }
+```
+
+**`obtener()`**
+
+```typescript
   async obtener(id: number): Promise<EjemploGuardado> {
     const response = await this.auth.cliente.get<{ data: EjemploGuardado }>('/items/ejemplos_campos/' + id, { params: { fields: this.campos } });
     return response.data.data;
   }
-}
 ```
 
-### `mobile/src/app/ejemplos-campos/ejemplos-campos.page.ts`
+**`mobile/src/app/ejemplos-campos/ejemplos-campos.module.ts`**. Crea este archivo con el siguiente contenido o sustituye la plantilla inicial del generador.
+
+```typescript
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
+import { IonicModule } from '@ionic/angular';
+import { RouterModule } from '@angular/router';
+import { EjemplosCamposPage } from './ejemplos-campos.page';
+@NgModule({
+  imports: [CommonModule, ReactiveFormsModule, IonicModule, RouterModule.forChild([{ path: '', component: EjemplosCamposPage }])],
+  declarations: [EjemplosCamposPage]
+})
+export class EjemplosCamposPageModule {}
+```
+
+### Ruta en `mobile/src/app/app-routing.module.ts`
+
+Conserva las rutas existentes y el import de `authGuard` del manual 13. Agrega este objeto al arreglo `routes`:
+
+```typescript
+{
+  path: 'ejemplos-campos',
+  canActivate: [authGuard],
+  loadChildren: () => import('./ejemplos-campos/ejemplos-campos.module')
+    .then(m => m.EjemplosCamposPageModule)
+},
+```
+
+### Paso 3. Conectar y validar los controles
+
+Cada `formControlName` coincide con una clave del formulario. El grupo `canales` contiene dos casillas; `tecnologias` empieza como arreglo vacío. La casilla de términos usa `Validators.requiredTrue`: debe estar marcada para guardar. Nombre, correo, monto y tipo son obligatorios; edad, teléfono y sitio web se validan cuando contienen datos.
+
+La figura 1 muestra los datos básicos capturados en Ionic.
+
+<p align="center">
+  <img src="imagenes/17-datos-basicos.jpg" alt="Entradas de texto, correo, teléfono, dirección web y números en Ionic" width="390"><br>
+  <em>Figura 1. Entradas de texto, correo, teléfono, dirección web y números en Ionic.</em>
+</p>
+
+
+La figura 2 muestra las opciones seleccionadas. Selecciona Taller, En línea, Ionic y Directus, y marca los canales que quieras conservar.
+
+<p align="center">
+  <img src="imagenes/17-selecciones.jpg" alt="Selección simple, radio, selección múltiple y casillas marcadas" width="390"><br>
+  <em>Figura 2. Selección simple, radio, selección múltiple y casillas marcadas.</em>
+</p>
+
+**`mobile/src/app/ejemplos-campos/ejemplos-campos.page.ts`**
+
+1. En el archivo nuevo coloca los imports, las declaraciones y la estructura inicial que se muestran abajo. Si el generador creó una clase de ejemplo, sustituye esa plantilla una sola vez.
 
 ```typescript
 import { Component } from '@angular/core';
@@ -295,7 +293,14 @@ export class EjemplosCamposPage {
   envio: EjemploCrear | null = null;
   guardado: EjemploGuardado | null = null;
   constructor(private fb: FormBuilder, private servicio: EjemplosCamposService) {}
+}
+```
 
+2. Dentro de `EjemplosCamposPage`, inserta los siguientes métodos en orden, justo antes de la última llave de la clase.
+
+**`error()`**
+
+```typescript
   error(nombre: string): string {
     const control = this.form.get(nombre);
     if (!control?.touched || !control.errors) return '';
@@ -306,6 +311,11 @@ export class EjemplosCamposPage {
     if (control.hasError('maxlength')) return 'El texto supera la longitud permitida.';
     return 'Revisa el formato de este campo.';
   }
+```
+
+**`guardar()`**
+
+```typescript
   async guardar(): Promise<void> {
     if (this.enviando || this.guardado) return;
     this.mensaje = '';
@@ -336,6 +346,11 @@ export class EjemplosCamposPage {
       this.mensaje = 'No fue posible guardar. Revisa la conexión y los permisos de la colección.';
     } finally { this.enviando = false; }
   }
+```
+
+**`consultarGuardado()`**
+
+```typescript
   async consultarGuardado(): Promise<void> {
     if (!this.guardado || this.enviando) return;
     this.enviando = true;
@@ -345,6 +360,11 @@ export class EjemplosCamposPage {
     } catch { this.mensaje = 'No fue posible recuperar el registro guardado.'; }
     finally { this.enviando = false; }
   }
+```
+
+**`nuevo()`**
+
+```typescript
   nuevo(): void {
     if (this.enviando) return;
     this.form.reset({ nombre: '', correo: '', telefono: '', sitio_web: '', descripcion: '', edad: '', monto: '',
@@ -352,10 +372,9 @@ export class EjemplosCamposPage {
       acepta_terminos: false, recibir_avisos: false, prioridad: 3, fecha_evento: '', hora_evento: '' });
     this.guardado = null; this.envio = null; this.mensaje = '';
   }
-}
 ```
 
-### `mobile/src/app/ejemplos-campos/ejemplos-campos.page.html`
+**`mobile/src/app/ejemplos-campos/ejemplos-campos.page.html`**. Coloca esta plantilla en la vista de la práctica. Si Ionic generó contenido de ejemplo, sustitúyelo.
 
 ```html
 <ion-header>
@@ -434,7 +453,7 @@ export class EjemplosCamposPage {
 </ion-content>
 ```
 
-### `mobile/src/app/ejemplos-campos/ejemplos-campos.page.scss`
+**`mobile/src/app/ejemplos-campos/ejemplos-campos.page.scss`**. Agrega estas reglas al final de la hoja de estilos.
 
 ```scss
 ion-input, ion-textarea, ion-select { margin-bottom: 12px; border-bottom: 1px solid var(--ion-color-medium); }
@@ -444,46 +463,52 @@ pre { white-space: pre-wrap; overflow-wrap: anywhere; font-family: monospace; fo
 ion-note { display: block; }
 ```
 
-### `mobile/src/app/ejemplos-campos/ejemplos-campos.module.ts`
+### Paso 4. Construir los datos y guardar
 
-```typescript
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
-import { RouterModule } from '@angular/router';
-import { EjemplosCamposPage } from './ejemplos-campos.page';
-@NgModule({
-  imports: [CommonModule, ReactiveFormsModule, IonicModule, RouterModule.forChild([{ path: '', component: EjemplosCamposPage }])],
-  declarations: [EjemplosCamposPage]
-})
-export class EjemplosCamposPageModule {}
-```
+`guardar()` comprueba la validación antes de llamar a la API. Primero consulta el catálogo por codigo=app_ionic. Después construye el objeto: convierte números, transforma las casillas en arreglo, envía null en los campos opcionales vacíos y agrega `estado`, el ID de `origen` y `fecha_envio`. No envía `id` ni `fecha_creacion`.
 
-### Ruta en `mobile/src/app/app-routing.module.ts`
+La figura 3 muestra el interruptor, el rango y los controles de fecha y hora. Pulsa **Guardar ejemplo** para ejecutar POST /items/ejemplos_campos. Mientras se procesa, el botón se desactiva; al guardar queda desactivado hasta pulsar + para otro ejemplo.
 
-Conserva las rutas existentes y el import de `authGuard` del manual 13. Agrega este objeto al arreglo `routes`:
+<p align="center">
+  <img src="imagenes/17-fecha-hora.jpg" alt="Interruptor, prioridad, fecha y hora antes de consultar el registro guardado" width="390"><br>
+  <em>Figura 3. Interruptor, prioridad, fecha y hora antes de consultar el registro guardado.</em>
+</p>
 
-```typescript
-{
-  path: 'ejemplos-campos',
-  canActivate: [authGuard],
-  loadChildren: () => import('./ejemplos-campos/ejemplos-campos.module')
-    .then(m => m.EjemplosCamposPageModule)
-},
-```
+### Paso 5. Consultar y comprobar
 
-### Las dos opciones del botón +
+Pulsa **Consultar registro guardado**: se ejecuta un GET por ID. Abre los paneles **JSON enviado** y **Registro recuperado** para comprobar los datos. La figura 4 muestra el resultado real de esa consulta, incluido el estado y las dos fechas.
 
-Elige la configuración en la página:
+<p align="center">
+  <img src="imagenes/17-registro-guardado.jpg" alt="Registro 8 recuperado desde Directus después de guardarlo en Ionic" width="390"><br>
+  <em>Figura 4. Registro 8 recuperado desde Directus después de guardarlo en Ionic.</em>
+</p>
 
-```typescript
-readonly usarBotonFlotante = false; // false: barra; true: flotante
-```
 
-En la barra se usa `ion-button fill="solid"` con un icono `add` en slot icon-only. En la alternativa flotante se usa `ion-fab-button`, que ya es sólido. Ambos tienen una etiqueta accesible y carecen de texto visible.
+En Directus abre Contenido → Ejemplos Campos y selecciona ese registro. La figura 5 muestra las selecciones y los booleanos persistidos, vistos desde Directus.
 
-## 5. Comprobar el resultado
+<p align="center">
+  <img src="imagenes/17-directus-selecciones.jpg" alt="Selecciones guardadas en la colección de Directus" width="900"><br>
+  <em>Figura 5. Selecciones guardadas en la colección de Directus.</em>
+</p>
+
+
+La figura 6 muestra el estado y la relación de origen en Directus: el nombre viene del catálogo, mientras ejemplos_campos almacena su llave.
+
+<p align="center">
+  <img src="imagenes/17-origen-relacionado.jpg" alt="Estado ENUM y origen relacionado en Directus" width="900"><br>
+  <em>Figura 6. Estado ENUM y origen relacionado en Directus.</em>
+</p>
+
+### Paso 6. Elegir la ubicación del icono +
+
+Elige **una opción** mediante `usarBotonFlotante`. Con false aparece en la barra, como en las figuras anteriores; con true aparece abajo a la derecha, como en la figura 7. El mismo método `nuevo()` reinicia el ejemplo. El HTML completo contiene ambas alternativas con condiciones que impiden mostrarlas juntas.
+
+<p align="center">
+  <img src="imagenes/17-boton-flotante.jpg" alt="Variante con icono + flotante para preparar otro ejemplo" width="390"><br>
+  <em>Figura 7. Variante con icono + flotante para preparar otro ejemplo.</em>
+</p>
+
+## 4. Comprobar el resultado
 
 ### Prueba del formulario
 
@@ -522,7 +547,7 @@ Consulta el [JSON realmente enviado](recursos/17_campos/envio-ejemplo.json) y el
 
 Las validaciones de correo, edad y monto del ejemplo se ejecutan en Angular. Los límites y permisos del servidor se configuran por separado; no se documentan estas validaciones de interfaz como reglas de la API.
 
-## 6. Explicación detallada del flujo
+## 5. Explicación detallada del flujo
 
 La figura 9 muestra la captura, la decisión de validación, el guardado y la lectura posterior. Las ramas de corrección y de nuevo ejemplo regresan al formulario; la consulta posterior vuelve a mostrar los datos persistidos.
 

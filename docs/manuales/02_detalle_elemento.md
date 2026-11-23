@@ -41,7 +41,7 @@ La diferencia principal respecto al listado es que ahora guardarás **un objeto*
 
 ## 3. Implementación paso a paso
 
-Sigue los pasos en orden. En la sección 4 encontrarás el código completo para comparar el resultado.
+Sigue los pasos en orden.
 
 ### Paso 1. Crear la página y configurar NgModules
 
@@ -295,189 +295,7 @@ En `productos-view.page.html`, **después de `</ion-content>`**, agrega:
 
 Al presionar el botón, se abrirá el JSON del producto mostrado en otra pestaña del navegador.
 
-## 4. Así debe quedar el código completo
-
-Los siguientes archivos corresponden al resultado de esta práctica, **incluido el ejercicio complementario del paso 6**. Si omites ese ejercicio, omite también `abrirPagina()` y el bloque `ion-footer`.
-
-### `mobile/src/app/productos-list/productos-list.page.html`
-
-```html
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Productos</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content>
-  <ion-list>
-    <ion-item *ngFor="let producto of productos">
-      <ion-label class="ion-text-wrap">
-        <h2>{{ producto.nombre }}</h2>
-        <p>{{ producto.descripcion }}</p>
-        <p>Precio: ${{ producto.precio }}</p>
-        <p>Stock: {{ producto.stock }}</p>
-        <p>Registro: {{ producto.fecha_registro | date:'yyyy-MM-dd' }}</p>
-      </ion-label>
-      <ion-button fill="solid" slot="end" [routerLink]="['/productos-view', producto.id]" aria-label="Ver detalle">
-        <ion-icon slot="icon-only" name="eye"></ion-icon>
-      </ion-button>
-    </ion-item>
-  </ion-list>
-</ion-content>
-```
-
-### `mobile/src/app/productos-view/productos-view.page.ts`
-
-```typescript
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { LoadingController } from '@ionic/angular';
-import axios from 'axios';
-import { environment } from '../../environments/environment';
-
-interface Producto {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  precio: string;
-  stock: number;
-  fecha_registro: string;
-}
-
-@Component({
-  selector: 'app-productos-view',
-  templateUrl: './productos-view.page.html',
-  styleUrls: ['./productos-view.page.scss'],
-  standalone: false,
-})
-export class ProductosViewPage implements OnInit {
-
-  producto: Producto | null = null;
-  mensajeError: string = '';
-
-  constructor(
-    private route: ActivatedRoute,
-    private loading: LoadingController
-  ) {}
-
-  ngOnInit(): void {
-    this.cargarProducto();
-  }
-
-  async cargarProducto(): Promise<void> {
-    const id = this.route.snapshot.paramMap.get('id');
-
-    this.producto = null;
-    this.mensajeError = '';
-
-    if (!id) {
-      this.mensajeError = 'No se recibió el ID del producto.';
-      return;
-    }
-
-    const loading = await this.loading.create({
-      message: 'Cargando producto...',
-      spinner: 'bubbles',
-    });
-
-    await loading.present();
-
-    try {
-      const response = await axios.get<{ data: Producto }>(
-        `${environment.apiUrl}/items/productos/${encodeURIComponent(id)}`
-      );
-
-      this.producto = response.data.data;
-    } catch (error) {
-      console.error('Error al cargar el producto:', error);
-      this.mensajeError = 'No se pudo cargar el producto. Revisa el ID, la conexión y los permisos de lectura.';
-    } finally {
-      await loading.dismiss();
-    }
-  }
-
-  abrirPagina(): void {
-    if (!this.producto) {
-      return;
-    }
-
-    const url = `${environment.apiUrl}/items/productos/${this.producto.id}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
-  }
-}
-```
-
-### `mobile/src/app/productos-view/productos-view.page.html`
-
-```html
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/productos-list"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Detalle del producto</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content>
-  <ion-text color="danger" *ngIf="mensajeError">
-    <p class="ion-padding">{{ mensajeError }}</p>
-  </ion-text>
-
-  <ion-card *ngIf="producto as detalle">
-    <ion-card-header>
-      <ion-card-title>{{ detalle.nombre }}</ion-card-title>
-      <ion-card-subtitle>Producto #{{ detalle.id }}</ion-card-subtitle>
-    </ion-card-header>
-
-    <ion-card-content>
-      <ion-list>
-        <ion-item>
-          <ion-label class="ion-text-wrap">
-            <p>Descripción</p>
-            <h2>{{ detalle.descripcion }}</h2>
-          </ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>
-            <p>Precio</p>
-            <h2>${{ detalle.precio }}</h2>
-          </ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>
-            <p>Stock</p>
-            <h2>{{ detalle.stock }}</h2>
-          </ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>
-            <p>Fecha de registro</p>
-            <h2 *ngIf="detalle.fecha_registro; else sinFecha">
-              {{ detalle.fecha_registro | date:'yyyy-MM-dd' }}
-            </h2>
-            <ng-template #sinFecha>
-              <h2>Sin fecha de registro</h2>
-            </ng-template>
-          </ion-label>
-        </ion-item>
-      </ion-list>
-    </ion-card-content>
-  </ion-card>
-</ion-content>
-
-<ion-footer *ngIf="producto">
-  <ion-toolbar>
-    <ion-button fill="solid" expand="block" (click)="abrirPagina()">
-      Ver respuesta de la API
-    </ion-button>
-  </ion-toolbar>
-</ion-footer>
-```
-
-La ruta `productos-view/:id` es un cambio dentro de `app-routing.module.ts`: aplica únicamente la entrada del paso 3 y conserva las demás rutas. El TypeScript del listado sigue siendo el del manual 01; sus módulos y los del detalle conservan la configuración indicada en los pasos 3 y 5.
-
-## 5. Comprobar que funciona
+## 4. Comprobar que funciona
 
 1. Guarda los archivos y espera a que Ionic termine de compilar.
 2. Abre `http://localhost:8100/productos-list` y presiona el icono de **ojo** en un producto.
@@ -498,7 +316,7 @@ Al consultar un ID inexistente, debe aparecer el mensaje de la figura 2, con el 
 
 Estas pruebas se realizan en el navegador de la computadora donde se ejecuta Docker. Para usar otro dispositivo, ajusta `apiUrl` como se explicó en el manual 01.
 
-## 6. Explicación detallada del flujo
+## 5. Explicación detallada del flujo
 
 ### Del producto seleccionado a su tarjeta de detalle
 

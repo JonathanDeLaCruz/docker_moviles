@@ -50,7 +50,7 @@ Por ejemplo, `await axios.get('http://localhost:8000/items/productos')` solicita
 
 ## 3. Implementación paso a paso
 
-Sigue los pasos en orden. Primero prepararás el proyecto y la API; después escribirás el TypeScript y el HTML. En la sección 4 encontrarás los archivos completos para comparar el resultado.
+Sigue los pasos en orden. Primero prepararás el proyecto y la API; después escribirás el TypeScript y el HTML.
 
 ### Paso 1. Crear la página e instalar Axios
 
@@ -250,100 +250,7 @@ Si necesitas agregarla, insértala dentro de `routes`, separándola de las otras
 
 En `productos-list.module.ts`, conserva los imports generados de `CommonModule`, `FormsModule`, `IonicModule` y `ProductosListPageRoutingModule`, y la declaración de `ProductosListPage`. El módulo de rutas de la página debe conservar `path: ''` y `component: ProductosListPage`.
 
-## 4. Así debe quedar el código completo
-
-Estos son los archivos completos de entorno, TypeScript y HTML para el **listado básico de esta práctica**. Compáralos con lo que acabas de escribir. Si tus archivos de entorno tienen otras propiedades, también debes conservarlas.
-
-### `mobile/src/environments/environment.ts`
-
-```typescript
-export const environment = {
-  production: false,
-  apiUrl: 'http://localhost:8000'
-};
-```
-
-### `mobile/src/environments/environment.prod.ts`
-
-```typescript
-export const environment = {
-  production: true,
-  apiUrl: 'https://api.midominio.com'
-};
-```
-
-### `mobile/src/app/productos-list/productos-list.page.ts`
-
-```typescript
-import { Component, OnInit } from '@angular/core';
-import axios from 'axios';
-import { environment } from '../../environments/environment';
-
-interface Producto {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  precio: string;
-  stock: number;
-  fecha_registro: string;
-}
-
-@Component({
-  selector: 'app-productos-list',
-  templateUrl: './productos-list.page.html',
-  styleUrls: ['./productos-list.page.scss'],
-  standalone: false,
-})
-export class ProductosListPage implements OnInit {
-  productos: Producto[] = [];
-
-  constructor() {}
-
-  ngOnInit(): void {
-    this.cargarProductos();
-  }
-
-  async cargarProductos(): Promise<void> {
-    try {
-      const response = await axios.get<{ data: Producto[] }>(
-        `${environment.apiUrl}/items/productos`
-      );
-
-      this.productos = response.data.data;
-    } catch (error) {
-      console.error('Error al cargar los productos:', error);
-    }
-  }
-}
-```
-
-### `mobile/src/app/productos-list/productos-list.page.html`
-
-```html
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Productos</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content>
-  <ion-list>
-    <ion-item *ngFor="let producto of productos">
-      <ion-label class="ion-text-wrap">
-        <h2>{{ producto.nombre }}</h2>
-        <p>{{ producto.descripcion }}</p>
-        <p>Precio: ${{ producto.precio }}</p>
-        <p>Stock: {{ producto.stock }}</p>
-        <p>Registro: {{ producto.fecha_registro | date:'yyyy-MM-dd' }}</p>
-      </ion-label>
-    </ion-item>
-  </ion-list>
-</ion-content>
-```
-
-La configuración de CORS y la entrada de ruta son cambios dentro de archivos compartidos: aplica únicamente los bloques indicados en los pasos 3 y 6. Los módulos generados y el archivo SCSS no requieren cambios para este listado.
-
-## 5. Comprobar que funciona
+## 4. Comprobar que funciona
 
 1. Guarda los archivos y espera a que Ionic termine de compilar.
 2. Abre `http://localhost:8100/productos-list`.
@@ -365,7 +272,7 @@ Registro: 2026-08-25
 
 Los valores dependerán de los registros de tu colección. Si la respuesta es `{"data": []}`, el listado no tendrá filas.
 
-## 6. Explicación detallada del flujo
+## 5. Explicación detallada del flujo
 
 ### De la página a la base de datos y de regreso
 

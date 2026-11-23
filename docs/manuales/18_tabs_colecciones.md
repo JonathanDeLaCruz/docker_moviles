@@ -75,7 +75,7 @@ docker compose restart api
 
 ### Paso 3. Conectar los tabs y las rutas
 
-Copia las rutas y páginas del punto 4. `app-routing.module.ts` envía el inicio a `/tabs/productos` y protege el módulo de tabs. `tabs-routing.module.ts` conecta sus páginas hijas. `tab` y `href` de cada botón corresponden al primer segmento de su ruta.
+Copia las rutas y páginas de este paso. `app-routing.module.ts` envía el inicio a `/tabs/productos` y protege el módulo de tabs. `tabs-routing.module.ts` conecta sus páginas hijas. `tab` y `href` de cada botón corresponden al primer segmento de su ruta.
 
 | Tab o acceso | Ruta | Pantallas |
 | --- | --- | --- |
@@ -91,7 +91,114 @@ La figura 2 muestra los tabs ya conectados al listado de productos. Las páginas
   <em>Figura 2. Productos, Pedidos y Resumen en la barra inferior.</em>
 </p>
 
-Sustituye los enlaces del menú por las rutas del punto 4. Después de comprobar las rutas, retira las carpetas tab1, tab2, tab3 y explore-container. Las direcciones antiguas de los manuales conservan redirecciones para abrir la pantalla correspondiente.
+Sustituye los enlaces del menú por las rutas de este paso. Después de comprobar las rutas, retira las carpetas tab1, tab2, tab3 y explore-container. Las direcciones antiguas de los manuales conservan redirecciones para abrir la pantalla correspondiente.
+
+**`mobile/src/app/app-routing.module.ts`**. Aplica estos cambios en el orden indicado.
+
+Sustituye el bloque desde `import { authGuard } from './guard/auth.guard';` hasta `})` al inicio del archivo y antes de `export class AppRoutingModule {}`.
+
+```typescript
+import { NgModule } from '@angular/core';
+import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { authGuard } from './guard/auth.guard';
+import { COLECCIONES } from './catalogos/colecciones.config';
+const routes: Routes = [
+  { path: 'login', loadChildren: () => import('./login/login.module').then(m => m.LoginPageModule) },
+  { path: 'registro', loadChildren: () => import('./registro/registro.module').then(m => m.RegistroPageModule) },
+  { path: 'tabs', canActivate: [authGuard], loadChildren: () => import('./tabs/tabs.module').then(m => m.TabsPageModule) },
+  { path: 'catalogos', canActivate: [authGuard], canActivateChild: [authGuard], children: [
+    ...COLECCIONES.filter(c => c.tabla !== 'pedidos').reduce<Routes>((rutas, c) => [...rutas,
+      { path: c.ruta + '/formulario/:id', redirectTo: '/tabs/catalogos/' + c.ruta + '/formulario/:id', pathMatch: 'full' },
+      { path: c.ruta + '/formulario', redirectTo: '/tabs/catalogos/' + c.ruta + '/formulario', pathMatch: 'full' },
+      { path: c.ruta + '/detalle/:id', redirectTo: '/tabs/catalogos/' + c.ruta + '/detalle/:id', pathMatch: 'full' },
+      { path: c.ruta, redirectTo: '/tabs/catalogos/' + c.ruta, pathMatch: 'full' }
+    ], []),
+    { path: '', redirectTo: '/tabs/resumen', pathMatch: 'full' }
+  ] },
+  { path: 'productos-list', redirectTo: 'tabs/productos', pathMatch: 'full' },
+  { path: 'productos-view/:id', redirectTo: 'tabs/productos/detalle/:id', pathMatch: 'full' },
+  { path: 'productos-form/:id', redirectTo: 'tabs/productos/formulario/:id', pathMatch: 'full' },
+  { path: 'productos-form', redirectTo: 'tabs/productos/formulario', pathMatch: 'full' },
+  { path: 'producto-imagen/:id', redirectTo: 'tabs/productos/imagen/:id', pathMatch: 'full' },
+  { path: 'ejemplos-campos', canActivate: [authGuard], loadChildren: () => import('./ejemplos-campos/ejemplos-campos.module').then(m => m.EjemplosCamposPageModule) },
+  { path: '', redirectTo: 'tabs/productos', pathMatch: 'full' },
+  { path: '**', redirectTo: 'tabs/productos' }
+];
+@NgModule({ imports: [RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })], exports: [RouterModule] })
+```
+
+**`mobile/src/app/tabs/tabs-routing.module.ts`**. Crea este archivo con el siguiente contenido o sustituye la plantilla inicial del generador.
+
+```typescript
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { TabsPage } from './tabs.page';
+import { COLECCIONES } from '../catalogos/colecciones.config';
+import { authGuard } from '../guard/auth.guard';
+import { rutasColeccion } from '../catalogos/rutas-coleccion';
+const routes: Routes = [{ path: '', component: TabsPage, canActivateChild: [authGuard], children: [
+  { path: 'productos/formulario', loadChildren: () => import('../productos-form/productos-form.module').then(m => m.ProductosFormPageModule) },
+  { path: 'productos/detalle/:id', loadChildren: () => import('../productos-view/productos-view.module').then(m => m.ProductosViewPageModule) },
+  { path: 'productos/imagen/:id', loadChildren: () => import('../producto-imagen/producto-imagen.module').then(m => m.ProductoImagenPageModule) },
+  { path: 'productos', loadChildren: () => import('../productos-list/productos-list.module').then(m => m.ProductosListPageModule) },
+  ...rutasColeccion('pedidos', 'pedidos'),
+  { path: 'resumen', loadChildren: () => import('../resumen/resumen.module').then(m => m.ResumenPageModule) },
+  ...COLECCIONES.filter(c => c.tabla !== 'pedidos').reduce<Routes>((rutas, c) => [...rutas, ...rutasColeccion('catalogos/' + c.ruta, c.ruta)], []),
+  { path: 'catalogos', redirectTo: 'resumen', pathMatch: 'full' },
+  { path: 'tab1', redirectTo: 'productos', pathMatch: 'full' },
+  { path: 'tab2', redirectTo: 'pedidos', pathMatch: 'full' },
+  { path: 'tab3', redirectTo: 'resumen', pathMatch: 'full' },
+  { path: '', redirectTo: 'productos', pathMatch: 'full' }
+]}];
+@NgModule({ imports: [RouterModule.forChild(routes)], exports: [RouterModule] })
+export class TabsPageRoutingModule {}
+```
+
+**`mobile/src/app/tabs/tabs.page.html`**. Coloca esta plantilla en la vista de la práctica. Si Ionic generó contenido de ejemplo, sustitúyelo.
+
+```html
+<ion-tabs>
+  <ion-tab-bar slot="bottom">
+    <ion-tab-button tab="productos" href="/tabs/productos"><ion-icon name="cube" aria-hidden="true"></ion-icon><ion-label>Productos</ion-label></ion-tab-button>
+    <ion-tab-button tab="pedidos" href="/tabs/pedidos"><ion-icon name="receipt" aria-hidden="true"></ion-icon><ion-label>Pedidos</ion-label></ion-tab-button>
+    <ion-tab-button tab="resumen" href="/tabs/resumen"><ion-icon name="stats-chart" aria-hidden="true"></ion-icon><ion-label>Resumen</ion-label></ion-tab-button>
+  </ion-tab-bar>
+</ion-tabs>
+```
+
+**`mobile/src/app/app.component.ts`**. Aplica estos cambios en el orden indicado.
+
+Sustituye el bloque desde `@Component({` hasta `];` después de `import { Component } from '@angular/core';` y antes de `}`.
+
+```typescript
+import { Router } from '@angular/router';
+import { AuthService } from './services/auth';
+import { COLECCIONES } from './catalogos/colecciones.config';
+@Component({ selector: 'app-root', templateUrl: 'app.component.html', styleUrls: ['app.component.scss'], standalone: false })
+export class AppComponent {
+  enlaces = [
+    { ruta: '/tabs/productos', texto: 'Productos' },
+    { ruta: '/tabs/pedidos', texto: 'Pedidos' },
+    { ruta: '/tabs/resumen', texto: 'Resumen' }
+  ];
+  catalogos = COLECCIONES.filter(c => c.tabla !== 'pedidos');
+  constructor(private auth: AuthService, private router: Router) {}
+  async salir(): Promise<void> { try { await this.auth.cerrarSesion(); } finally { await this.router.navigateByUrl('/login', { replaceUrl: true }); } }
+```
+
+**`mobile/src/app/app.component.html`**. Aplica estos cambios en el orden indicado.
+
+Inserta el fragmento después de `</ion-item>` / `</ion-menu-toggle>` y antes de `</ion-list>`.
+
+```html
+        <ion-list-header><ion-label>Catálogos y ejemplos</ion-label></ion-list-header>
+        <ion-menu-toggle *ngFor="let catalogo of catalogos" autoHide="false">
+          <ion-item [routerLink]="['/tabs/catalogos', catalogo.ruta]" routerDirection="root" button detail="false">
+            <ion-icon slot="start" [name]="catalogo.icono" aria-hidden="true"></ion-icon><ion-label>{{ catalogo.titulo }}</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle><ion-item button (click)="salir()"><ion-icon slot="start" name="log-out"></ion-icon><ion-label>Cerrar sesión</ion-label></ion-item></ion-menu-toggle>
+```
 
 ### Paso 4. Administrar los catálogos
 
@@ -147,203 +254,7 @@ En Clientes, crea el registro que usarás en el pedido. La figura 10 muestra el 
   <em>Figura 10. Formulario del cliente relacionado con el pedido.</em>
 </p>
 
-### Paso 5. Integrar los catálogos en productos
-
-Agrega marca y proveedor a Producto y ProductoGuardar. En el detalle expande sus campos id y nombre. El formulario consulta ambos catálogos, carga los IDs al editar y los incluye en el cuerpo de creación o actualización. Un valor vacío se envía como null.
-
-Conserva los controles de categorías, la subida de imagen y la recuperación del archivo existente. La figura 11 muestra el formulario integrado y la figura 12 el detalle del producto de prueba con todas sus relaciones.
-
-<p align="center">
-  <img src="imagenes/18-producto-formulario.jpg" alt="Formulario de producto con marca, proveedor, categoría e imagen" width="390"><br>
-  <em>Figura 11. Guardado integrado de producto y sus relaciones.</em>
-</p>
-
-<p align="center">
-  <img src="imagenes/18-producto-detalle.jpg" alt="Producto con imagen, marca, proveedor y categorías" width="390"><br>
-  <em>Figura 12. Detalle del producto 16 creado en Ionic.</em>
-</p>
-
-### Paso 6. Registrar y actualizar pedidos
-
-Abre el tab Pedidos y pulsa +. Selecciona cliente y producto, captura una cantidad entera mayor que cero y agrega observaciones si las necesitas. La figura 13 muestra el rechazo de cantidad cero en Ionic. La figura 14 muestra un pedido listo para guardar.
-
-<p align="center">
-  <img src="imagenes/18-pedido-validacion.jpg" alt="Validación de cantidad mínima en el pedido" width="390"><br>
-  <em>Figura 13. Ionic impide enviar una cantidad inferior a uno.</em>
-</p>
-
-<p align="center">
-  <img src="imagenes/18-pedido-formulario.jpg" alt="Pedido con cliente, producto y cantidad seleccionados" width="390"><br>
-  <em>Figura 14. Formulario del pedido con dos llaves foráneas.</em>
-</p>
-
-El POST envía los IDs; el GET solicita los nombres relacionados. La fecha de creación la genera Directus. Edita el pedido, cambia su estado a entregado y actualiza. La figura 15 muestra el resultado.
-
-<p align="center">
-  <img src="imagenes/18-pedido-detalle.jpg" alt="Pedido actualizado a entregado con nombres relacionados" width="390"><br>
-  <em>Figura 15. Detalle del pedido 2 después de actualizarlo.</em>
-</p>
-
-### Paso 7. Confirmar eliminaciones y proteger relaciones
-
-El botón de basura abre la confirmación de la figura 16. Cancelar conserva el registro. Al confirmar, el servicio comprueba si el catálogo está en uso; si tiene relaciones muestra el aviso de la figura 17. La llave foránea de la base también protege la relación.
-
-<p align="center">
-  <img src="imagenes/18-confirmar-eliminar.jpg" alt="Confirmación de eliminación de una marca, antes de cancelar" width="390"><br>
-  <em>Figura 16. La eliminación requiere una acción explícita.</em>
-</p>
-
-<p align="center">
-  <img src="imagenes/18-relacion-en-uso.jpg" alt="Mensaje que impide eliminar un cliente con pedido" width="390"><br>
-  <em>Figura 17. El cliente se conserva mientras el pedido lo referencia.</em>
-</p>
-
-### Paso 8. Elegir la ubicación del botón de creación
-
-En colecciones-list.page.ts elige `usarBotonFlotante = false` para el + sólido en la barra, o true para la variante de la figura 18. El HTML incluye ambas opciones con condiciones para mostrar solo una. Los botones de detalle usan ojo y los de creación +, con etiquetas accesibles y sin texto visible.
-
-<p align="center">
-  <img src="imagenes/18-boton-flotante.jpg" alt="Listado de marcas con botón flotante de creación" width="390"><br>
-  <em>Figura 18. Variante flotante dentro del catálogo abierto desde el menú.</em>
-</p>
-
-### Paso 9. Mostrar indicadores en el tercer tab
-
-Crea `resumen.page` y `ResumenService` con el código del punto 4. El tab **Resumen** muestra tarjetas de productos, unidades en stock, productos sin stock y pedidos. Las barras muestran cuántos pedidos están pendientes, entregados o cancelados. La figura 19 presenta los datos consultados en Directus.
-
-El servicio usa `aggregate[count]` y `aggregate[sum]` sobre productos y agrupa los pedidos por estado con `groupBy[]`. No descarga todos los registros para contarlos. Los totales respetan los permisos de la cuenta; se consultan al entrar al tab y al pulsar el icono de actualizar. Si no hay pedidos, las proporciones valen cero. Si falla la consulta, se muestra el mensaje para reintentar y se retiran los valores anteriores.
-
-<p align="center">
-  <img src="imagenes/18-resumen.jpg" alt="Resumen de inventario y pedidos con tarjetas y barras por estado" width="390"><br>
-  <em>Figura 19. Tercer tab con indicadores actuales de inventario y pedidos.</em>
-</p>
-
-## 4. Código completo de referencia
-
-Los archivos siguientes corresponden a la aplicación probada. Conserva los módulos, servicios y componentes de las prácticas previas. También puedes consultar el [código de la aplicación](../../mobile/src/app).
-
-### `mobile/src/app/app-routing.module.ts`
-
-```typescript
-import { NgModule } from '@angular/core';
-import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
-import { authGuard } from './guard/auth.guard';
-import { COLECCIONES } from './catalogos/colecciones.config';
-const routes: Routes = [
-  { path: 'login', loadChildren: () => import('./login/login.module').then(m => m.LoginPageModule) },
-  { path: 'registro', loadChildren: () => import('./registro/registro.module').then(m => m.RegistroPageModule) },
-  { path: 'tabs', canActivate: [authGuard], loadChildren: () => import('./tabs/tabs.module').then(m => m.TabsPageModule) },
-  { path: 'catalogos', canActivate: [authGuard], canActivateChild: [authGuard], children: [
-    ...COLECCIONES.filter(c => c.tabla !== 'pedidos').reduce<Routes>((rutas, c) => [...rutas,
-      { path: c.ruta + '/formulario/:id', redirectTo: '/tabs/catalogos/' + c.ruta + '/formulario/:id', pathMatch: 'full' },
-      { path: c.ruta + '/formulario', redirectTo: '/tabs/catalogos/' + c.ruta + '/formulario', pathMatch: 'full' },
-      { path: c.ruta + '/detalle/:id', redirectTo: '/tabs/catalogos/' + c.ruta + '/detalle/:id', pathMatch: 'full' },
-      { path: c.ruta, redirectTo: '/tabs/catalogos/' + c.ruta, pathMatch: 'full' }
-    ], []),
-    { path: '', redirectTo: '/tabs/resumen', pathMatch: 'full' }
-  ] },
-  { path: 'productos-list', redirectTo: 'tabs/productos', pathMatch: 'full' },
-  { path: 'productos-view/:id', redirectTo: 'tabs/productos/detalle/:id', pathMatch: 'full' },
-  { path: 'productos-form/:id', redirectTo: 'tabs/productos/formulario/:id', pathMatch: 'full' },
-  { path: 'productos-form', redirectTo: 'tabs/productos/formulario', pathMatch: 'full' },
-  { path: 'producto-imagen/:id', redirectTo: 'tabs/productos/imagen/:id', pathMatch: 'full' },
-  { path: 'ejemplos-campos', canActivate: [authGuard], loadChildren: () => import('./ejemplos-campos/ejemplos-campos.module').then(m => m.EjemplosCamposPageModule) },
-  { path: '', redirectTo: 'tabs/productos', pathMatch: 'full' },
-  { path: '**', redirectTo: 'tabs/productos' }
-];
-@NgModule({ imports: [RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })], exports: [RouterModule] })
-export class AppRoutingModule {}
-```
-
-### `mobile/src/app/tabs/tabs-routing.module.ts`
-
-```typescript
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
-import { TabsPage } from './tabs.page';
-import { COLECCIONES } from '../catalogos/colecciones.config';
-import { authGuard } from '../guard/auth.guard';
-import { rutasColeccion } from '../catalogos/rutas-coleccion';
-const routes: Routes = [{ path: '', component: TabsPage, canActivateChild: [authGuard], children: [
-  { path: 'productos/formulario', loadChildren: () => import('../productos-form/productos-form.module').then(m => m.ProductosFormPageModule) },
-  { path: 'productos/detalle/:id', loadChildren: () => import('../productos-view/productos-view.module').then(m => m.ProductosViewPageModule) },
-  { path: 'productos/imagen/:id', loadChildren: () => import('../producto-imagen/producto-imagen.module').then(m => m.ProductoImagenPageModule) },
-  { path: 'productos', loadChildren: () => import('../productos-list/productos-list.module').then(m => m.ProductosListPageModule) },
-  ...rutasColeccion('pedidos', 'pedidos'),
-  { path: 'resumen', loadChildren: () => import('../resumen/resumen.module').then(m => m.ResumenPageModule) },
-  ...COLECCIONES.filter(c => c.tabla !== 'pedidos').reduce<Routes>((rutas, c) => [...rutas, ...rutasColeccion('catalogos/' + c.ruta, c.ruta)], []),
-  { path: 'catalogos', redirectTo: 'resumen', pathMatch: 'full' },
-  { path: 'tab1', redirectTo: 'productos', pathMatch: 'full' },
-  { path: 'tab2', redirectTo: 'pedidos', pathMatch: 'full' },
-  { path: 'tab3', redirectTo: 'resumen', pathMatch: 'full' },
-  { path: '', redirectTo: 'productos', pathMatch: 'full' }
-]}];
-@NgModule({ imports: [RouterModule.forChild(routes)], exports: [RouterModule] })
-export class TabsPageRoutingModule {}
-```
-
-### `mobile/src/app/tabs/tabs.page.html`
-
-```html
-<ion-tabs>
-  <ion-tab-bar slot="bottom">
-    <ion-tab-button tab="productos" href="/tabs/productos"><ion-icon name="cube" aria-hidden="true"></ion-icon><ion-label>Productos</ion-label></ion-tab-button>
-    <ion-tab-button tab="pedidos" href="/tabs/pedidos"><ion-icon name="receipt" aria-hidden="true"></ion-icon><ion-label>Pedidos</ion-label></ion-tab-button>
-    <ion-tab-button tab="resumen" href="/tabs/resumen"><ion-icon name="stats-chart" aria-hidden="true"></ion-icon><ion-label>Resumen</ion-label></ion-tab-button>
-  </ion-tab-bar>
-</ion-tabs>
-```
-
-### `mobile/src/app/app.component.ts`
-
-```typescript
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from './services/auth';
-import { COLECCIONES } from './catalogos/colecciones.config';
-@Component({ selector: 'app-root', templateUrl: 'app.component.html', styleUrls: ['app.component.scss'], standalone: false })
-export class AppComponent {
-  enlaces = [
-    { ruta: '/tabs/productos', texto: 'Productos' },
-    { ruta: '/tabs/pedidos', texto: 'Pedidos' },
-    { ruta: '/tabs/resumen', texto: 'Resumen' }
-  ];
-  catalogos = COLECCIONES.filter(c => c.tabla !== 'pedidos');
-  constructor(private auth: AuthService, private router: Router) {}
-  async salir(): Promise<void> { try { await this.auth.cerrarSesion(); } finally { await this.router.navigateByUrl('/login', { replaceUrl: true }); } }
-}
-```
-
-### `mobile/src/app/app.component.html`
-
-```html
-<ion-app>
-  <ion-menu contentId="main" menuId="principal">
-    <ion-header>
-      <ion-toolbar color="personalizado"><ion-title>Menú</ion-title></ion-toolbar>
-    </ion-header>
-    <ion-content>
-      <ion-list>
-        <ion-menu-toggle *ngFor="let enlace of enlaces" autoHide="false">
-          <ion-item [routerLink]="enlace.ruta" routerDirection="root" button detail="false">
-            <ion-label>{{ enlace.texto }}</ion-label>
-          </ion-item>
-        </ion-menu-toggle>
-        <ion-list-header><ion-label>Catálogos y ejemplos</ion-label></ion-list-header>
-        <ion-menu-toggle *ngFor="let catalogo of catalogos" autoHide="false">
-          <ion-item [routerLink]="['/tabs/catalogos', catalogo.ruta]" routerDirection="root" button detail="false">
-            <ion-icon slot="start" [name]="catalogo.icono" aria-hidden="true"></ion-icon><ion-label>{{ catalogo.titulo }}</ion-label>
-          </ion-item>
-        </ion-menu-toggle>
-        <ion-menu-toggle><ion-item button (click)="salir()"><ion-icon slot="start" name="log-out"></ion-icon><ion-label>Cerrar sesión</ion-label></ion-item></ion-menu-toggle>
-      </ion-list>
-    </ion-content>
-  </ion-menu>
-  <ion-router-outlet id="main"></ion-router-outlet>
-</ion-app>
-```
-
-### `mobile/src/app/catalogos/colecciones.config.ts`
+**`mobile/src/app/catalogos/colecciones.config.ts`**. Crea este archivo con el siguiente contenido o sustituye la plantilla inicial del generador.
 
 ```typescript
 export interface Opcion { texto: string; valor: string; }
@@ -404,7 +315,9 @@ export function rutaColeccion(config: Coleccion): string {
 }
 ```
 
-### `mobile/src/app/services/colecciones.ts`
+**`mobile/src/app/services/colecciones.ts`**
+
+1. En el archivo nuevo coloca los imports, las declaraciones y la estructura inicial que se muestran abajo. Si el generador creó una clase de ejemplo, sustituye esa plantilla una sola vez.
 
 ```typescript
 import { Injectable } from '@angular/core';
@@ -414,11 +327,24 @@ export type Registro = Record<string, any>;
 @Injectable({ providedIn: 'root' })
 export class ColeccionesService {
   constructor(private auth: AuthService) {}
+}
+```
+
+2. Dentro de `ColeccionesService`, inserta los siguientes métodos en orden, justo antes de la última llave de la clase.
+
+**`campos()`**
+
+```typescript
   private campos(config: Coleccion): string {
     const relacionados = config.campos.filter(c => c.relacion).map(c => c.clave + '.nombre');
     if (config.tabla === 'ejemplos_campos') relacionados.push('origen.nombre', 'origen.codigo');
     return ['*', ...relacionados, ...config.campos.filter(c => c.relacion).map(c => c.clave + '.id')].join(',');
   }
+```
+
+**`listado()`**
+
+```typescript
   async listado(config: Coleccion, pagina: number, porPagina: number, texto = ''): Promise<{ registros: Registro[]; total: number }> {
     const filtro = texto.trim() ? { filter: JSON.stringify({ _or: config.buscar.map(c => ({ [c]: { _icontains: texto.trim() } })) }) } : {};
     const url = '/items/' + config.tabla;
@@ -428,14 +354,29 @@ export class ColeccionesService {
     ]);
     return { registros: lista.data.data, total: Number(conteo.data.data[0]?.count ?? 0) };
   }
+```
+
+**`detalle()`**
+
+```typescript
   async detalle(config: Coleccion, id: number): Promise<Registro> {
     const r = await this.auth.cliente.get<{ data: Registro }>('/items/' + config.tabla + '/' + id, { params: { fields: this.campos(config) } });
     return r.data.data;
   }
+```
+
+**`opciones()`**
+
+```typescript
   async opciones(tabla: string): Promise<Registro[]> {
     const r = await this.auth.cliente.get<{ data: Registro[] }>('/items/' + tabla, { params: { fields: 'id,nombre', sort: 'nombre', limit: -1 } });
     return r.data.data;
   }
+```
+
+**`guardar()`**
+
+```typescript
   async guardar(config: Coleccion, datos: Registro, id?: number): Promise<Registro> {
     if (config.tabla === 'ejemplos_campos' && id === undefined) {
       const origen = await this.auth.cliente.get<{ data: Registro[] }>('/items/origenes_ejemplo', { params: { 'filter[codigo][_eq]': 'app_ionic', limit: 1 } });
@@ -446,6 +387,11 @@ export class ColeccionesService {
     const r = id === undefined ? await this.auth.cliente.post<{ data: Registro }>(url, datos) : await this.auth.cliente.patch<{ data: Registro }>(url + '/' + id, datos);
     return r.data.data;
   }
+```
+
+**`eliminar()`**
+
+```typescript
   async eliminar(config: Coleccion, id: number): Promise<void> {
     const referencias: Record<string, [string, string]> = {
       marcas: ['productos', 'marca'], proveedores: ['productos', 'proveedor'],
@@ -462,6 +408,11 @@ export class ColeccionesService {
     }
     await this.auth.cliente.delete('/items/' + config.tabla + '/' + id);
   }
+```
+
+**`mensaje()`**
+
+```typescript
   mensaje(error: any): string {
     const codigo = error?.response?.data?.errors?.[0]?.extensions?.code;
     if (codigo === 'RECORD_NOT_UNIQUE') return 'Ese valor ya está registrado.';
@@ -469,10 +420,9 @@ export class ColeccionesService {
     if (codigo === 'FORBIDDEN') return 'La cuenta no tiene permiso para esta operación.';
     return error?.response ? 'No se pudo completar la operación. Revisa los datos y las relaciones.' : (error?.message || 'No se pudo conectar con Directus.');
   }
-}
 ```
 
-### `mobile/src/app/catalogos/rutas-coleccion.ts`
+**`mobile/src/app/catalogos/rutas-coleccion.ts`**. Crea este archivo con el siguiente contenido o sustituye la plantilla inicial del generador.
 
 ```typescript
 import { Routes } from '@angular/router';
@@ -487,82 +437,7 @@ export function rutasColeccion(ruta: string, coleccion: string): Routes {
 }
 ```
 
-### `mobile/src/app/services/resumen.ts`
-
-```typescript
-import { Injectable } from '@angular/core';
-import { AuthService } from './auth';
-export interface Resumen {
-  productos: number; unidades: number; sinStock: number;
-  pendientes: number; entregados: number; cancelados: number; pedidos: number;
-}
-@Injectable({ providedIn: 'root' })
-export class ResumenService {
-  constructor(private auth: AuthService) {}
-  async consultar(): Promise<Resumen> {
-    const [productos, agotados, pedidos] = await Promise.all([
-      this.auth.cliente.get<{ data: { count: number | string; sum: { stock: number | string | null } }[] }>('/items/productos', { params: { 'aggregate[count]': '*', 'aggregate[sum]': 'stock' } }),
-      this.auth.cliente.get<{ data: { count: number | string }[] }>('/items/productos', { params: { 'aggregate[count]': '*', 'filter[stock][_eq]': 0 } }),
-      this.auth.cliente.get<{ data: { estado: string; count: number | string }[] }>('/items/pedidos', { params: { 'aggregate[count]': '*', 'groupBy[]': 'estado' } })
-    ]);
-    const total = (estado: string) => Number(pedidos.data.data.find(p => p.estado === estado)?.count ?? 0);
-    return {
-      productos: Number(productos.data.data[0]?.count ?? 0), unidades: Number(productos.data.data[0]?.sum?.stock ?? 0),
-      sinStock: Number(agotados.data.data[0]?.count ?? 0), pendientes: total('pendiente'), entregados: total('entregado'),
-      cancelados: total('cancelado'), pedidos: pedidos.data.data.reduce((suma, p) => suma + Number(p.count), 0)
-    };
-  }
-}
-```
-
-### `mobile/src/app/resumen/resumen.page.ts`
-
-```typescript
-import { Component } from '@angular/core';
-import { Resumen, ResumenService } from '../services/resumen';
-@Component({ selector: 'app-resumen', templateUrl: './resumen.page.html', standalone: false })
-export class ResumenPage {
-  datos: Resumen | null = null; cargando = false; mensaje = '';
-  constructor(private servicio: ResumenService) {}
-  ionViewWillEnter(): void { void this.cargar(); }
-  async cargar(): Promise<void> {
-    if (this.cargando) return;
-    this.cargando = true; this.mensaje = ''; this.datos = null;
-    try { this.datos = await this.servicio.consultar(); }
-    catch { this.mensaje = 'No se pudo cargar el resumen. Intenta actualizarlo.'; }
-    finally { this.cargando = false; }
-  }
-}
-```
-
-### `mobile/src/app/resumen/resumen.page.html`
-
-```html
-<ion-header><ion-toolbar color="personalizado">
-  <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons><ion-title>Resumen</ion-title>
-  <ion-buttons slot="end"><ion-button fill="solid" aria-label="Actualizar resumen" (click)="cargar()" [disabled]="cargando"><ion-icon slot="icon-only" name="refresh"></ion-icon></ion-button></ion-buttons>
-</ion-toolbar></ion-header>
-<ion-content class="ion-padding">
-  <h1>Inventario y pedidos</h1><p>Totales actuales de los registros disponibles para tu cuenta.</p>
-  <p *ngIf="cargando" role="status">Cargando resumen...</p><p *ngIf="mensaje" role="status">{{ mensaje }}</p>
-  <ng-container *ngIf="datos as resumen">
-    <ion-grid><ion-row>
-      <ion-col size="6"><ion-card><ion-card-header><ion-card-subtitle>Productos</ion-card-subtitle><ion-card-title>{{ resumen.productos }}</ion-card-title></ion-card-header></ion-card></ion-col>
-      <ion-col size="6"><ion-card><ion-card-header><ion-card-subtitle>Unidades en stock</ion-card-subtitle><ion-card-title>{{ resumen.unidades }}</ion-card-title></ion-card-header></ion-card></ion-col>
-      <ion-col size="6"><ion-card><ion-card-header><ion-card-subtitle>Sin stock</ion-card-subtitle><ion-card-title>{{ resumen.sinStock }}</ion-card-title></ion-card-header></ion-card></ion-col>
-      <ion-col size="6"><ion-card><ion-card-header><ion-card-subtitle>Pedidos</ion-card-subtitle><ion-card-title>{{ resumen.pedidos }}</ion-card-title></ion-card-header></ion-card></ion-col>
-    </ion-row></ion-grid>
-    <ion-card><ion-card-header><ion-card-title>Estado de los pedidos</ion-card-title></ion-card-header><ion-card-content>
-      <p *ngIf="!resumen.pedidos">Todavía no hay pedidos.</p>
-      <p>Pendientes: {{ resumen.pendientes }}</p><ion-progress-bar color="warning" aria-label="Proporción de pedidos pendientes" [value]="resumen.pedidos ? resumen.pendientes / resumen.pedidos : 0"></ion-progress-bar>
-      <p>Entregados: {{ resumen.entregados }}</p><ion-progress-bar color="success" aria-label="Proporción de pedidos entregados" [value]="resumen.pedidos ? resumen.entregados / resumen.pedidos : 0"></ion-progress-bar>
-      <p>Cancelados: {{ resumen.cancelados }}</p><ion-progress-bar color="danger" aria-label="Proporción de pedidos cancelados" [value]="resumen.pedidos ? resumen.cancelados / resumen.pedidos : 0"></ion-progress-bar>
-    </ion-card-content></ion-card>
-  </ng-container>
-</ion-content>
-```
-
-### `mobile/src/app/resumen/resumen.module.ts`
+**`mobile/src/app/resumen/resumen.module.ts`**. Crea este archivo con el siguiente contenido o sustituye la plantilla inicial del generador.
 
 ```typescript
 import { NgModule } from '@angular/core';
@@ -574,7 +449,9 @@ import { ResumenPage } from './resumen.page';
 export class ResumenPageModule {}
 ```
 
-### `mobile/src/app/colecciones-list/colecciones-list.page.ts`
+**`mobile/src/app/colecciones-list/colecciones-list.page.ts`**
+
+1. En el archivo nuevo coloca los imports, las declaraciones y la estructura inicial que se muestran abajo. Si el generador creó una clase de ejemplo, sustituye esa plantilla una sola vez.
 
 ```typescript
 import { Component } from '@angular/core';
@@ -591,7 +468,20 @@ export class ColeccionesListPage {
   readonly usarBotonFlotante = false;
   private solicitud = 0;
   constructor(private route: ActivatedRoute, private servicio: ColeccionesService, private alertas: AlertController) {}
+}
+```
+
+2. Dentro de `ColeccionesListPage`, inserta los siguientes métodos en orden, justo antes de la última llave de la clase.
+
+**`ionViewWillEnter()`**
+
+```typescript
   ionViewWillEnter(): void { void this.cargar(); }
+```
+
+**`cargar()`**
+
+```typescript
   async cargar(): Promise<void> {
     const solicitud = ++this.solicitud; this.cargando = true; this.mensaje = '';
     try {
@@ -602,15 +492,40 @@ export class ColeccionesListPage {
     } catch (e) { if (solicitud === this.solicitud) { this.registros = []; this.total = 0; this.mensaje = this.servicio.mensaje(e); } }
     finally { if (solicitud === this.solicitud) this.cargando = false; }
   }
+```
+
+**`buscar()`**
+
+```typescript
   buscar(event: CustomEvent): void { this.texto = event.detail.value ?? ''; this.pagina = 1; void this.cargar(); }
+```
+
+**`cambiarPagina()`**
+
+```typescript
   cambiarPagina(pagina: number): void { this.pagina = pagina; void this.cargar(); }
+```
+
+**`titulo()`**
+
+```typescript
   titulo(registro: Registro): string {
     return this.config.tabla === 'pedidos' ? 'Pedido #' + registro['id'] : registro['nombre'];
   }
+```
+
+**`resumen()`**
+
+```typescript
   resumen(registro: Registro): string {
     if (this.config.tabla === 'pedidos') return registro['cliente']?.nombre + ' · ' + registro['producto']?.nombre + ' · ' + registro['cantidad'] + ' · ' + registro['estado'];
     return registro['correo'] || registro['codigo'] || registro['descripcion'] || '';
   }
+```
+
+**`eliminar()`**
+
+```typescript
   async eliminar(registro: Registro): Promise<void> {
     const alerta = await this.alertas.create({ header: 'Eliminar ' + this.config.singular, message: '¿Eliminar este registro?', buttons: [{ text: 'Cancelar', role: 'cancel' }, { text: 'Eliminar', role: 'destructive' }] });
     await alerta.present();
@@ -618,10 +533,9 @@ export class ColeccionesListPage {
     try { await this.servicio.eliminar(this.config, registro['id']); await this.cargar(); }
     catch (e) { this.mensaje = this.servicio.mensaje(e); }
   }
-}
 ```
 
-### `mobile/src/app/colecciones-list/colecciones-list.page.html`
+**`mobile/src/app/colecciones-list/colecciones-list.page.html`**. Coloca esta plantilla en la vista de la práctica. Si Ionic generó contenido de ejemplo, sustitúyelo.
 
 ```html
 <ion-header><ion-toolbar color="personalizado">
@@ -646,7 +560,7 @@ export class ColeccionesListPage {
 </ion-content>
 ```
 
-### `mobile/src/app/colecciones-list/colecciones-list.module.ts`
+**`mobile/src/app/colecciones-list/colecciones-list.module.ts`**. Crea este archivo con el siguiente contenido o sustituye la plantilla inicial del generador.
 
 ```typescript
 import { NgModule } from '@angular/core';
@@ -659,7 +573,7 @@ import { ColeccionesListPage } from './colecciones-list.page';
 export class ColeccionesListPageModule {}
 ```
 
-### `mobile/src/app/colecciones-view/colecciones-view.page.ts`
+**`mobile/src/app/colecciones-view/colecciones-view.page.ts`**. Crea este archivo con el siguiente contenido o sustituye la plantilla inicial del generador.
 
 ```typescript
 import { Component } from '@angular/core';
@@ -686,7 +600,7 @@ export class ColeccionesViewPage {
 }
 ```
 
-### `mobile/src/app/colecciones-view/colecciones-view.page.html`
+**`mobile/src/app/colecciones-view/colecciones-view.page.html`**. Coloca esta plantilla en la vista de la práctica. Si Ionic generó contenido de ejemplo, sustitúyelo.
 
 ```html
 <ion-header><ion-toolbar color="personalizado"><ion-buttons slot="start"><ion-back-button [defaultHref]="base"></ion-back-button></ion-buttons><ion-title>Detalle de {{ config.singular }}</ion-title><ion-buttons slot="end"><ion-button *ngIf="registro" fill="solid" [routerLink]="[base, 'formulario', registro['id']]" aria-label="Editar registro"><ion-icon slot="icon-only" name="pencil"></ion-icon></ion-button></ion-buttons></ion-toolbar></ion-header>
@@ -703,7 +617,7 @@ export class ColeccionesViewPage {
 </ion-content>
 ```
 
-### `mobile/src/app/colecciones-view/colecciones-view.module.ts`
+**`mobile/src/app/colecciones-view/colecciones-view.module.ts`**. Crea este archivo con el siguiente contenido o sustituye la plantilla inicial del generador.
 
 ```typescript
 import { NgModule } from '@angular/core';
@@ -715,7 +629,9 @@ import { ColeccionesViewPage } from './colecciones-view.page';
 export class ColeccionesViewPageModule {}
 ```
 
-### `mobile/src/app/colecciones-form/colecciones-form.page.ts`
+**`mobile/src/app/colecciones-form/colecciones-form.page.ts`**
+
+1. En el archivo nuevo coloca los imports, las declaraciones y la estructura inicial que se muestran abajo. Si el generador creó una clase de ejemplo, sustituye esa plantilla una sola vez.
 
 ```typescript
 import { Component, OnInit } from '@angular/core';
@@ -729,12 +645,25 @@ export class ColeccionesFormPage implements OnInit {
   form = new FormGroup<Record<string, FormControl>>({}); opciones: Record<string, Registro[]> = {};
   id?: number; cargando = true; guardando = false; mensaje = ''; listo = false;
   constructor(private route: ActivatedRoute, private router: Router, private servicio: ColeccionesService) {}
+}
+```
+
+2. Dentro de `ColeccionesFormPage`, inserta los siguientes métodos en orden, justo antes de la última llave de la clase.
+
+**`ionViewWillEnter()`**
+
+```typescript
   async ionViewWillEnter(): Promise<void> {
     if (!this.listo) return;
     try {
       await Promise.all(this.config.campos.filter(c => c.relacion).map(async campo => { this.opciones[campo.clave] = await this.servicio.opciones(campo.relacion!); }));
     } catch (e) { this.mensaje = this.servicio.mensaje(e); }
   }
+```
+
+**`ngOnInit()`**
+
+```typescript
   async ngOnInit(): Promise<void> {
     try {
       const id = this.route.snapshot.paramMap.get('id'); this.id = id === null ? undefined : Number(id);
@@ -765,6 +694,11 @@ export class ColeccionesFormPage implements OnInit {
     } catch (e) { this.mensaje = this.servicio.mensaje(e); }
     finally { this.cargando = false; }
   }
+```
+
+**`error()`**
+
+```typescript
   error(campo: Campo): string {
     const control = this.form.controls[campo.clave];
     if (!control.touched || !control.invalid) return '';
@@ -775,10 +709,20 @@ export class ColeccionesFormPage implements OnInit {
     if (control.hasError('max')) return 'El máximo es ' + campo.max + '.';
     return 'Revisa el formato de este campo.';
   }
+```
+
+**`marcar()`**
+
+```typescript
   marcar(campo: Campo, valor: string, checked: boolean): void {
     const control = this.form.controls[campo.clave]; const valores: string[] = control.value ?? [];
     control.setValue(checked ? [...new Set([...valores, valor])] : valores.filter(v => v !== valor));
   }
+```
+
+**`guardar()`**
+
+```typescript
   async guardar(): Promise<void> {
     if (this.guardando || !this.listo) return;
     if (this.form.invalid) { this.form.markAllAsTouched(); this.mensaje = 'Revisa los campos marcados.'; return; }
@@ -797,10 +741,9 @@ export class ColeccionesFormPage implements OnInit {
     } catch (e) { this.mensaje = this.servicio.mensaje(e); }
     finally { this.guardando = false; }
   }
-}
 ```
 
-### `mobile/src/app/colecciones-form/colecciones-form.page.html`
+**`mobile/src/app/colecciones-form/colecciones-form.page.html`**. Coloca esta plantilla en la vista de la práctica. Si Ionic generó contenido de ejemplo, sustitúyelo.
 
 ```html
 <ion-header><ion-toolbar color="personalizado"><ion-buttons slot="start"><ion-back-button [defaultHref]="base"></ion-back-button></ion-buttons><ion-title>{{ id === undefined ? 'Crear' : 'Editar' }} {{ config.singular }}</ion-title></ion-toolbar></ion-header>
@@ -827,7 +770,7 @@ export class ColeccionesFormPage implements OnInit {
 </ion-content>
 ```
 
-### `mobile/src/app/colecciones-form/colecciones-form.module.ts`
+**`mobile/src/app/colecciones-form/colecciones-form.module.ts`**. Crea este archivo con el siguiente contenido o sustituye la plantilla inicial del generador.
 
 ```typescript
 import { NgModule } from '@angular/core';
@@ -840,152 +783,70 @@ import { ColeccionesFormPage } from './colecciones-form.page';
 export class ColeccionesFormPageModule {}
 ```
 
-### `mobile/src/app/services/productos.ts`
+### Paso 5. Integrar los catálogos en productos
+
+Agrega marca y proveedor a Producto y ProductoGuardar. En el detalle expande sus campos id y nombre. El formulario consulta ambos catálogos, carga los IDs al editar y los incluye en el cuerpo de creación o actualización. Un valor vacío se envía como null.
+
+Conserva los controles de categorías, la subida de imagen y la recuperación del archivo existente. La figura 11 muestra el formulario integrado y la figura 12 el detalle del producto de prueba con todas sus relaciones.
+
+<p align="center">
+  <img src="imagenes/18-producto-formulario.jpg" alt="Formulario de producto con marca, proveedor, categoría e imagen" width="390"><br>
+  <em>Figura 11. Guardado integrado de producto y sus relaciones.</em>
+</p>
+
+<p align="center">
+  <img src="imagenes/18-producto-detalle.jpg" alt="Producto con imagen, marca, proveedor y categorías" width="390"><br>
+  <em>Figura 12. Detalle del producto 16 creado en Ionic.</em>
+</p>
+
+**`mobile/src/app/services/productos.ts`**. Aplica estos cambios en el orden indicado.
+
+Inserta el fragmento después de `import { environment } from '../../environments/environment';` / `export interface Producto {` y antes de `categorias?: { id: number; categorias_id: { id: number; nombre: string } }[];`.
 
 ```typescript
-import { Injectable } from '@angular/core';
-import { defer, map, Observable } from 'rxjs';
-import { AuthService } from './auth';
-import { environment } from '../../environments/environment';
-
-export interface Producto {
   marca?: { id: number; nombre: string } | null;
   proveedor?: { id: number; nombre: string } | null;
-  categorias?: { id: number; categorias_id: { id: number; nombre: string } }[];
-  imagen?: string | null;
-  id: number;
-  nombre: string;
-  descripcion: string;
-  precio: string;
-  stock: number;
-  fecha_registro: string;
-}
-export interface ProductoGuardar {
-  marca?: number | null;
-  proveedor?: number | null;
-  imagen?: string | null;
-  categorias?: { categorias_id: number }[] | { create: { categorias_id: number }[]; delete: number[] };
-  nombre: string;
-  descripcion: string;
-  precio: number;
-  stock: number;
-}
-
-@Injectable({ providedIn: 'root' })
-export class ProductosService {
-  constructor(private auth: AuthService) {}
-  private url = environment.apiUrl + '/items/productos';
-
-  private filtro(busqueda: string): Record<string, string> {
-    const texto = busqueda.trim();
-    return texto ? { filter: JSON.stringify({ _or: [
-      { nombre: { _icontains: texto } },
-      { descripcion: { _icontains: texto } }
-    ] }) } : {};
-  }
-
-  listado(pagina = 1, porPagina = 3, busqueda = ''): Observable<Producto[]> {
-    return defer(() => this.auth.cliente.get<{ data: Producto[] }>(this.url, {
-      params: { page: pagina, limit: porPagina, sort: 'id', ...this.filtro(busqueda) }
-    })).pipe(map(response => response.data.data));
-  }
-
-  detalle(id: number): Observable<Producto> {
-    return defer(() => this.auth.cliente.get<{ data: Producto }>(this.url + '/' + id, { params: { fields: '*,marca.id,marca.nombre,proveedor.id,proveedor.nombre,categorias.id,categorias.categorias_id.id,categorias.categorias_id.nombre' } }))
-      .pipe(map(response => response.data.data));
-  }
-
-  crear(producto: ProductoGuardar): Observable<Producto> {
-    return defer(() => this.auth.cliente.post<{ data: Producto }>(this.url, producto))
-      .pipe(map(response => response.data.data));
-  }
-
-  actualizar(id: number, producto: ProductoGuardar): Observable<Producto> {
-    return defer(() => this.auth.cliente.patch<{ data: Producto }>(this.url + '/' + id, producto))
-      .pipe(map(response => response.data.data));
-  }
-
-  eliminar(id: number): Observable<void> {
-    return defer(() => this.auth.cliente.delete(this.url + '/' + id)).pipe(map(() => undefined));
-  }
-
-  total(busqueda = ''): Observable<number> {
-    return defer(() => this.auth.cliente.get<{ data: { count: string | number }[] }>(this.url, {
-      params: { 'aggregate[count]': '*', ...this.filtro(busqueda) }
-    })).pipe(map(response => Number(response.data.data[0]?.count ?? 0)));
-  }
-}
 ```
 
-### `mobile/src/app/productos-form/productos-form.page.ts`
+Inserta el fragmento después de `}` / `export interface ProductoGuardar {` y antes de `imagen?: string | null;`.
+
+```typescript
+  marca?: number | null;
+  proveedor?: number | null;
+```
+
+Sustituye la línea `return defer(() => this.auth.cliente.get<{ data: Producto }>(this.url + '/' + id, { params: { fields: '*,categorias.id,categorias.categorias_id.id,categorias.categorias_id.nombre' } }))` después de `}` / `detalle(id: number): Observable<Producto> {` y antes de `.pipe(map(response => response.data.data));`.
+
+```typescript
+    return defer(() => this.auth.cliente.get<{ data: Producto }>(this.url + '/' + id, { params: { fields: '*,marca.id,marca.nombre,proveedor.id,proveedor.nombre,categorias.id,categorias.categorias_id.id,categorias.categorias_id.nombre' } }))
+```
+
+**`mobile/src/app/productos-form/productos-form.page.ts`**. Aplica estos cambios en el orden indicado.
+
+Inserta el fragmento al inicio del archivo y antes de `import { ImagenesService } from '../services/imagenes';`.
 
 ```typescript
 import { ColeccionesService, Registro } from '../services/colecciones';
-import { ImagenesService } from '../services/imagenes';
-import { Categoria, CategoriasService } from '../services/categorias';
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { AlertController } from '@ionic/angular';
-import { firstValueFrom } from 'rxjs';
-import { ProductoGuardar, ProductosService } from '../services/productos';
+```
 
+Inserta el fragmento después de `})` / `export class ProductosFormPage implements OnInit, OnDestroy {` y antes de `archivoImagen: File | null = null;`.
 
-@Component({
-  selector: 'app-productos-form',
-  templateUrl: './productos-form.page.html',
-  styleUrls: ['./productos-form.page.scss'],
-  standalone: false,
-})
-export class ProductosFormPage implements OnInit, OnDestroy {
+```typescript
   marcas: Registro[] = [];
   proveedores: Registro[] = [];
   errorCatalogos = '';
   private inicializado = false;
-  archivoImagen: File | null = null;
-  imagenId: string | null = null;
-  imagenUrl = '';
-  mensajeImagen = '';
+```
 
-  categorias: Categoria[] = [];
-  enlacesCategorias: { id: number; categoriaId: number }[] = [];
-  mensajeCategorias = '';
-  productoForm!: FormGroup;
-  idProducto?: number;
-  cargando: boolean = false;
-  guardando: boolean = false;
+Inserta el fragmento después de `private categoriasService: CategoriasService,` / `private imagenesService: ImagenesService,` y antes de `private router: Router`.
 
-  mensajesValidacion: Record<string, Record<string, string>> = {
-    nombre: {
-      required: 'El nombre es obligatorio.',
-      maxlength: 'El nombre no debe superar 150 caracteres.'
-    },
-    precio: {
-      required: 'El precio es obligatorio.',
-      min: 'El precio debe ser igual o mayor que cero.'
-    },
-    stock: {
-      required: 'El stock es obligatorio.',
-      min: 'El stock debe ser igual o mayor que cero.',
-      pattern: 'El stock debe contener únicamente números enteros.'
-    }
-  };
-
-  constructor(
-    private formBuilder: FormBuilder,
-    private alertController: AlertController,
-    private activatedRoute: ActivatedRoute,
-    private productosService: ProductosService,
-    private categoriasService: CategoriasService,
-    private imagenesService: ImagenesService,
+```typescript
     private coleccionesService: ColeccionesService,
-    private router: Router
-  ) {}
+```
 
-  get esEdicion(): boolean {
-    return this.idProducto !== undefined;
-  }
+Inserta el fragmento después de `return this.idProducto !== undefined;` / `}` y antes de `async ngOnInit(): Promise<void> {`.
 
+```typescript
   async ionViewWillEnter(): Promise<void> {
     if (!this.inicializado) return;
     try {
@@ -994,368 +855,220 @@ export class ProductosFormPage implements OnInit, OnDestroy {
       this.errorCatalogos = '';
     } catch { this.errorCatalogos = 'No se pudieron cargar marcas y proveedores. Revisa sus permisos.'; }
   }
+```
 
-  async ngOnInit(): Promise<void> {
-    this.crearFormulario();
-    await this.cargarCategorias();
+Inserta el fragmento después de `this.crearFormulario();` / `await this.cargarCategorias();` y antes de `const id = this.activatedRoute.snapshot.paramMap.get('id');`.
+
+```typescript
     try { [this.marcas, this.proveedores] = await Promise.all([this.coleccionesService.opciones('marcas'), this.coleccionesService.opciones('proveedores')]); }
     catch { this.errorCatalogos = 'No se pudieron cargar marcas y proveedores. Revisa sus permisos.'; }
+```
 
-    const id = this.activatedRoute.snapshot.paramMap.get('id');
+Al final del método que inicializa el formulario, después de resolver la carga del producto en edición y antes de cerrar el método, marca la inicialización como completada.
 
-    if (id !== null) {
-      const idConvertido = Number(id);
-
-      if (!Number.isNaN(idConvertido)) {
-        this.idProducto = idConvertido;
-        await this.cargarProducto();
-      }
-    }
+```typescript
     this.inicializado = true;
-  }
+```
 
-  private crearFormulario(): void {
-    this.productoForm = this.formBuilder.group({
-      nombre: ['', [
-        Validators.required,
-        Validators.maxLength(150)
-      ]],
-      descripcion: [''],
-      precio: ['', [
-        Validators.required,
-        Validators.min(0)
-      ]],
-      stock: ['', [
-        Validators.required,
-        Validators.min(0),
-        Validators.pattern('^[0-9]+$')
-      ]]
-    });
+Inserta el fragmento después de `]]` / `});` y antes de `this.productoForm.addControl('categorias', this.formBuilder.array([]));`.
+
+```typescript
     this.productoForm.addControl('marca', new FormControl(null));
     this.productoForm.addControl('proveedor', new FormControl(null));
-    this.productoForm.addControl('categorias', this.formBuilder.array([]));
-  }
+```
 
-  getError(controlName: string): string {
-    const control = this.productoForm.get(controlName);
+Inserta el fragmento después de `descripcion: producto.descripcion,` / `precio: producto.precio,` y antes de `stock: producto.stock`.
 
-    if (
-      !control ||
-      !control.errors ||
-      !(control.touched || control.dirty)
-    ) {
-      return '';
-    }
-
-    const tipoError = Object.keys(control.errors)[0];
-
-    return this.mensajesValidacion[controlName]?.[tipoError]
-      ?? 'El valor ingresado no es válido.';
-  }
-
-  private async cargarProducto(): Promise<void> {
-    if (this.idProducto === undefined) {
-      return;
-    }
-
-    this.cargando = true;
-
-    try {
-      const producto = await firstValueFrom(this.productosService.detalle(this.idProducto));
-
-      this.enlacesCategorias = (producto.categorias ?? []).map(enlace => ({ id: enlace.id, categoriaId: enlace.categorias_id.id }));
-      this.categoriasFA.clear();
-      for (const enlace of this.enlacesCategorias) {
-        this.categoriasFA.push(new FormControl(enlace.categoriaId, Validators.required));
-      }
-      this.imagenId = producto.imagen ?? null;
-      if (this.imagenId) {
-        try { this.mostrarImagen(await this.imagenesService.obtener(this.imagenId)); }
-        catch { this.mensajeImagen = 'No fue posible cargar la imagen actual.'; }
-      }
-      this.productoForm.patchValue({
-        nombre: producto.nombre,
-        descripcion: producto.descripcion,
-        precio: producto.precio,
+```typescript
         marca: producto.marca?.id ?? null,
         proveedor: producto.proveedor?.id ?? null,
-        stock: producto.stock
-      });
-    } catch (error) {
-      console.error('Error al cargar el producto:', error);
+```
 
-      const alerta = await this.alertController.create({
-        header: 'Error',
-        message: 'No fue posible cargar los datos del producto. Revisa la conexión, el identificador y los permisos de lectura en Directus.',
-        buttons: ['Aceptar']
-      });
+Inserta el fragmento después de `descripcion: valores.descripcion?.trim() ?? '',` / `precio: Number(valores.precio),` y antes de `stock: Number(valores.stock)`.
 
-      await alerta.present();
-    } finally {
-      this.cargando = false;
-    }
-  }
-
-  async guardarProducto(): Promise<void> {
-    if (this.guardando) return;
-    if (this.productoForm.invalid) {
-      this.productoForm.markAllAsTouched();
-      return;
-    }
-
-    this.guardando = true;
-
-    const valores = this.productoForm.value;
-
-    const producto: ProductoGuardar = {
-      nombre: valores.nombre.trim(),
-      descripcion: valores.descripcion?.trim() ?? '',
-      precio: Number(valores.precio),
+```typescript
       marca: valores.marca === null ? null : Number(valores.marca),
       proveedor: valores.proveedor === null ? null : Number(valores.proveedor),
-      stock: Number(valores.stock)
-    };
+```
 
-    const ids = [...new Set(this.categoriasFA.value.map(Number))] as number[];
-    if (this.esEdicion) {
-      const anteriores = new Set(this.enlacesCategorias.map(enlace => enlace.categoriaId));
-      producto.categorias = {
-        create: ids.filter(id => !anteriores.has(id)).map(id => ({ categorias_id: id })),
-        delete: this.enlacesCategorias.filter(enlace => !ids.includes(enlace.categoriaId)).map(enlace => enlace.id)
-      };
-    } else {
-      producto.categorias = ids.map(id => ({ categorias_id: id }));
-    }
+Sustituye la línea `await this.router.navigate(['/productos-list']);` después de `await alerta.present();` / `await alerta.onDidDismiss();` y antes de `} catch (error) {`.
 
-    try {
-      if (this.archivoImagen) {
-        this.imagenId = await this.imagenesService.subir(this.archivoImagen);
-        this.archivoImagen = null;
-      }
-      if (this.imagenId) producto.imagen = this.imagenId;
-      if (this.esEdicion && this.idProducto !== undefined) {
-        await firstValueFrom(this.productosService.actualizar(this.idProducto, producto));
-      } else {
-        await firstValueFrom(this.productosService.crear(producto));
-      }
-
-      const alerta = await this.alertController.create({
-        header: this.esEdicion ? 'Producto actualizado' : 'Producto guardado',
-        message: this.esEdicion
-          ? 'El producto fue actualizado correctamente.'
-          : 'El producto fue registrado correctamente.',
-        buttons: ['Aceptar']
-      });
-
-      await alerta.present();
-      await alerta.onDidDismiss();
-
+```typescript
       await this.router.navigate(['/tabs/productos']);
-    } catch (error) {
-      console.error(
-        this.esEdicion
-          ? 'Error al actualizar el producto:'
-          : 'Error al guardar el producto:',
-        error
-      );
+```
 
-      const alerta = await this.alertController.create({
-        header: 'Error',
-        message: this.esEdicion
-          ? 'No fue posible actualizar el producto. Revisa los datos, la conexión y los permisos de actualización en Directus.'
-          : 'No fue posible guardar el producto. Revisa los datos, la conexión y los permisos de creación en Directus.',
-        buttons: ['Aceptar']
-      });
+**`mobile/src/app/productos-form/productos-form.page.html`**. Aplica estos cambios en el orden indicado.
 
-      await alerta.present();
-    } finally {
-      this.guardando = false;
-    }
-  }
-  onImagenSeleccionada(event: Event): void {
-    this.archivoImagen = (event.target as HTMLInputElement).files?.[0] ?? null;
-    if (this.archivoImagen) {
-      this.mensajeImagen = '';
-      this.mostrarImagen(this.archivoImagen);
-    }
-  }
-  private mostrarImagen(archivo: Blob): void {
-    if (this.imagenUrl) URL.revokeObjectURL(this.imagenUrl);
-    this.imagenUrl = URL.createObjectURL(archivo);
-  }
-  ngOnDestroy(): void {
-    if (this.imagenUrl) URL.revokeObjectURL(this.imagenUrl);
-  }
-  get categoriasFA(): FormArray { return this.productoForm.get('categorias') as FormArray; }
-  agregarCategoria(): void { this.categoriasFA.push(new FormControl(null, Validators.required)); }
-  eliminarCategoria(indice: number): void { this.categoriasFA.removeAt(indice); }
-  private async cargarCategorias(): Promise<void> {
-    try { this.categorias = await firstValueFrom(this.categoriasService.listado()); }
-    catch { this.mensajeCategorias = 'No fue posible consultar las categorías. Revisa su configuración y permisos.'; }
+Sustituye el bloque desde `<ion-toolbar>` hasta `<ion-back-button defaultHref="/productos-list"></ion-back-button>` después de `<ion-header>` y antes de `</ion-buttons>`.
+
+```html
+  <ion-toolbar color="personalizado">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/productos"></ion-back-button>
+```
+
+Inserta el fragmento después de `</ion-note>` / `</ion-list>` y antes de `<section>`.
+
+```html
+    <p *ngIf="errorCatalogos" role="status">{{ errorCatalogos }}</p>
+    <ion-select label="Marca" labelPlacement="stacked" formControlName="marca" interface="popover"><ion-select-option [value]="null">Sin marca</ion-select-option><ion-select-option *ngFor="let marca of marcas" [value]="marca['id']">{{ marca['nombre'] }}</ion-select-option></ion-select>
+    <ion-select label="Proveedor" labelPlacement="stacked" formControlName="proveedor" interface="popover"><ion-select-option [value]="null">Sin proveedor</ion-select-option><ion-select-option *ngFor="let proveedor of proveedores" [value]="proveedor['id']">{{ proveedor['nombre'] }}</ion-select-option></ion-select>
+```
+
+Sustituye la línea `<ion-button fill="solid" expand="block" type="submit" class="ion-margin-top" [disabled]="guardando || cargando">` después de `<img *ngIf="imagenUrl" [src]="imagenUrl" alt="Vista previa de la imagen del producto" class="imagen-producto">` / `</section>` y antes de `{{ guardando ? 'Guardando...' : (esEdicion ? 'Actualizar' : 'Guardar') }}`.
+
+```html
+    <ion-button fill="solid" expand="block" type="submit" class="ion-margin-top" [disabled]="guardando || cargando || !!errorCatalogos">
+```
+
+**`mobile/src/app/productos-view/productos-view.page.html`**. Aplica estos cambios en el orden indicado.
+
+Sustituye el bloque desde `<ion-toolbar>` hasta `<ion-back-button defaultHref="/productos-list"></ion-back-button>` después de `<ion-header>` y antes de `</ion-buttons>`.
+
+```html
+  <ion-toolbar color="personalizado">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/productos"></ion-back-button>
+```
+
+Inserta el fragmento después de `<img *ngIf="imagenUrl" [src]="imagenUrl" [alt]="'Imagen de ' + detalle.nombre" class="imagen-producto">` / `<p *ngIf="mensajeImagen" role="status">{{ mensajeImagen }}</p>` y antes de `<h2>Categorías</h2>`.
+
+```html
+      <p>Marca: {{ detalle.marca?.nombre || 'Sin marca' }}</p>
+      <p>Proveedor: {{ detalle.proveedor?.nombre || 'Sin proveedor' }}</p>
+```
+
+### Paso 6. Registrar y actualizar pedidos
+
+Abre el tab Pedidos y pulsa +. Selecciona cliente y producto, captura una cantidad entera mayor que cero y agrega observaciones si las necesitas. La figura 13 muestra el rechazo de cantidad cero en Ionic. La figura 14 muestra un pedido listo para guardar.
+
+<p align="center">
+  <img src="imagenes/18-pedido-validacion.jpg" alt="Validación de cantidad mínima en el pedido" width="390"><br>
+  <em>Figura 13. Ionic impide enviar una cantidad inferior a uno.</em>
+</p>
+
+<p align="center">
+  <img src="imagenes/18-pedido-formulario.jpg" alt="Pedido con cliente, producto y cantidad seleccionados" width="390"><br>
+  <em>Figura 14. Formulario del pedido con dos llaves foráneas.</em>
+</p>
+
+El POST envía los IDs; el GET solicita los nombres relacionados. La fecha de creación la genera Directus. Edita el pedido, cambia su estado a entregado y actualiza. La figura 15 muestra el resultado.
+
+<p align="center">
+  <img src="imagenes/18-pedido-detalle.jpg" alt="Pedido actualizado a entregado con nombres relacionados" width="390"><br>
+  <em>Figura 15. Detalle del pedido 2 después de actualizarlo.</em>
+</p>
+
+### Paso 7. Confirmar eliminaciones y proteger relaciones
+
+El botón de basura abre la confirmación de la figura 16. Cancelar conserva el registro. Al confirmar, el servicio comprueba si el catálogo está en uso; si tiene relaciones muestra el aviso de la figura 17. La llave foránea de la base también protege la relación.
+
+<p align="center">
+  <img src="imagenes/18-confirmar-eliminar.jpg" alt="Confirmación de eliminación de una marca, antes de cancelar" width="390"><br>
+  <em>Figura 16. La eliminación requiere una acción explícita.</em>
+</p>
+
+<p align="center">
+  <img src="imagenes/18-relacion-en-uso.jpg" alt="Mensaje que impide eliminar un cliente con pedido" width="390"><br>
+  <em>Figura 17. El cliente se conserva mientras el pedido lo referencia.</em>
+</p>
+
+### Paso 8. Elegir la ubicación del botón de creación
+
+En colecciones-list.page.ts elige `usarBotonFlotante = false` para el + sólido en la barra, o true para la variante de la figura 18. El HTML incluye ambas opciones con condiciones para mostrar solo una. Los botones de detalle usan ojo y los de creación +, con etiquetas accesibles y sin texto visible.
+
+<p align="center">
+  <img src="imagenes/18-boton-flotante.jpg" alt="Listado de marcas con botón flotante de creación" width="390"><br>
+  <em>Figura 18. Variante flotante dentro del catálogo abierto desde el menú.</em>
+</p>
+
+### Paso 9. Mostrar indicadores en el tercer tab
+
+Crea `resumen.page` y `ResumenService` con el código de este paso. El tab **Resumen** muestra tarjetas de productos, unidades en stock, productos sin stock y pedidos. Las barras muestran cuántos pedidos están pendientes, entregados o cancelados. La figura 19 presenta los datos consultados en Directus.
+
+El servicio usa `aggregate[count]` y `aggregate[sum]` sobre productos y agrupa los pedidos por estado con `groupBy[]`. No descarga todos los registros para contarlos. Los totales respetan los permisos de la cuenta; se consultan al entrar al tab y al pulsar el icono de actualizar. Si no hay pedidos, las proporciones valen cero. Si falla la consulta, se muestra el mensaje para reintentar y se retiran los valores anteriores.
+
+<p align="center">
+  <img src="imagenes/18-resumen.jpg" alt="Resumen de inventario y pedidos con tarjetas y barras por estado" width="390"><br>
+  <em>Figura 19. Tercer tab con indicadores actuales de inventario y pedidos.</em>
+</p>
+
+**`mobile/src/app/services/resumen.ts`**. Crea este archivo con el siguiente contenido o sustituye la plantilla inicial del generador.
+
+```typescript
+import { Injectable } from '@angular/core';
+import { AuthService } from './auth';
+export interface Resumen {
+  productos: number; unidades: number; sinStock: number;
+  pendientes: number; entregados: number; cancelados: number; pedidos: number;
+}
+@Injectable({ providedIn: 'root' })
+export class ResumenService {
+  constructor(private auth: AuthService) {}
+  async consultar(): Promise<Resumen> {
+    const [productos, agotados, pedidos] = await Promise.all([
+      this.auth.cliente.get<{ data: { count: number | string; sum: { stock: number | string | null } }[] }>('/items/productos', { params: { 'aggregate[count]': '*', 'aggregate[sum]': 'stock' } }),
+      this.auth.cliente.get<{ data: { count: number | string }[] }>('/items/productos', { params: { 'aggregate[count]': '*', 'filter[stock][_eq]': 0 } }),
+      this.auth.cliente.get<{ data: { estado: string; count: number | string }[] }>('/items/pedidos', { params: { 'aggregate[count]': '*', 'groupBy[]': 'estado' } })
+    ]);
+    const total = (estado: string) => Number(pedidos.data.data.find(p => p.estado === estado)?.count ?? 0);
+    return {
+      productos: Number(productos.data.data[0]?.count ?? 0), unidades: Number(productos.data.data[0]?.sum?.stock ?? 0),
+      sinStock: Number(agotados.data.data[0]?.count ?? 0), pendientes: total('pendiente'), entregados: total('entregado'),
+      cancelados: total('cancelado'), pedidos: pedidos.data.data.reduce((suma, p) => suma + Number(p.count), 0)
+    };
   }
 }
 ```
 
-### `mobile/src/app/productos-form/productos-form.page.html`
+**`mobile/src/app/resumen/resumen.page.ts`**. Crea este archivo con el siguiente contenido o sustituye la plantilla inicial del generador.
+
+```typescript
+import { Component } from '@angular/core';
+import { Resumen, ResumenService } from '../services/resumen';
+@Component({ selector: 'app-resumen', templateUrl: './resumen.page.html', standalone: false })
+export class ResumenPage {
+  datos: Resumen | null = null; cargando = false; mensaje = '';
+  constructor(private servicio: ResumenService) {}
+  ionViewWillEnter(): void { void this.cargar(); }
+  async cargar(): Promise<void> {
+    if (this.cargando) return;
+    this.cargando = true; this.mensaje = ''; this.datos = null;
+    try { this.datos = await this.servicio.consultar(); }
+    catch { this.mensaje = 'No se pudo cargar el resumen. Intenta actualizarlo.'; }
+    finally { this.cargando = false; }
+  }
+}
+```
+
+**`mobile/src/app/resumen/resumen.page.html`**. Coloca esta plantilla en la vista de la práctica. Si Ionic generó contenido de ejemplo, sustitúyelo.
 
 ```html
-<ion-header>
-  <ion-toolbar color="personalizado">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/tabs/productos"></ion-back-button>
-    </ion-buttons>
-
-    <ion-title>
-      {{ esEdicion ? 'Editar producto' : 'Nuevo producto' }}
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
-
+<ion-header><ion-toolbar color="personalizado">
+  <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons><ion-title>Resumen</ion-title>
+  <ion-buttons slot="end"><ion-button fill="solid" aria-label="Actualizar resumen" (click)="cargar()" [disabled]="cargando"><ion-icon slot="icon-only" name="refresh"></ion-icon></ion-button></ion-buttons>
+</ion-toolbar></ion-header>
 <ion-content class="ion-padding">
-  <div *ngIf="cargando" class="ion-text-center ion-padding">
-    <ion-spinner></ion-spinner>
-    <p>Cargando producto...</p>
-  </div>
-
-  <form *ngIf="productoForm && !cargando" [formGroup]="productoForm" (ngSubmit)="guardarProducto()">
-    <ion-list>
-      <ion-item>
-        <ion-input label="Nombre" labelPlacement="stacked" type="text" formControlName="nombre" maxlength="150"></ion-input>
-      </ion-item>
-      <ion-note color="danger" *ngIf="getError('nombre') as error">
-        {{ error }}
-      </ion-note>
-
-      <ion-item>
-        <ion-textarea label="Descripción" labelPlacement="stacked" formControlName="descripcion" autoGrow="true"></ion-textarea>
-      </ion-item>
-
-      <ion-item>
-        <ion-input label="Precio" labelPlacement="stacked" type="number" formControlName="precio" min="0"></ion-input>
-      </ion-item>
-      <ion-note color="danger" *ngIf="getError('precio') as error">
-        {{ error }}
-      </ion-note>
-
-      <ion-item>
-        <ion-input label="Stock" labelPlacement="stacked" type="number" formControlName="stock" min="0"></ion-input>
-      </ion-item>
-      <ion-note color="danger" *ngIf="getError('stock') as error">
-        {{ error }}
-      </ion-note>
-    </ion-list>
-
-    <p *ngIf="errorCatalogos" role="status">{{ errorCatalogos }}</p>
-    <ion-select label="Marca" labelPlacement="stacked" formControlName="marca" interface="popover"><ion-select-option [value]="null">Sin marca</ion-select-option><ion-select-option *ngFor="let marca of marcas" [value]="marca['id']">{{ marca['nombre'] }}</ion-select-option></ion-select>
-    <ion-select label="Proveedor" labelPlacement="stacked" formControlName="proveedor" interface="popover"><ion-select-option [value]="null">Sin proveedor</ion-select-option><ion-select-option *ngFor="let proveedor of proveedores" [value]="proveedor['id']">{{ proveedor['nombre'] }}</ion-select-option></ion-select>
-    <section>
-      <h2>Categorías</h2>
-      <p *ngIf="mensajeCategorias" role="status">{{ mensajeCategorias }}</p>
-      <ion-button fill="solid" type="button" (click)="agregarCategoria()" aria-label="Agregar categoría"><ion-icon slot="icon-only" name="add"></ion-icon></ion-button>
-      <div formArrayName="categorias">
-        <ion-item *ngFor="let control of categoriasFA.controls; let i = index">
-          <ion-select label="Categoría" labelPlacement="stacked" [formControlName]="i" interface="popover">
-            <ion-select-option *ngFor="let categoria of categorias" [value]="categoria.id">{{ categoria.nombre }}</ion-select-option>
-          </ion-select>
-          <ion-button fill="solid" type="button" color="danger" (click)="eliminarCategoria(i)" aria-label="Quitar categoría"><ion-icon slot="icon-only" name="trash"></ion-icon></ion-button>
-        </ion-item>
-      </div>
-    </section>
-
-    <section class="ion-margin-top">
-      <h2>Imagen del producto</h2>
-      <label for="imagen-producto">Selecciona una imagen</label>
-      <input id="imagen-producto" type="file" accept="image/*" (change)="onImagenSeleccionada($event)" [disabled]="guardando">
-      <p *ngIf="esEdicion">Si no seleccionas otra imagen, se conserva la actual.</p>
-      <p *ngIf="mensajeImagen" role="status">{{ mensajeImagen }}</p>
-      <img *ngIf="imagenUrl" [src]="imagenUrl" alt="Vista previa de la imagen del producto" class="imagen-producto">
-    </section>
-
-    <ion-button fill="solid" expand="block" type="submit" class="ion-margin-top" [disabled]="guardando || cargando || !!errorCatalogos">
-      {{ guardando ? 'Guardando...' : (esEdicion ? 'Actualizar' : 'Guardar') }}
-    </ion-button>
-  </form>
+  <h1>Inventario y pedidos</h1><p>Totales actuales de los registros disponibles para tu cuenta.</p>
+  <p *ngIf="cargando" role="status">Cargando resumen...</p><p *ngIf="mensaje" role="status">{{ mensaje }}</p>
+  <ng-container *ngIf="datos as resumen">
+    <ion-grid><ion-row>
+      <ion-col size="6"><ion-card><ion-card-header><ion-card-subtitle>Productos</ion-card-subtitle><ion-card-title>{{ resumen.productos }}</ion-card-title></ion-card-header></ion-card></ion-col>
+      <ion-col size="6"><ion-card><ion-card-header><ion-card-subtitle>Unidades en stock</ion-card-subtitle><ion-card-title>{{ resumen.unidades }}</ion-card-title></ion-card-header></ion-card></ion-col>
+      <ion-col size="6"><ion-card><ion-card-header><ion-card-subtitle>Sin stock</ion-card-subtitle><ion-card-title>{{ resumen.sinStock }}</ion-card-title></ion-card-header></ion-card></ion-col>
+      <ion-col size="6"><ion-card><ion-card-header><ion-card-subtitle>Pedidos</ion-card-subtitle><ion-card-title>{{ resumen.pedidos }}</ion-card-title></ion-card-header></ion-card></ion-col>
+    </ion-row></ion-grid>
+    <ion-card><ion-card-header><ion-card-title>Estado de los pedidos</ion-card-title></ion-card-header><ion-card-content>
+      <p *ngIf="!resumen.pedidos">Todavía no hay pedidos.</p>
+      <p>Pendientes: {{ resumen.pendientes }}</p><ion-progress-bar color="warning" aria-label="Proporción de pedidos pendientes" [value]="resumen.pedidos ? resumen.pendientes / resumen.pedidos : 0"></ion-progress-bar>
+      <p>Entregados: {{ resumen.entregados }}</p><ion-progress-bar color="success" aria-label="Proporción de pedidos entregados" [value]="resumen.pedidos ? resumen.entregados / resumen.pedidos : 0"></ion-progress-bar>
+      <p>Cancelados: {{ resumen.cancelados }}</p><ion-progress-bar color="danger" aria-label="Proporción de pedidos cancelados" [value]="resumen.pedidos ? resumen.cancelados / resumen.pedidos : 0"></ion-progress-bar>
+    </ion-card-content></ion-card>
+  </ng-container>
 </ion-content>
 ```
 
-### `mobile/src/app/productos-view/productos-view.page.html`
-
-```html
-<ion-header>
-  <ion-toolbar color="personalizado">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/tabs/productos"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Detalle del producto</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content>
-  <ion-text color="danger" *ngIf="mensajeError">
-    <p class="ion-padding">{{ mensajeError }}</p>
-  </ion-text>
-
-  <ion-card *ngIf="producto as detalle">
-    <ion-card-header>
-      <ion-card-title>{{ detalle.nombre }}</ion-card-title>
-      <ion-card-subtitle>Producto #{{ detalle.id }}</ion-card-subtitle>
-    </ion-card-header>
-
-    <ion-card-content>
-      <img *ngIf="imagenUrl" [src]="imagenUrl" [alt]="'Imagen de ' + detalle.nombre" class="imagen-producto">
-      <p *ngIf="mensajeImagen" role="status">{{ mensajeImagen }}</p>
-      <p>Marca: {{ detalle.marca?.nombre || 'Sin marca' }}</p>
-      <p>Proveedor: {{ detalle.proveedor?.nombre || 'Sin proveedor' }}</p>
-      <h2>Categorías</h2>
-      <ul *ngIf="detalle.categorias?.length; else sinCategorias">
-        <li *ngFor="let enlace of detalle.categorias">{{ enlace.categorias_id.nombre }}</li>
-      </ul>
-      <ng-template #sinCategorias><p>Sin categorías asignadas.</p></ng-template>
-      <ion-list>
-        <ion-item>
-          <ion-label class="ion-text-wrap">
-            <p>Descripción</p>
-            <h2>{{ detalle.descripcion }}</h2>
-          </ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>
-            <p>Precio</p>
-            <h2>${{ detalle.precio }}</h2>
-          </ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>
-            <p>Stock</p>
-            <h2>{{ detalle.stock }}</h2>
-          </ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>
-            <p>Fecha de registro</p>
-            <h2 *ngIf="detalle.fecha_registro; else sinFecha">
-              {{ detalle.fecha_registro | date:'yyyy-MM-dd' }}
-            </h2>
-            <ng-template #sinFecha>
-              <h2>Sin fecha de registro</h2>
-            </ng-template>
-          </ion-label>
-        </ion-item>
-      </ion-list>
-    </ion-card-content>
-  </ion-card>
-</ion-content>
-
-<ion-footer *ngIf="producto">
-  <ion-toolbar>
-    <ion-button fill="solid" expand="block" (click)="abrirPagina()">
-      Ver respuesta de la API
-    </ion-button>
-  </ion-toolbar>
-</ion-footer>
-```
-
-## 5. Comprobar el resultado
+## 4. Comprobar el resultado
 
 Ejecuta la aplicación existente del proyecto y compila el código:
 
@@ -1395,7 +1108,7 @@ MariaDB rechazó por API la eliminación de padres relacionados y el pedido de c
 
 La comprobación se realizó en el navegador con Ionic, no mediante una instalación Android. La compilación de desarrollo es independiente del despliegue del servidor.
 
-## 6. Explicación detallada del flujo
+## 5. Explicación detallada del flujo
 
 La figura 20 muestra el recorrido desde los tabs y el menú hasta Directus y MariaDB, con las ramas de consulta, guardado, validación y eliminación. El PNG permite verlo también en lectores Markdown que no ejecutan Mermaid.
 
